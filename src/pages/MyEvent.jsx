@@ -2,9 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import "../styles/Event.css";
-import { EVENTS } from "../data/events";
-import { getRegistrationsMap } from "../data/eventLocalStore";
 import EventTopbar from "../components/EventTopbar";
+import eventService from "../services/eventService";
 
 const CATEGORY_BADGE_MAP = {
   Workshop: "Workshop, Học tập",
@@ -14,8 +13,10 @@ const CATEGORY_BADGE_MAP = {
 };
 
 const MyEvent = () => {
-  const [sortBy, setSortBy] = useState("date-desc"); // "date-desc" | "date-asc" | "name"
-  const [activeNav, setActiveNav] = useState("events"); // "club" | "events"
+  const [sortBy, setSortBy] = useState("date-desc");
+  const [activeNav, setActiveNav] = useState("events");
+  const [myEvents, setMyEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.body.classList.add("event-body");
@@ -24,42 +25,21 @@ const MyEvent = () => {
     };
   }, []);
 
-  const myEvents = useMemo(() => {
-    const regs = getRegistrationsMap();
-    const registeredIds = Object.keys(regs).filter((id) => regs[id]);
-    const registered = EVENTS.filter((e) => registeredIds.includes(e.id));
-
-    // Filter past events (endDate < today)
-    const now = Date.now();
-    const past = registered.filter((e) => {
-      const raw = e.endDate ?? e.startDate ?? "";
-      const parts = String(raw).split("/");
-      if (parts.length !== 3) return false;
-      const [dd, mm, yyyy] = parts.map((p) => parseInt(p, 10));
-      if (!dd || !mm || !yyyy) return false;
-      const end = new Date(yyyy, mm - 1, dd, 23, 59, 59, 999).getTime();
-      return end < now;
-    });
-
-    // Sort
-    if (sortBy === "date-desc") {
-      past.sort((a, b) => {
-        const aDate = parseDate(a.endDate ?? a.startDate ?? "");
-        const bDate = parseDate(b.endDate ?? b.startDate ?? "");
-        return bDate - aDate;
-      });
-    } else if (sortBy === "date-asc") {
-      past.sort((a, b) => {
-        const aDate = parseDate(a.endDate ?? a.startDate ?? "");
-        const bDate = parseDate(b.endDate ?? b.startDate ?? "");
-        return aDate - bDate;
-      });
-    } else if (sortBy === "name") {
-      past.sort((a, b) => a.title.localeCompare(b.title));
-    }
-
-    return past;
-  }, [sortBy]);
+  useEffect(() => {
+    // Gọi API lấy sự kiện đã tham gia
+    const fetchMyEvents = async () => {
+      setLoading(true);
+      try {
+        const userId = localStorage.getItem("userId");
+        const res = await eventService.getPastEvents({ userId });
+        setMyEvents(res.data.data || []);
+      } catch (err) {
+        setMyEvents([]);
+      }
+      setLoading(false);
+    };
+    fetchMyEvents();
+  }, []);
 
   function parseDate(dateStr) {
     const parts = String(dateStr).split("/");
@@ -68,6 +48,27 @@ const MyEvent = () => {
     if (!dd || !mm || !yyyy) return 0;
     return new Date(yyyy, mm - 1, dd).getTime();
   }
+
+  // Sắp xếp sự kiện theo sortBy
+  const sortedEvents = useMemo(() => {
+    const events = [...myEvents];
+    if (sortBy === "date-desc") {
+      events.sort((a, b) => {
+        const aDate = parseDate(a.endDate ?? a.startDate ?? "");
+        const bDate = parseDate(b.endDate ?? b.startDate ?? "");
+        return bDate - aDate;
+      });
+    } else if (sortBy === "date-asc") {
+      events.sort((a, b) => {
+        const aDate = parseDate(a.endDate ?? a.startDate ?? "");
+        const bDate = parseDate(b.endDate ?? b.startDate ?? "");
+        return aDate - bDate;
+      });
+    } else if (sortBy === "name") {
+      events.sort((a, b) => a.title.localeCompare(b.title));
+    }
+    return events;
+  }, [myEvents, sortBy]);
 
   return (
     <div className="event-container">
@@ -121,24 +122,37 @@ const MyEvent = () => {
               </div>
             </div>
 
-            {myEvents.length === 0 ? (
+            {loading ? (
+              <div className="myevent-empty glass-panel">
+                <div className="myevent-emptyTitle">Đang tải dữ liệu...</div>
+              </div>
+            ) : sortedEvents.length === 0 ? (
               <div className="myevent-empty glass-panel">
                 <div className="myevent-emptyTitle">Chưa có sự kiện đã tham gia</div>
                 <div className="myevent-emptySub">Các sự kiện bạn đã đăng ký và kết thúc sẽ hiển thị ở đây.</div>
-                <Button as={Link} to="/event" className="event-secondaryBtn mt-3">
+                <Button as={Link} to="/events" className="event-secondaryBtn mt-3">
                   Khám phá sự kiện
                 </Button>
               </div>
             ) : (
               <div className="myevent-list">
-                {myEvents.map((e) => {
+                {sortedEvents.map((e) => {
                   const badgeText = CATEGORY_BADGE_MAP[e.category] ?? e.category;
                   return (
-                    <div key={e.id} className="myevent-card glass-panel">
+                    <div key={e._id || e.id} className="myevent-card glass-panel">
                       <Row className="g-3 align-items-center">
                         <Col md={4}>
                           <div className="myevent-cardImage" aria-hidden="true">
-                            <div className="event-rowMediaOverlay" />
+                            {e.media_urls && e.media_urls.length > 0 ? (
+                              <img
+                                src={`http://localhost:5000${e.media_urls[0]}`}
+                                alt={e.title}
+                                className="myevent-cardImg"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
+                              />
+                            ) : (
+                              <div className="event-rowMediaOverlay" />
+                            )}
                           </div>
                         </Col>
                         <Col md={8}>
@@ -150,7 +164,7 @@ const MyEvent = () => {
                           </div>
                           <h3 className="myevent-cardTitle">{e.title}</h3>
                           <div className="myevent-cardHost">Clb đảm nhận sự kiện: {e.host ?? "UniClub"}</div>
-                          <Button as={Link} to={`/event/${e.id}`} className="myevent-cardBtn">
+                          <Button as={Link} to={`/event/${e._id || e.id}`} className="myevent-cardBtn">
                             Xem sự kiện
                           </Button>
                         </Col>

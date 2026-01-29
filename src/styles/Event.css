@@ -204,6 +204,27 @@ body.event-body #root {
 .event-catItem:hover {
   transform: translateY(-2px);
 }
+.event-catItem.is-active {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 2px 12px rgba(120, 190, 255, 0.10);
+  border: 2px solid #bde0fe;
+  color: #1f2a44;
+  font-weight: 900;
+  border-radius: 18px;
+  transform: scale(1.04);
+  transition: all 0.18s cubic-bezier(.4,2,.3,1);
+}
+
+.event-catItem.is-active .event-catCircle {
+  border-color: #ffafcc;
+  color: #ff61a6;
+  box-shadow: 0 8px 18px rgba(255, 97, 166, 0.10);
+}
+
+.event-catItem.is-active .event-catLabel {
+  color: #1f2a44;
+  text-shadow: none;
+}
 
 .event-catCircle {
   width: 90px;

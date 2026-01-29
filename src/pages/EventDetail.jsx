@@ -1,19 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Badge, Button, Container } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Badge, Button, Container, Spinner } from "react-bootstrap";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import "../styles/Event.css";
-import { getEventById } from "../data/events";
 import EventTopbar from "../components/EventTopbar";
 import RegistrationModal from "../components/RegistrationModal";
-import {
-  addFeedback,
-  checkInEvent,
-  getCheckinTime,
-  getFeedbackList,
-  getProfile,
-  isCheckedIn,
-  isRegistered,
-} from "../data/eventLocalStore";
+import eventService from "../services/eventService";
 
 const CATEGORY_BADGE_MAP = {
   Workshop: "Workshop, Học tập",
@@ -21,6 +12,28 @@ const CATEGORY_BADGE_MAP = {
   "Giải trí": "Giải trí, Trải nghiệm",
   "Cộng đồng": "Hoạt động, Cộng đồng",
 };
+const STATUS_MAP = {
+  0: "Sắp diễn ra",
+  1: "Đang mở",
+  2: "Đã kết thúc",
+  3: "Đã huỷ",
+};
+// Hàm format ngày từ ISO string
+function formatDate(date) {
+  if (!date) return '--/--/----';
+  const d = new Date(date);
+  if (isNaN(d)) return '--/--/----';
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+}
+
+// Hàm giả lập lấy profile user 
+function getProfile() {
+  return {
+    userId: localStorage.getItem("userId"),
+    fullName: localStorage.getItem("fullName") || "Bạn",
+    email: localStorage.getItem("email") || "",
+  };
+}
 
 const EventDetail = () => {
   const navigate = useNavigate();
@@ -33,6 +46,15 @@ const EventDetail = () => {
   const [checkinLoading, setCheckinLoading] = useState(false);
   const [checkinError, setCheckinError] = useState(null);
 
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [registered, setRegistered] = useState(false);
+  const [hasEnded, setHasEnded] = useState(false);
+  const [isOngoing, setIsOngoing] = useState(false);
+  const [checkedIn, setCheckedIn] = useState(false);
+  const [checkinTime, setCheckinTime] = useState(null);
+  const [feedbackList, setFeedbackList] = useState([]);
+
   useEffect(() => {
     document.body.classList.add("event-body");
     return () => {
@@ -40,54 +62,76 @@ const EventDetail = () => {
     };
   }, []);
 
-  const event = useMemo(() => getEventById(eventId), [eventId]);
-  const registered = useMemo(() => {
-    // bump when registration changed
-    void regVersion;
-    return isRegistered(eventId);
-  }, [eventId, regVersion]);
+  // Lấy chi tiết event
+  useEffect(() => {
+    setLoading(true);
+    const fetchEvent = async () => {
+      try {
+        const profile = getProfile();
+        const res = await eventService.getEventById(eventId, profile.userId);
+        const ev = res.data.data;
+        setEvent(ev);
+        setRegistered(ev.userRegistrationStatus === "registered" || ev.userRegistrationStatus === "approved" || ev.userRegistrationStatus === "attended");
+        setCheckedIn(ev.userRegistration?.checkedIn || ev.userRegistration?.status === 3 || false);
+        setCheckinTime(ev.userRegistration?.check_in_time || null);
+        setHasEnded(ev.isEventEnded);
+        setIsOngoing(ev.isEventStarted && !ev.isEventEnded);
+      } catch (err) {
+        setEvent(null);
+      }
+      setLoading(false);
+    };
+    fetchEvent();
+    // eslint-disable-next-line
+  }, [eventId, regVersion, checkinVersion]);
 
-  const hasEnded = useMemo(() => {
-    const raw = event?.endDate ?? event?.startDate ?? "";
-    const parts = String(raw).split("/");
-    if (parts.length !== 3) return false;
-    const [dd, mm, yyyy] = parts.map((p) => parseInt(p, 10));
-    if (!dd || !mm || !yyyy) return false;
-    const end = new Date(yyyy, mm - 1, dd, 23, 59, 59, 999).getTime();
-    return Date.now() > end;
-  }, [event?.endDate, event?.startDate]);
-
-  const isOngoing = useMemo(() => {
-    if (!event) return false;
-    const now = Date.now();
-    const startRaw = event.startDate ?? "";
-    const endRaw = event.endDate ?? event.startDate ?? "";
-    const startParts = String(startRaw).split("/");
-    const endParts = String(endRaw).split("/");
-    if (startParts.length !== 3 || endParts.length !== 3) return false;
-    const [sd, sm, sy] = startParts.map((p) => parseInt(p, 10));
-    const [ed, em, ey] = endParts.map((p) => parseInt(p, 10));
-    if (!sd || !sm || !sy || !ed || !em || !ey) return false;
-    const start = new Date(sy, sm - 1, sd, 0, 0, 0, 0).getTime();
-    const end = new Date(ey, em - 1, ed, 23, 59, 59, 999).getTime();
-    return now >= start && now <= end;
-  }, [event]);
-
-  const checkedIn = useMemo(() => {
-    void checkinVersion;
-    return isCheckedIn(eventId);
-  }, [eventId, checkinVersion]);
-
-  const checkinTime = useMemo(() => {
-    void checkinVersion;
-    return getCheckinTime(eventId);
-  }, [eventId, checkinVersion]);
-
-  const feedbackList = useMemo(() => {
-    // bump when added
-    void feedbackVersion;
-    return getFeedbackList(eventId);
+  // Lấy feedbacks
+  useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const profile = getProfile();
+        const res = await eventService.getFeedbacks(eventId, { userId: profile.userId });
+        setFeedbackList(res.data.data.feedbacks || []);
+      } catch (err) {
+        setFeedbackList([]);
+      }
+    };
+    fetchFeedbacks();
   }, [eventId, feedbackVersion]);
+
+  // Check-in
+  const handleCheckin = async () => {
+    setCheckinLoading(true);
+    setCheckinError(null);
+    try {
+      const profile = getProfile();
+      await eventService.checkInEvent(eventId, profile.email);
+      setCheckedIn(true);
+      setCheckinTime(Date.now());
+      setCheckinVersion(v => v + 1);
+    } catch (err) {
+      setCheckinError(
+        err.response?.data?.message || err.message || "Check-in thất bại. Vui lòng thử lại."
+      );
+    }
+    setCheckinLoading(false);
+  };
+
+  // Gửi feedback 
+  const handleFeedbackSubmit = async () => {
+    setFeedbackText("");
+    setFeedbackVersion(v => v + 1);
+  };
+
+  if (loading) {
+    return (
+      <div className="event-container">
+        <Container className="py-5 text-center">
+          <Spinner animation="border" />
+        </Container>
+      </div>
+    );
+  }
 
   if (!event) {
     return (
@@ -115,19 +159,22 @@ const EventDetail = () => {
 
       <Container className="pb-5">
         <div className="event-detailTop">
-
           <div className="event-detailTopRight">
             <Badge className="event-status" bg="info">
-              {event.status}
+              {STATUS_MAP[event.status] ?? event.status}
             </Badge>
           </div>
         </div>
-
         <div className="event-detailLayout">
           <div className="event-detailMain">
-            <div className="event-detailPill">{CATEGORY_BADGE_MAP[event.category] ?? event.category}</div>
-            <h1 className="event-detailH1">{event.title}</h1>
-
+            <h1 className="event-detailH1">
+              {event.title}
+              {event.category && (
+                <span className="event-detailTag" style={{ marginLeft: 10 }}>
+                  {CATEGORY_BADGE_MAP[event.category] ?? event.category}
+                </span>
+              )}
+            </h1>
             <div className="event-orgCard glass-panel">
               <div className="event-orgLeft">
                 <div className="event-orgAvatar" aria-hidden="true" />
@@ -143,17 +190,14 @@ const EventDetail = () => {
 
             <div className="event-detailContent glass-panel">
               <div className="event-detailContentTitle">Nội dung chi tiết</div>
-
               <div className="event-detailSectionTitle">1) GIỚI THIỆU</div>
               <p className="event-detailParagraph">{event.longDescription ?? event.description}</p>
-
               <div className="event-detailSectionTitle">2) HOẠT ĐỘNG CHÍNH</div>
               <ul className="event-detailList">
                 <li>{event.description}</li>
                 <li>Thời gian: {event.timeText}</li>
                 <li>Địa điểm: {event.location}</li>
               </ul>
-
               <div className="event-detailSectionTitle">3) Ý NGHĨA</div>
               <p className="event-detailParagraph">
                 Cùng UniClub kết nối bạn bè, trải nghiệm hoạt động thú vị và tạo kỷ niệm đẹp trong trường.
@@ -164,27 +208,33 @@ const EventDetail = () => {
           <div className="event-detailSide">
             <div className="event-sideCard glass-panel">
               <div className="event-sideImage" aria-hidden="true">
-                <div className="event-rowMediaOverlay" />
+                {event.media_urls && event.media_urls.length > 0 ? (
+                  <img
+                    src={`http://localhost:5000${event.media_urls[0]}`}
+                    alt={event.title}
+                    className="event-rowImg"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
+                  />
+                ) : (
+                  <div className="event-rowMediaOverlay" />
+                )}
               </div>
-
               <div className="event-sideInfo">
                 <div className="event-sideTwoCol">
                   <div className="event-sideMini">
                     <div className="event-sideMiniLabel">Ngày bắt đầu</div>
-                    <div className="event-sideMiniValue">{event.startDate ?? event.dateText}</div>
+                    <div className="event-sideMiniValue">{formatDate(event.start_time)}</div>
                   </div>
                   <div className="event-sideMini">
                     <div className="event-sideMiniLabel">Ngày kết thúc</div>
-                    <div className="event-sideMiniValue">{event.endDate ?? event.dateText}</div>
+                    <div className="event-sideMiniValue">{formatDate(event.end_time)}</div>
                   </div>
                 </div>
-
                 <div className="event-sideBlock">
                   <div className="event-sideMiniLabel">Làng concept</div>
                   <div className="event-sideMiniValue">{event.location}</div>
                   <div className="event-sideLink">Xem bản đồ</div>
                 </div>
-
                 <div className="event-sideParticipants">
                   <div className="event-sideAvatars" aria-hidden="true">
                     <span />
@@ -196,11 +246,9 @@ const EventDetail = () => {
                   </div>
                 </div>
               </div>
-
               <Button className="event-sideRegisterBtn" type="button" onClick={() => setShowRegister(true)}>
                 {registered ? "Huỷ/Chỉnh sửa đăng ký" : "Đăng ký"}
               </Button>
-
               {registered && isOngoing && (
                 <div className="event-checkinSection">
                   {checkedIn ? (
@@ -232,31 +280,7 @@ const EventDetail = () => {
                         className="event-checkinBtn"
                         type="button"
                         disabled={checkinLoading}
-                        onClick={async () => {
-                          setCheckinLoading(true);
-                          setCheckinError(null);
-                          try {
-                            const profile = getProfile();
-                            // TODO: Gọi API backend check-in với email
-                            // const response = await fetch(`/api/events/${eventId}/checkin`, {
-                            //   method: 'POST',
-                            //   headers: { 'Content-Type': 'application/json' },
-                            //   body: JSON.stringify({ email: profile.email })
-                            // });
-                            // if (!response.ok) throw new Error('Check-in thất bại');
-                            
-                            // Simulate API call
-                            await new Promise(resolve => setTimeout(resolve, 1000));
-                            
-                            // Lưu vào localStorage sau khi API thành công
-                            checkInEvent(eventId);
-                            setCheckinVersion((v) => v + 1);
-                          } catch (err) {
-                            setCheckinError(err.message || "Check-in thất bại. Vui lòng thử lại.");
-                          } finally {
-                            setCheckinLoading(false);
-                          }
-                        }}
+                        onClick={handleCheckin}
                       >
                         {checkinLoading ? (
                           <>
@@ -287,13 +311,12 @@ const EventDetail = () => {
               <div className="event-feedbackHint">Bạn cần đăng ký tham gia để feedback.</div>
             ) : null}
           </div>
-
           <div className="event-feedbackList">
             {feedbackList.length === 0 ? (
               <div className="event-feedbackEmpty2">Chưa có feedback.</div>
             ) : (
               feedbackList.map((f) => (
-                <div key={f.id} className="event-feedbackItem">
+                <div key={f._id || f.id} className="event-feedbackItem">
                   <div className="event-feedbackItemTop">
                     <div className="event-feedbackName">{f.userName}</div>
                     <div className="event-feedbackDate">{new Date(f.createdAt).toLocaleString()}</div>
@@ -303,7 +326,6 @@ const EventDetail = () => {
               ))
             )}
           </div>
-
           <div className="event-feedbackForm">
             <textarea
               className="event-feedbackTextarea"
@@ -317,17 +339,7 @@ const EventDetail = () => {
               className="event-feedbackSubmit"
               type="button"
               disabled={!hasEnded || !registered || !feedbackText.trim()}
-              onClick={() => {
-                const profile = getProfile();
-                addFeedback(eventId, {
-                  id: `${Date.now()}`,
-                  userName: profile.fullName,
-                  text: feedbackText.trim(),
-                  createdAt: new Date().toISOString(),
-                });
-                setFeedbackText("");
-                setFeedbackVersion((v) => v + 1);
-              }}
+              onClick={handleFeedbackSubmit}
             >
               Gửi feedback
             </Button>
@@ -347,4 +359,3 @@ const EventDetail = () => {
 };
 
 export default EventDetail;
-

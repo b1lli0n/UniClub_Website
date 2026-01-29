@@ -1,161 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
+import { Container, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import '../styles/Event.css';
-import { EVENTS } from '../data/events';
 import EventTopbar from '../components/EventTopbar';
 import RegistrationModal from '../components/RegistrationModal';
-import { isRegistered } from '../data/eventLocalStore';
-
-const IconBase = ({ children, viewBox = '0 0 24 24' }) => (
-    <svg
-        className="event-catIcon"
-        viewBox={viewBox}
-        width="26"
-        height="26"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-    >
-        {children}
-    </svg>
-);
-
-const IconBook = () => (
-    <IconBase>
-        <path
-            d="M6.5 4.8h8.3c1.6 0 2.7 1.3 2.7 2.9v11.1c0 .8-.7 1.5-1.6 1.5H7.9c-.8 0-1.4-.7-1.4-1.5V6.3c0-.8.7-1.5 1.6-1.5Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinejoin="round"
-        />
-        <path d="M9.2 8h6.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-        <path d="M9.2 11h6.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-    </IconBase>
-);
-
-const IconMusic = () => (
-    <IconBase>
-        <path
-            d="M14 4.8v10.2c0 1.2-1 2.2-2.2 2.2s-2.2-1-2.2-2.2 1-2.2 2.2-2.2c.8 0 1.4.3 1.9.8V7.2l7-1.5v8.8c0 1.2-1 2.2-2.2 2.2s-2.2-1-2.2-2.2 1-2.2 2.2-2.2c.7 0 1.4.3 1.9.8V4.8"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        />
-    </IconBase>
-);
-
-const IconUtensils = () => (
-    <IconBase>
-        <path
-            d="M7 4.5v7.2c0 .9-.7 1.6-1.6 1.6S3.8 12.6 3.8 11.7V4.5"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        />
-        <path d="M5.4 4.5v7.9" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-        <path
-            d="M14.2 4.5v7.2c0 1 .8 1.7 1.7 1.7h.8V4.5"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        />
-        <path d="M14.2 8h3.3" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-    </IconBase>
-);
-
-const IconShoe = () => (
-    <IconBase>
-        <path
-            d="M6 14.5c1.8 1.4 3.9 2.2 6.2 2.2h6.4c.9 0 1.7.7 1.7 1.7v.7H5.2c-.8 0-1.4-.6-1.4-1.4 0-1.6.8-2.8 2.2-3.2Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinejoin="round"
-        />
-        <path
-            d="M10.2 12.2c.5 1.1 1.3 2.2 2.4 3.1"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-        />
-    </IconBase>
-);
-
-const IconClover = () => (
-    <IconBase>
-        <path
-            d="M12 20c0-3.2-2.4-4.6-4.3-6.1-1.4-1.1-2.7-2.2-2.7-3.9 0-1.5 1.2-2.7 2.7-2.7 1.3 0 2.3.8 2.6 2 .3-1.2 1.3-2 2.6-2 1.5 0 2.7 1.2 2.7 2.7 0 1.7-1.3 2.8-2.7 3.9C14.4 15.4 12 16.8 12 20Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinejoin="round"
-        />
-    </IconBase>
-);
-
-const IconCommunity = () => (
-    <IconBase>
-        <path
-            d="M8.2 11.2c1.4 0 2.5-1.1 2.5-2.5S9.6 6.2 8.2 6.2 5.7 7.3 5.7 8.7s1.1 2.5 2.5 2.5Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-        />
-        <path
-            d="M15.8 11.2c1.4 0 2.5-1.1 2.5-2.5s-1.1-2.5-2.5-2.5-2.5 1.1-2.5 2.5 1.1 2.5 2.5 2.5Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-        />
-        <path
-            d="M4.8 19.2c.4-2.3 2.4-4 4.9-4h4.6c2.5 0 4.5 1.7 4.9 4"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        />
-    </IconBase>
-);
-
-const IconCalendar = () => (
-    <IconBase>
-        <path
-            d="M6.2 6.7h11.6c.9 0 1.7.7 1.7 1.7v10.5c0 .9-.7 1.7-1.7 1.7H6.2c-.9 0-1.7-.7-1.7-1.7V8.4c0-.9.7-1.7 1.7-1.7Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinejoin="round"
-        />
-        <path d="M7.2 4.8v3.1" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-        <path d="M16.8 4.8v3.1" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-        <path d="M4.5 10.2h15" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-    </IconBase>
-);
-
-const IconClipboard = () => (
-    <IconBase>
-        <path
-            d="M8 6.3h8.2c.9 0 1.7.7 1.7 1.7v11c0 .9-.7 1.7-1.7 1.7H8c-.9 0-1.7-.7-1.7-1.7V8c0-.9.7-1.7 1.7-1.7Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinejoin="round"
-        />
-        <path
-            d="M9 6.3c.1-1.4 1.3-2.5 2.9-2.5s2.8 1.1 2.9 2.5"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-        />
-        <path d="M9.4 10.3h5.4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-        <path d="M9.4 13.2h5.4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-    </IconBase>
-);
-
-const DISCOVER_CATEGORIES = [
-    { id: 'workshop', labelTop: 'Work Shop,', labelBottom: 'Học tập', mapsTo: 'Workshop', Icon: IconBook },
-    { id: 'sport', labelTop: 'Thể Thao', labelBottom: '', mapsTo: 'Thể thao', Icon: IconShoe },
-    { id: 'entertainment', labelTop: 'Giải trí', labelBottom: '', mapsTo: 'Giải trí', Icon: IconClover },
-    { id: 'community', labelTop: 'Hoạt động', labelBottom: 'cộng đồng', mapsTo: 'Cộng đồng', Icon: IconCommunity },
-];
+import eventService from '../services/eventService';
+import { Form } from "react-bootstrap";
 
 const CATEGORY_BADGE_MAP = {
     Workshop: 'Workshop, Học tập',
@@ -164,14 +14,39 @@ const CATEGORY_BADGE_MAP = {
     'Cộng đồng': 'Hoạt động, Cộng đồng',
 };
 
-const getDateParts = (dateText) => {
-    // Expected format: "DD/MM"
-    if (!dateText) return { day: '--', month: '--' };
-    const [day, month] = String(dateText).split('/');
-    return { day: day || '--', month: month || '--' };
+// hàm này để lấy ngày/tháng từ start_time (ISO) hoặc startDate/dateText (DD/MM/YYYY)
+const getDateParts = (event) => {
+    let dateStr = event.start_time || event.startDate || event.dateText || "";
+    if (!dateStr) return { day: '--', month: '--' };
+
+    // Nếu là ISO date (2026-01-28T00:00:00.000Z)
+    if (typeof dateStr === 'object' && dateStr instanceof Date) {
+        // Nếu là object Date
+        return {
+            day: String(dateStr.getDate()).padStart(2, '0'),
+            month: String(dateStr.getMonth() + 1).padStart(2, '0')
+        };
+    }
+    if (dateStr.includes('T')) {
+        const d = new Date(dateStr);
+        return {
+            day: String(d.getDate()).padStart(2, '0'),
+            month: String(d.getMonth() + 1).padStart(2, '0')
+        };
+    }
+    // Nếu là dạng DD/MM/YYYY hoặc DD/MM
+    const parts = dateStr.split('/');
+    if (parts.length >= 2) {
+        return { day: parts[0], month: parts[1] };
+    }
+    return { day: '--', month: '--' };
 };
 
 const parseDate = (dateStr) => {
+    // Ưu tiên ISO date
+    if (dateStr && dateStr.includes('T')) {
+        return new Date(dateStr).getTime();
+    }
     const parts = String(dateStr).split('/');
     if (parts.length !== 3) return 0;
     const [dd, mm, yyyy] = parts.map((p) => parseInt(p, 10));
@@ -179,14 +54,25 @@ const parseDate = (dateStr) => {
     return new Date(yyyy, mm - 1, dd).getTime();
 };
 
+const DISCOVER_CATEGORIES = [
+    { id: 'all', labelTop: 'Tất cả', labelBottom: '', mapsTo: 'Tất cả', icon: " 🌟" },
+    { id: 'workshop', labelTop: 'Work Shop,', labelBottom: 'Học tập', mapsTo: 'Workshop', icon: "💡" },
+    { id: 'sport', labelTop: 'Thể Thao', labelBottom: '', mapsTo: 'Thể thao', icon: "🏀" },
+    { id: 'entertainment', labelTop: 'Giải trí', labelBottom: '', mapsTo: 'Giải trí', icon: "🎮" },
+    { id: 'community', labelTop: 'Hoạt động', labelBottom: 'cộng đồng', mapsTo: 'Cộng đồng', icon: "🤝" },
+];
+
 const Event = () => {
     const [query, setQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('Tất cả');
-    const [sortBy, setSortBy] = useState('date-desc'); // "date-desc" | "date-asc" | "name"
+    const [sortBy, setSortBy] = useState('date-desc');
     const [showRegister, setShowRegister] = useState(false);
     const [registerEventTitle, setRegisterEventTitle] = useState('Sự kiện');
     const [registerEventId, setRegisterEventId] = useState(null);
     const [regVersion, setRegVersion] = useState(0);
+
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         document.body.classList.add('event-body');
@@ -195,33 +81,54 @@ const Event = () => {
         };
     }, []);
 
+    // Lấy danh sách sự kiện từ backend
+    useEffect(() => {
+        const fetchEvents = async () => {
+            setLoading(true);
+            try {
+                const res = await eventService.getEvents();
+                setEvents(res.data.data || []);
+            } catch (err) {
+                setEvents([]);
+            }
+            setLoading(false);
+        };
+        fetchEvents();
+    }, [regVersion]);
+
     const categories = useMemo(() => {
-        const set = new Set(EVENTS.map((e) => e.category));
+        // Lọc bỏ null/undefined và chuẩn hóa về đúng kiểu
+        const set = new Set(events.map((e) => (e.category ? e.category.trim() : '')).filter(Boolean));
         return ['Tất cả', ...Array.from(set)];
-    }, []);
+    }, [events]);
 
     const filteredEvents = useMemo(() => {
         const q = query.trim().toLowerCase();
-        const filtered = EVENTS.filter((e) => {
-            const byCategory = activeCategory === 'Tất cả' ? true : e.category === activeCategory;
+        const filtered = events.filter((e) => {
+            const eventCat = e.category ? e.category.trim().toLowerCase() : '';
+            const activeCat = activeCategory.trim().toLowerCase();
+            const byCategory = activeCat === 'tất cả'
+                ? true
+                : eventCat === activeCat;
             const byQuery = !q
                 ? true
                 : `${e.title} ${e.description} ${e.category} ${e.location}`.toLowerCase().includes(q);
             return byCategory && byQuery;
         });
 
+
         // Sort
         const sorted = [...filtered];
         if (sortBy === 'date-desc') {
             sorted.sort((a, b) => {
-                const aDate = parseDate(a.endDate ?? a.startDate ?? a.dateText ?? '');
-                const bDate = parseDate(b.endDate ?? b.startDate ?? b.dateText ?? '');
+                const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
+                const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
                 return bDate - aDate;
             });
         } else if (sortBy === 'date-asc') {
             sorted.sort((a, b) => {
-                const aDate = parseDate(a.endDate ?? a.startDate ?? a.dateText ?? '');
-                const bDate = parseDate(b.endDate ?? b.startDate ?? b.dateText ?? '');
+                const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
+                const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
                 return aDate - bDate;
             });
         } else if (sortBy === 'name') {
@@ -229,12 +136,7 @@ const Event = () => {
         }
 
         return sorted;
-    }, [activeCategory, query, sortBy]);
-
-    const featured = useMemo(() => {
-        const inList = filteredEvents.find((e) => e.featured);
-        return inList ?? filteredEvents[0] ?? EVENTS.find((e) => e.featured) ?? EVENTS[0];
-    }, [filteredEvents]);
+    }, [events, activeCategory, query, sortBy]);
 
     return (
         <div className="event-container">
@@ -245,9 +147,9 @@ const Event = () => {
 
                 <Container className="pb-4">
                     <div className="event-catGrid" role="list">
-                        {DISCOVER_CATEGORIES.map(({ id, labelTop, labelBottom, mapsTo, Icon }) => {
+                        {DISCOVER_CATEGORIES.map(({ id, labelTop, labelBottom, mapsTo, icon }) => {
                             const canMap = categories.includes(mapsTo);
-                            const isActive = canMap && activeCategory === mapsTo;
+                            const isActive = canMap && activeCategory.toLowerCase() === mapsTo.toLowerCase();
                             return (
                                 <button
                                     key={id}
@@ -257,9 +159,7 @@ const Event = () => {
                                     onClick={() => setActiveCategory(canMap ? mapsTo : 'Tất cả')}
                                     aria-label={`${labelTop} ${labelBottom}`}
                                 >
-                                    <div className="event-catCircle">
-                                        <Icon />
-                                    </div>
+                                    <div className="event-catCircle">{icon}</div>
                                     <div className="event-catLabel">
                                         <div>{labelTop}</div>
                                         {labelBottom && <div>{labelBottom}</div>}
@@ -295,7 +195,11 @@ const Event = () => {
                     </div>
                 </div>
 
-                {filteredEvents.length === 0 ? (
+                {loading ? (
+                    <div className="event-empty glass-panel">
+                        <div className="event-emptyTitle">Đang tải dữ liệu...</div>
+                    </div>
+                ) : filteredEvents.length === 0 ? (
                     <div className="event-empty glass-panel">
                         <div className="event-emptyTitle">Không tìm thấy sự kiện phù hợp</div>
                         <div className="event-emptySub">Thử đổi danh mục hoặc từ khóa khác nhé.</div>
@@ -313,19 +217,26 @@ const Event = () => {
                 ) : (
                     <div className="event-rowList">
                         {filteredEvents.map((e) => {
-                            const { day, month } = getDateParts(e.dateText);
+                            const { day, month } = getDateParts(e);
                             const badgeText = CATEGORY_BADGE_MAP[e.category] ?? e.category;
-                            // re-render when registration changes
-                            const registered = regVersion >= 0 ? isRegistered(e.id) : false;
                             return (
-                                <div key={e.id} className="event-row glass-panel">
+                                <div key={e._id || e.id} className="event-row glass-panel">
                                     <div className="event-rowMedia" aria-hidden="true">
-                                        <div className="event-rowMediaOverlay" />
+                                        {e.media_urls && e.media_urls.length > 0 ? (
+                                            <img
+                                                src={`http://localhost:5000${e.media_urls[0]}`}
+                                                alt={e.title}
+                                                className="event-rowImg"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
+                                            />
+                                        ) : (
+                                            <div className="event-rowMediaOverlay" />
+                                        )}
                                     </div>
 
                                     <div className="event-rowBody">
                                         <div className="event-rowTitleWrap">
-                                            <Link className="event-rowTitle" to={`/event/${e.id}`}>
+                                            <Link className="event-rowTitle" to={`/event/${e._id || e.id}`}>
                                                 {e.title}
                                             </Link>
                                             <div className="event-rowBadge">{badgeText}</div>
@@ -351,11 +262,11 @@ const Event = () => {
                                             type="button"
                                             onClick={() => {
                                                 setRegisterEventTitle(e.title);
-                                                setRegisterEventId(e.id);
+                                                setRegisterEventId(e._id || e.id);
                                                 setShowRegister(true);
                                             }}
                                         >
-                                            {registered ? 'Đã đăng ký' : 'Đăng ký'}
+                                            Đăng ký
                                         </Button>
                                     </div>
 

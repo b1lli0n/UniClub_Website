@@ -1,32 +1,36 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import { cancelRegistration, getProfile, isRegistered, registerEvent, setProfile } from "../data/eventLocalStore";
+import eventService from "../services/eventService";
 
 const RegistrationModal = ({ show, onHide, eventId, eventTitle = "Sự kiện", onChanged }) => {
-  const [mode, setMode] = useState("view"); // "view" | "edit"
-  const [user, setUser] = useState(getProfile());
+  const [mode, setMode] = useState("view");
+  const [user, setUser] = useState({ fullName: "", phone: "", email: "" });
   const [registered, setRegistered] = useState(false);
 
   useEffect(() => {
     if (!show) return;
     setMode("view");
-    setUser(getProfile());
-    setRegistered(isRegistered(eventId));
-  }, [show, eventId]);
+    if (user && user.email) {
+      eventService.getEventById(eventId, user._id || user.email)
+        .then(res => setRegistered(res.data.data.userRegistrationStatus === 1))
+        .catch(() => setRegistered(false));
+    } else {
+      setRegistered(false);
+    }
+  }, [show, eventId, user]);
 
   const canSubmit = useMemo(() => {
     return Boolean(user.fullName?.trim() && user.phone?.trim() && user.email?.trim());
   }, [user]);
 
-  const handleRegister = () => {
-    setProfile(user);
-    registerEvent(eventId);
+  const handleRegister = async () => {
+    await eventService.registerForEvent(eventId, user._id || user.email);
     onChanged?.();
     onHide?.();
   };
 
-  const handleCancel = () => {
-    cancelRegistration(eventId);
+  const handleCancel = async () => {
+    await eventService.cancelRegistration(eventId, user._id || user.email);
     onChanged?.();
     onHide?.();
   };
@@ -132,4 +136,3 @@ const RegistrationModal = ({ show, onHide, eventId, eventTitle = "Sự kiện", 
 };
 
 export default RegistrationModal;
-
