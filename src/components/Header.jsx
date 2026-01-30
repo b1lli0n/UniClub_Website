@@ -1,28 +1,23 @@
-import { Container, Image, Nav, Navbar } from "react-bootstrap";
-
-const Header = () => {
+/* Simple header matching My Club topbar */
+const Header = ({ searchValue = '', onSearchChange = () => { } }) => {
   return (
-    <Navbar expand="lg" className="bg-dark mb-4">
-      <Container>
-        <Navbar.Brand className="text-white" href="/">
-          <Image src="/images/logo.png" />
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto ">
-            <Nav.Link className="text-white" href="/">
-              Home
-            </Nav.Link>
-            <Nav.Link className="text-white" href="/about">
-              About
-            </Nav.Link>
-            <Nav.Link className="text-white" href="/contacts">
-              Contacts
-            </Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+    <div className="myclub-topbar glass-card">
+      <button className="myclub-logo">Logo</button>
+
+      <div className="myclub-search">
+        <input
+          type="text"
+          placeholder="Search"
+          value={searchValue}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+      </div>
+
+      <div className="myclub-actions">
+        <button className="myclub-pill">Thông báo</button>
+        <button className="myclub-avatar">Avt + Name</button>
+      </div>
+    </div>
   );
 };
 

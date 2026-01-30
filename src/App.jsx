@@ -1,17 +1,17 @@
 import React from 'react'
-import Header from './components/Header'
-import Footer from './components/Footer'
 import AppRouter from './router/AppRouter'
+import { SidebarNav } from './components/layout/SidebarNav'
 
 const App = () => {
   return (
-    <>
-      <Header />
-      <main>
-        <AppRouter />
-      </main>
-      <Footer />
-    </>
+    <div className="app-shell">
+      <SidebarNav />
+      <div className="app-content">
+        <main className="app-main">
+          <AppRouter />
+        </main>
+      </div>
+    </div>
   )
 }
 
