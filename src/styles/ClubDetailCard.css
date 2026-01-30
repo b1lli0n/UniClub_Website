@@ -1,0 +1,213 @@
+/* src/styles/ClubDetailCard.css */
+.club-detail-card {
+  background: rgba(248, 241, 241, 0.849);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 16px 50px rgba(31, 42, 68, 0.10);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 22px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 20px;
+  padding: 20px;
+  cursor: pointer;
+  align-items: center;
+  min-height: 220px;
+}
+
+.club-detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 60px rgba(31, 42, 68, 0.14);
+}
+
+.club-detail-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 0;
+}
+
+.club-detail-title {
+  font-size: 24px;
+  font-weight: 950;
+  color: rgba(31, 42, 68, 0.96);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.club-detail-description {
+  color: rgba(31, 42, 68, 0.72);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 600;
+}
+
+.club-detail-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.club-detail-members {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  color: rgba(31, 42, 68, 0.85);
+  font-weight: 700;
+}
+
+.club-detail-members svg {
+  flex-shrink: 0;
+  color: rgba(120, 190, 255, 0.95);
+}
+
+/* Badge hiển thị số sự kiện CLB */
+.club-detail-events {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(189, 224, 254, 0.35);
+  border: 1px solid rgba(189, 224, 254, 0.7);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(31, 42, 68, 0.9);
+}
+
+.club-detail-category {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: rgba(220, 67, 67, 0.836);
+  color: white;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.club-detail-see-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(31, 42, 68, 0.18);
+  color: rgba(31, 42, 68, 0.92);
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+.club-detail-see-more:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+  gap: 0.75rem;
+}
+
+.club-detail-see-more svg {
+  transition: transform 0.2s;
+}
+
+.club-detail-see-more:hover svg {
+  transform: translateX(2px);
+}
+
+.club-detail-image {
+  height: 240px; /* cao hơn, gần vuông hơn */
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.club-detail-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(135deg, rgba(189, 224, 254, 0.95), rgba(255, 175, 204, 0.92));
+  border: 2px solid rgba(20, 20, 20, 0.9);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(31, 42, 68, 0.4);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.club-detail-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.club-detail-logo-img[src*="default.png"] {
+  object-fit: contain;
+}
+
+@media (max-width: 968px) {
+  .club-detail-card {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .club-detail-image {
+    order: -1;
+    height: 200px;
+  }
+
+  .club-detail-text {
+    padding: 0 0.5rem 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .club-detail-card {
+    padding: 16px;
+  }
+
+  .club-detail-title {
+    font-size: 1.35rem;
+  }
+
+  .club-detail-description {
+    font-size: 0.95rem;
+    -webkit-line-clamp: 2;
+  }
+
+  .club-detail-info {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .club-detail-image {
+    height: 220px; /* mobile cũng cao hơn một chút */
+  }
+
+  .club-detail-see-more {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+}

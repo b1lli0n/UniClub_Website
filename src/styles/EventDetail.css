@@ -1,0 +1,269 @@
+.event-detail-page {
+  min-height: calc(100vh - 200px);
+  padding: 2rem 0;
+  background: #f8f9fa;
+}
+
+.event-detail-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Event Information Section */
+.event-information-section {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.event-info-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+}
+
+.event-info-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.event-info-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.event-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.event-info-item label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.event-category {
+  font-size: 1rem;
+  color: var(--color-cerulean);
+  font-weight: 600;
+  margin: 0;
+}
+
+.event-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.event-club-badge {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-rose);
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.event-club-badge span {
+  font-size: 1rem;
+  color: var(--color-cerulean);
+  font-weight: 600;
+}
+
+.event-description {
+  font-size: 1.1rem;
+  color: #333;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.event-image-placeholder {
+  width: 100%;
+  height: 400px;
+  background: linear-gradient(135deg, var(--color-periwinkle) 0%, var(--color-cerulean) 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.event-date,
+.event-location,
+.event-participants {
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 500;
+  margin: 0;
+}
+
+.event-participants {
+  color: var(--color-cerulean);
+  font-weight: 600;
+}
+
+.register-button {
+  padding: 1rem 2rem;
+  background: var(--color-cerulean);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(35, 80, 210, 0.3);
+}
+
+.register-button:hover {
+  background: var(--color-periwinkle);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(35, 80, 210, 0.4);
+}
+
+/* Feedback Section */
+.feedback-section {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 2rem 0;
+}
+
+.feedback-form {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.feedback-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+.feedback-input:focus {
+  outline: none;
+  border-color: var(--color-cerulean);
+}
+
+.feedback-input::placeholder {
+  color: #999;
+}
+
+.submit-comment-button {
+  padding: 0.75rem 2rem;
+  background: var(--color-cerulean);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.submit-comment-button:hover {
+  background: var(--color-periwinkle);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(35, 80, 210, 0.3);
+}
+
+.feedbacks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.feedback-item {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.feedback-user {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.feedback-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.feedback-comment {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .event-info-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .event-image-placeholder {
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .event-detail-container {
+    padding: 0 1rem;
+  }
+
+  .event-information-section,
+  .feedback-section {
+    padding: 2rem;
+  }
+
+  .event-name {
+    font-size: 2rem;
+  }
+
+  .event-description {
+    font-size: 1rem;
+  }
+
+  .event-image-placeholder {
+    height: 250px;
+    font-size: 1.2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+}

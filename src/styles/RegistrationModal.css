@@ -1,0 +1,111 @@
+.registration-modal .modal-content {
+    border-radius: 1.5rem;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.registration-modal .modal-header {
+    border-bottom: 1px solid rgba(255, 175, 204, 0.2);
+    padding: 1.25rem 1.5rem;
+}
+
+.registration-modal-title {
+    font-weight: 700;
+    color: var(--candy-text);
+    font-size: 1.25rem;
+}
+
+.registration-modal .modal-body {
+    padding: 1.5rem;
+}
+
+.registration-event-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--candy-hotpink);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 175, 204, 0.2);
+}
+
+.registration-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--candy-text);
+    opacity: 0.7;
+}
+
+.registration-input {
+    border: 2px solid transparent;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    transition: all 0.3s;
+}
+
+.registration-input:focus {
+    border-color: var(--candy-hotpink);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(255, 175, 204, 0.2);
+}
+
+.registration-submit-btn {
+    width: 100%;
+    background: var(--candy-hotpink) !important;
+    border: none !important;
+    border-radius: 0.75rem;
+    padding: 0.875rem;
+    font-weight: 600;
+    color: white !important;
+    transition: all 0.3s;
+    margin-top: 0.5rem;
+}
+
+.registration-submit-btn:hover {
+    background: var(--candy-purple) !important;
+    transform: translateY(-2px);
+}
+
+.registration-success {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.success-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--candy-lightpink), var(--candy-hotpink));
+    color: white;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.success-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--candy-text);
+    margin-bottom: 0.5rem;
+}
+
+.success-sub {
+    color: var(--candy-text);
+    opacity: 0.7;
+    font-size: 0.95rem;
+}
+
+.registration-modal .modal-footer {
+    border-top: 1px solid rgba(255, 175, 204, 0.2);
+    padding: 1rem 1.5rem;
+}
+
+.registration-cancel-btn {
+    border-radius: 0.75rem;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+}

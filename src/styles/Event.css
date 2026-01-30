@@ -1,0 +1,433 @@
+/* src/styles/Event.css */
+:root {
+  --event-hot-pink: #ffafcc;
+  --event-powder-blue: #bde0fe;
+  --event-lavender: #cdb4db;
+  --event-ink: #1f2a44;
+  --event-muted: rgba(31, 42, 68, 0.72);
+}
+
+/* Scope fixes for template defaults (index.css/App.css) */
+body.event-body {
+  margin: 0;
+  min-height: 100vh;
+  display: block;
+  place-items: unset;
+  color: var(--event-ink);
+  background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
+}
+
+body.event-body #root {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.event-container {
+  min-height: 100vh;
+}
+
+/* Glass + soft UI */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 16px 50px rgba(31, 42, 68, 0.10);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 22px;
+}
+
+.event-hero {
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.event-hero::before,
+.event-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto;
+  width: 520px;
+  height: 520px;
+  filter: blur(40px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.event-hero::before {
+  top: -260px;
+  left: -200px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 60%);
+}
+
+.event-hero::after {
+  top: -220px;
+  right: -260px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 175, 204, 0.55), rgba(255, 255, 255, 0) 60%);
+}
+
+/* Category Grid */
+.event-catGrid {
+  margin-top: 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 28px 40px;
+}
+
+.event-catItem {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  justify-items: center;
+  width: 120px;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.event-catItem:hover {
+  transform: translateY(-2px);
+}
+
+.event-catCircle {
+  width: 90px;
+  height: 90px;
+  border-radius: 999px;
+  border: 2px solid rgba(120, 190, 255, 0.85);
+  display: grid;
+  place-items: center;
+  color: rgba(120, 190, 255, 0.95);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 22px rgba(31, 42, 68, 0.07);
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.event-catIcon {
+  color: currentColor;
+}
+
+.event-catLabel {
+  margin-top: 12px;
+  font-size: 13px;
+  color: rgba(31, 42, 68, 0.85);
+  line-height: 1.3;
+  text-align: center;
+  font-weight: 800;
+}
+
+.event-catItem:hover .event-catCircle {
+  border-color: rgba(255, 175, 204, 0.9);
+  color: rgba(255, 97, 166, 0.95);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.event-catItem.is-active .event-catCircle {
+  border-color: rgba(255, 175, 204, 0.95);
+  color: rgba(255, 97, 166, 0.98);
+  box-shadow: 0 16px 30px rgba(255, 97, 166, 0.18);
+}
+
+/* Section Head */
+.event-sectionHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin: 12px 0 14px;
+  gap: 16px;
+}
+
+.event-sectionTitle {
+  margin: 0;
+  font-weight: 900;
+  letter-spacing: -0.15px;
+}
+
+.event-sectionSub {
+  margin: 6px 0 0;
+  color: var(--event-muted);
+}
+
+/* Sort */
+.event-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.event-sortLabel {
+  font-weight: 900;
+  color: rgba(31, 42, 68, 0.85);
+  font-size: 13px;
+}
+
+.event-sortSelect {
+  border-radius: 10px;
+  border: 1px solid rgba(31, 42, 68, 0.18);
+  background: rgba(255, 255, 255, 0.8);
+  padding: 8px 10px;
+  font-weight: 800;
+  color: rgba(31, 42, 68, 0.9);
+  cursor: pointer;
+  min-width: 140px;
+}
+
+/* Row card list */
+.event-rowList {
+  display: grid;
+  gap: 16px;
+}
+
+.event-row {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 420px 1fr 120px;
+  gap: 18px;
+  align-items: center;
+}
+
+.event-rowMedia {
+  height: 150px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(135deg, rgba(189, 224, 254, 0.95), rgba(255, 175, 204, 0.92));
+  border: 2px solid rgba(20, 20, 20, 0.9);
+}
+
+.event-rowMediaOverlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 70% 20%, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 20% 90%, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 60%);
+}
+
+.event-rowBody {
+  min-width: 0;
+}
+
+.event-rowTitleWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.event-rowBadge {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: rgba(220, 93, 67, 0.92);
+  color: white;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.event-rowTitle {
+  display: inline-block;
+  margin: 0;
+  font-weight: 950;
+  font-size: 22px;
+  letter-spacing: -0.2px;
+  color: rgba(31, 42, 68, 0.96);
+  text-decoration: none;
+}
+
+.event-rowTitle:hover {
+  color: rgba(255, 97, 166, 0.98);
+}
+
+.event-rowMeta {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+  color: rgba(31, 42, 68, 0.8);
+  font-weight: 650;
+}
+
+.event-rowMetaItem {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.event-rowMetaText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-rowBtn.btn {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(31, 42, 68, 0.18) !important;
+  font-weight: 800;
+  color: rgba(31, 42, 68, 0.92) !important;
+}
+
+.event-rowBtn.btn:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  transform: translateY(-1px);
+}
+
+.event-rowBtn.btn.registered {
+  background: rgba(76, 175, 80, 0.15) !important;
+  border-color: rgba(76, 175, 80, 0.3) !important;
+  color: rgba(46, 125, 50, 0.95) !important;
+}
+
+.event-rowDate {
+  justify-self: end;
+  width: 110px;
+  height: 110px;
+  border-radius: 16px;
+  background: rgba(223, 241, 190, 0.85);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 12px 10px;
+}
+
+.event-rowDay {
+  font-weight: 950;
+  font-size: 44px;
+  line-height: 1;
+  color: rgba(120, 168, 30, 0.95);
+}
+
+.event-rowMonth {
+  margin-top: 6px;
+  font-weight: 800;
+  color: rgba(31, 42, 68, 0.9);
+  font-size: 13px;
+}
+
+/* Empty State */
+.event-empty {
+  padding: 26px;
+  text-align: center;
+}
+
+.event-emptyTitle {
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.event-emptySub {
+  margin-top: 8px;
+  color: var(--event-muted);
+}
+
+.event-secondaryBtn.btn {
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  color: rgba(31, 42, 68, 0.95) !important;
+}
+
+.event-secondaryBtn.btn:hover {
+  background: rgba(255, 255, 255, 0.8) !important;
+  transform: translateY(-1px);
+}
+
+/* Footer only when on Event page */
+body.event-body footer {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: rgba(31, 42, 68, 0.75) !important;
+  padding: 40px 0 !important;
+  margin-top: 80px;
+  text-align: center;
+  font-size: 14px;
+}
+
+body.event-body footer a,
+body.event-body footer strong {
+  color: var(--event-hot-pink) !important;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+body.event-body footer a:hover {
+  color: var(--event-lavender) !important;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .event-row {
+    grid-template-columns: 280px 1fr 110px;
+  }
+}
+
+@media (max-width: 768px) {
+  .event-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .event-rowMedia {
+    height: 190px;
+  }
+
+  .event-rowDate {
+    justify-self: start;
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .event-rowDay {
+    font-size: 32px;
+  }
+
+  .event-catGrid {
+    gap: 16px 24px;
+  }
+
+  .event-catCircle {
+    width: 70px;
+    height: 70px;
+  }
+
+  .event-catLabel {
+    font-size: 11px;
+  }
+
+  .event-catItem {
+    width: 90px;
+  }
+
+  .event-sectionHead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .event-sort {
+    width: 100%;
+  }
+
+  .event-sortSelect {
+    flex: 1;
+    min-width: 0;
+  }
+}
