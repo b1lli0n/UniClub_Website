@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getEventDetail, updateEvent, cancelEvent } from '../services/api';
+import '../styles/UpdateEvent.css';
 import { unmapEvent } from '../services/dataMappers';
 import StatusBadge from '../components/events/StatusBadge';
 import { EventUpdateForm } from '../components/events/EventUpdateForm';
@@ -33,8 +34,8 @@ function UpdateEventPage() {
     const [showCancelDialog, setShowCancelDialog] = useState(false);
 
     // TODO: lấy từ auth/context
-    const clubId = '69776c80120c12cc18c813bc';
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Nzc2YzgwMTIwYzEyY2MxOGM4MTNiOSIsImlhdCI6MTc2OTYyMjQ5Nn0.799v8HXXSCiVdjVlhZPr8cK-kygJfUDso4nxJrQFqsg';
+    const clubId = localStorage.getItem('clubId');
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         const loadEvent = async () => {
@@ -134,7 +135,7 @@ function UpdateEventPage() {
             <div className="home-page">
                 <div className="home-overlay" />
                 <div className="myclub-container">
-                    <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
+                    <div className="glass-card update-event-loading-card">
                         Loading...
                     </div>
                 </div>
@@ -147,7 +148,7 @@ function UpdateEventPage() {
             <div className="home-page">
                 <div className="home-overlay" />
                 <div className="myclub-container">
-                    <div className="glass-card" style={{ padding: '32px', textAlign: 'center', color: 'red' }}>
+                    <div className="glass-card update-event-error-card">
                         {error}
                     </div>
                 </div>
@@ -160,12 +161,12 @@ function UpdateEventPage() {
             <div className="home-page">
                 <div className="home-overlay" />
                 <div className="myclub-container">
-                    <div className="glass-card" style={{ padding: '64px 32px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚠️</div>
-                        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '8px' }}>
+                    <div className="glass-card update-event-notfound-card">
+                        <div className="update-event-notfound-icon">⚠️</div>
+                        <h3 className="update-event-notfound-title">
                             Không tìm thấy sự kiện
                         </h3>
-                        <p style={{ opacity: 0.8, marginBottom: '16px' }}>
+                        <p className="update-event-notfound-text">
                             Sự kiện này không tồn tại hoặc đã bị xóa
                         </p>
                         <button className="card-button" onClick={() => navigate('/events')}>
@@ -185,41 +186,25 @@ function UpdateEventPage() {
                     <h1 className="myclub-title">Chỉnh sửa sự kiện</h1>
                 </header>
 
-                <div style={{ marginBottom: '24px' }}>
+                <div className="update-event-back">
                     <button className="card-button" onClick={() => navigate(`/events/${eventId}`)}>
                         ← Quay lại
                     </button>
                 </div>
 
                 {message && (
-                    <div className="glass-card" style={{
-                        padding: '16px 24px',
-                        marginBottom: '24px',
-                        background: 'rgba(220, 252, 231, 0.6)',
-                        border: '2px solid #10b981'
-                    }}>
-                        <p style={{ margin: 0, color: '#166534', fontWeight: 600 }}>✓ {message}</p>
+                    <div className="glass-card update-event-message-card">
+                        <p className="update-event-message-text">✓ {message}</p>
                     </div>
                 )}
                 {error && event && (
-                    <div className="glass-card" style={{
-                        padding: '16px 24px',
-                        marginBottom: '24px',
-                        background: 'rgba(254, 226, 226, 0.6)',
-                        border: '2px solid #ef4444'
-                    }}>
-                        <p style={{ margin: 0, color: '#991b1b', fontWeight: 600 }}>⚠ {error}</p>
+                    <div className="glass-card update-event-error-alert">
+                        <p className="update-event-error-text">⚠ {error}</p>
                     </div>
                 )}
 
-                <div className="glass-card" style={{
-                    padding: '16px 24px',
-                    marginBottom: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                }}>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--candy-text)', opacity: 0.7 }}>
+                <div className="glass-card update-event-status-card">
+                    <span className="update-event-status-label">
                         Trạng thái hiện tại:
                     </span>
                     <StatusBadge status={event.status} />

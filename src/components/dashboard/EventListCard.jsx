@@ -1,67 +1,44 @@
 import StatusBadge from '../events/StatusBadge';
+import '../../styles/EventListCard.css';
 
 export function EventListCard({ title = 'Sự kiện', events = [], clubName, onCreate, onView, onEdit, onSeeAll }) {
     const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN');
 
     return (
-        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{title}</h3>
-                <button className="card-button" onClick={onCreate} style={{ padding: '8px 16px' }}>
+        <div className="glass-card event-list-card">
+            <div className="event-list-header">
+                <h3 className="event-list-title">{title}</h3>
+                <button className="card-button event-list-create" onClick={onCreate}>
                     + Tạo sự kiện
                 </button>
             </div>
 
-            <div style={{ display: 'grid', gap: '16px' }}>
+            <div className="event-list-grid">
                 {events.map((event) => (
                     <div
                         key={event.id}
-                        className="myclub-card"
-                        style={{
-                            padding: '16px',
-                            display: 'grid',
-                            gridTemplateColumns: '100px 1fr auto',
-                            gap: '16px',
-                            alignItems: 'center'
-                        }}
+                        className="myclub-card event-list-item"
                     >
-                        <div
-                            style={{
-                                height: '80px',
-                                background: 'rgba(255,255,255,0.5)',
-                                borderRadius: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '2rem'
-                            }}
-                        >
+                        <div className="event-list-thumb">
                             📅
                         </div>
 
                         <div>
-                            <h4 style={{ fontWeight: 700, marginBottom: '4px' }}>{event.title}</h4>
-                            <p style={{ fontSize: '0.875rem', opacity: 0.7, marginBottom: '8px' }}>{clubName}</p>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <button className="card-button" onClick={() => onView?.(event.id)} style={{ padding: '6px 12px', fontSize: '0.875rem' }}>
+                            <h4 className="event-list-item-title">{event.title}</h4>
+                            <p className="event-list-club">{clubName}</p>
+                            <div className="event-list-actions">
+                                <button className="card-button event-list-action" onClick={() => onView?.(event.id)}>
                                     Xem sự kiện
                                 </button>
-                                <button className="card-button" onClick={() => onEdit?.(event.id)} style={{ padding: '6px 12px', fontSize: '0.875rem' }}>
+                                <button className="card-button event-list-action" onClick={() => onEdit?.(event.id)}>
                                     Chỉnh sửa
                                 </button>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                        <div className="event-list-meta">
                             <StatusBadge status={event.status} />
-                            <span
-                                style={{
-                                    fontSize: '0.75rem',
-                                    background: 'rgba(255,255,255,0.6)',
-                                    padding: '4px 8px',
-                                    borderRadius: '8px'
-                                }}
-                            >
+                            <span className="event-list-date">
                                 {formatDate(event.startAt)} - {formatDate(event.endAt)}
                             </span>
                         </div>
@@ -70,15 +47,7 @@ export function EventListCard({ title = 'Sự kiện', events = [], clubName, on
 
                 <button
                     onClick={onSeeAll}
-                    style={{
-                        width: '100%',
-                        padding: '12px',
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'var(--candy-text)',
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                    }}
+                    className="event-list-see-all"
                 >
                     Xem tất cả sự kiện
                 </button>

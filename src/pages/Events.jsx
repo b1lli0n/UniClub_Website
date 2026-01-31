@@ -4,6 +4,7 @@ import { getEvents } from '../services/api';
 import EventCard from '../components/events/EventCard';
 import EventsFilter from '../components/events/EventsFilter';
 import EmptyEventState from '../components/events/EmptyEventState';
+import '../styles/Events.css';
 
 export default function EventsPage() {
     const navigate = useNavigate();
@@ -13,8 +14,8 @@ export default function EventsPage() {
     const [statusFilter, setStatusFilter] = useState('all');
 
     // TODO: lấy từ auth/context
-    const clubId = '69776c80120c12cc18c813bc';
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Nzc2YzgwMTIwYzEyY2MxOGM4MTNiOSIsImlhdCI6MTc2OTYyMjQ5Nn0.799v8HXXSCiVdjVlhZPr8cK-kygJfUDso4nxJrQFqsg';
+    const clubId = localStorage.getItem('clubId');
+    const token = localStorage.getItem('token');
 
     const loadEvents = async () => {
         try {
@@ -54,7 +55,7 @@ export default function EventsPage() {
             <div className="home-page">
                 <div className="home-overlay" />
                 <div className="myclub-container">
-                    <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
+                    <div className="glass-card events-loading-card">
                         Loading...
                     </div>
                 </div>
@@ -67,7 +68,7 @@ export default function EventsPage() {
             <div className="home-page">
                 <div className="home-overlay" />
                 <div className="myclub-container">
-                    <div className="glass-card" style={{ padding: '32px', textAlign: 'center', color: 'red' }}>
+                    <div className="glass-card events-error-card">
                         {error}
                     </div>
                 </div>
@@ -84,7 +85,7 @@ export default function EventsPage() {
                 </header>
 
                 {/* Header with title and create button */}
-                <div className="myclub-hero glass-card" style={{ marginBottom: '24px' }}>
+                <div className="myclub-hero glass-card events-hero">
                     <div className="myclub-hero-content">
                         <h2>Sự kiện</h2>
                         <p>Quản lý tất cả sự kiện của câu lạc bộ</p>
@@ -105,11 +106,7 @@ export default function EventsPage() {
 
                 {/* Events grid */}
                 {filteredEvents.length > 0 ? (
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                        gap: '16px'
-                    }}>
+                    <div className="events-grid">
                         {filteredEvents.map((event) => (
                             <EventCard
                                 key={event._id}

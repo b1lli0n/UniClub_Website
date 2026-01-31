@@ -1,5 +1,6 @@
 import { Home, Calendar, Bell, Users, Info, LayoutGrid } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
+import '../../styles/SidebarNav.css';
 
 const navItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
@@ -19,7 +20,7 @@ export function SidebarNav() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary shrink-0">
                     <span className="text-lg font-bold text-primary-foreground">U</span>
                 </div>
-                <span className="font-semibold text-sidebar-foreground opacity-0 transition-opacity whitespace-nowrap group-hover:opacity-100" style={{ maxWidth: '100px', overflow: 'hidden' }}>
+                <span className="font-semibold text-sidebar-foreground opacity-0 transition-opacity whitespace-nowrap group-hover:opacity-100 sidebar-text">
                     UniClub
                 </span>
             </div>
@@ -29,7 +30,7 @@ export function SidebarNav() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/40 overflow-hidden shrink-0">
                     <span className="text-lg">🎮</span>
                 </div>
-                <span className="text-sm font-medium text-sidebar-foreground opacity-0 transition-opacity whitespace-nowrap group-hover:opacity-100" style={{ maxWidth: '100px', overflow: 'hidden' }}>
+                <span className="text-sm font-medium text-sidebar-foreground opacity-0 transition-opacity whitespace-nowrap group-hover:opacity-100 sidebar-text">
                     Câu lạc bộ
                 </span>
             </div>
@@ -51,10 +52,9 @@ export function SidebarNav() {
                         <NavLink
                             key={item.path}
                             to={item.path}
-                            className={finalClass}
-                            style={{ textDecoration: 'none' }}
+                            className={`${finalClass} sidebar-link`}
                         >
-                            <IconComponent className={iconClass} style={{ opacity: 1 }} />
+                            <IconComponent className={`${iconClass} sidebar-icon`} />
                             <span className="ml-3 whitespace-nowrap opacity-0 transition-opacity">
                                 {item.label}
                             </span>
@@ -66,7 +66,7 @@ export function SidebarNav() {
             {/* Calendar icon at bottom */}
             <div className="border-t border-sidebar-border p-4">
                 <div className="flex items-center justify-center rounded-lg px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent/50 cursor-pointer">
-                    <Calendar className="h-5 w-5 shrink-0" style={{ opacity: 1 }} />
+                    <Calendar className="h-5 w-5 shrink-0 sidebar-icon" />
                     <span className="ml-3 whitespace-nowrap opacity-0 transition-opacity">
                         Lịch
                     </span>

@@ -1,0 +1,12 @@
+.sidebar-text {
+    max-width: 100px;
+    overflow: hidden;
+}
+
+.sidebar-link {
+    text-decoration: none;
+}
+
+.sidebar-icon {
+    opacity: 1;
+}

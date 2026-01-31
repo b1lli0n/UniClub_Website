@@ -1,0 +1,31 @@
+.event-detail-loading-card {
+    padding: 32px;
+    text-align: center;
+}
+
+.event-detail-error-card {
+    padding: 32px;
+    text-align: center;
+    color: red;
+}
+
+.event-detail-notfound-card {
+    padding: 64px 32px;
+    text-align: center;
+}
+
+.event-detail-notfound-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+}
+
+.event-detail-notfound-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.event-detail-notfound-text {
+    opacity: 0.8;
+    margin-bottom: 16px;
+}

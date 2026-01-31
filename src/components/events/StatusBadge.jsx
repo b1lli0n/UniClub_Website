@@ -1,13 +1,15 @@
+import '../../styles/StatusBadge.css';
+
 const statusConfig = {
-    published: { label: 'Đã xuất bản', bg: 'var(--candy-paleblue)' },
-    active: { label: 'Hoạt động', bg: 'var(--candy-paleblue)' },
-    draft: { label: 'Nháp', bg: 'var(--candy-lightpink)' },
-    completed: { label: 'Hoàn thành', bg: 'var(--candy-purple)' },
-    paused: { label: 'Tạm dừng', bg: 'rgba(255, 200, 221, 0.8)' },
-    canceled: { label: 'Đã hủy', bg: '#fee2e2' },
-    pending: { label: 'Đang chờ', bg: 'var(--candy-lightpink)' },
-    rejected: { label: 'Bị từ chối', bg: '#fee2e2' },
-    left: { label: 'Đã rời', bg: '#f3f4f6' }
+    published: { label: 'Đã xuất bản', className: 'published' },
+    active: { label: 'Hoạt động', className: 'active' },
+    draft: { label: 'Nháp', className: 'draft' },
+    completed: { label: 'Hoàn thành', className: 'completed' },
+    paused: { label: 'Tạm dừng', className: 'paused' },
+    canceled: { label: 'Đã hủy', className: 'canceled' },
+    pending: { label: 'Đang chờ', className: 'pending' },
+    rejected: { label: 'Bị từ chối', className: 'rejected' },
+    left: { label: 'Đã rời', className: 'left' }
 };
 
 // Map numeric codes to labels
@@ -34,16 +36,7 @@ export function StatusBadge({ status, statusCode }) {
     const config = statusConfig[finalStatus] || statusConfig.draft;
 
     return (
-        <span
-            style={{
-                background: config.bg,
-                padding: '6px 14px',
-                borderRadius: '12px',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                color: 'var(--candy-text)'
-            }}
-        >
+        <span className={`status-badge status-${config.className}`}>
             {config.label}
         </span>
     );

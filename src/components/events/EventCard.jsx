@@ -1,36 +1,27 @@
 import StatusBadge from './StatusBadge';
+import '../../styles/EventCard.css';
 
 const EventCard = ({ event, onViewDetails, formatDateTime }) => {
     return (
-        <div className="glass-card myclub-card" style={{ padding: '16px' }}>
-            <div style={{
-                height: '140px',
-                background: 'rgba(255,255,255,0.5)',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '3rem',
-                marginBottom: '12px'
-            }}>
+        <div className="glass-card myclub-card event-card">
+            <div className="event-card-hero">
                 📅
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
-                <h3 style={{ fontWeight: 700, fontSize: '1.1rem', margin: 0 }}>{event.title}</h3>
+            <div className="event-card-header">
+                <h3 className="event-card-title">{event.title}</h3>
                 <StatusBadge status={event.status} />
             </div>
-            <p style={{ fontSize: '0.875rem', opacity: 0.8, marginBottom: '8px' }}>
+            <p className="event-card-description">
                 {event.description || 'Không có mô tả'}
             </p>
-            <div style={{ fontSize: '0.875rem', color: 'var(--candy-text)', marginBottom: '8px' }}>
+            <div className="event-card-meta">
                 <div>📍 {event.location}</div>
                 <div>🕐 {formatDateTime(event.startAt)}</div>
                 <div>👥 Sức chứa: {event.capacity}</div>
             </div>
             <button
-                className="card-button"
                 onClick={() => onViewDetails(event._id)}
-                style={{ width: '100%', marginTop: '8px' }}
+                className="card-button event-card-button"
             >
                 Xem chi tiết
             </button>

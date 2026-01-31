@@ -1,30 +1,20 @@
+import '../../styles/CancelledEventAlert.css';
+
 const CancelledEventAlert = ({ canceledAt, cancelReason, formatDateTime }) => {
     return (
-        <div className="glass-card" style={{
-            padding: '24px',
-            border: '2px solid #fee2e2',
-            background: 'rgba(254, 226, 226, 0.3)'
-        }}>
-            <h3 style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: '#dc2626',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '16px'
-            }}>
+        <div className="glass-card cancelled-event">
+            <h3 className="cancelled-event-title">
                 ⚠️ Sự kiện đã bị hủy
             </h3>
-            <div style={{ display: 'grid', gap: '12px' }}>
+            <div className="cancelled-event-grid">
                 <div>
-                    <p style={{ fontSize: '0.875rem', opacity: 0.7, margin: 0 }}>Thời gian hủy</p>
-                    <p style={{ fontWeight: 600, margin: 0 }}>{formatDateTime(canceledAt)}</p>
+                    <p className="cancelled-event-label">Thời gian hủy</p>
+                    <p className="cancelled-event-value">{formatDateTime(canceledAt)}</p>
                 </div>
                 {cancelReason && (
                     <div>
-                        <p style={{ fontSize: '0.875rem', opacity: 0.7, margin: 0 }}>Lý do</p>
-                        <p style={{ fontWeight: 600, margin: 0 }}>{cancelReason}</p>
+                        <p className="cancelled-event-label">Lý do</p>
+                        <p className="cancelled-event-value">{cancelReason}</p>
                     </div>
                 )}
             </div>

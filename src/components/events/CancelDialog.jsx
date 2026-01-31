@@ -1,3 +1,5 @@
+import '../../styles/CancelDialog.css';
+
 export function CancelDialog({
     open,
     eventTitle,
@@ -11,41 +13,18 @@ export function CancelDialog({
     if (!open) return null;
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            backdropFilter: 'blur(4px)'
-        }}>
-            <div className="glass-card" style={{
-                width: '90%',
-                maxWidth: '500px',
-                padding: '32px',
-                animation: 'slideIn 0.3s ease'
-            }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '12px' }}>
+        <div className="cancel-dialog-overlay">
+            <div className="glass-card cancel-dialog-card">
+                <h3 className="cancel-dialog-title">
                     Xác nhận hủy sự kiện
                 </h3>
-                <p style={{ fontSize: '0.875rem', opacity: 0.8, marginBottom: '24px' }}>
+                <p className="cancel-dialog-text">
                     Bạn có chắc chắn muốn hủy sự kiện "{eventTitle}"?
                     Thông báo sẽ được gửi đến {registrationsCount} người đã đăng ký.
                 </p>
 
-                <div style={{ marginBottom: '24px' }}>
-                    <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        marginBottom: '8px',
-                        color: 'var(--candy-text)'
-                    }}>
+                <div className="cancel-dialog-field">
+                    <label className="cancel-dialog-label">
                         Lý do hủy (tùy chọn)
                     </label>
                     <textarea
@@ -53,53 +32,22 @@ export function CancelDialog({
                         onChange={(e) => onChangeReason(e.target.value)}
                         placeholder="Nhập lý do hủy sự kiện..."
                         rows="3"
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            borderRadius: '12px',
-                            border: '2px solid rgba(162, 210, 255, 0.3)',
-                            background: 'rgba(255, 255, 255, 0.6)',
-                            fontSize: '1rem',
-                            color: 'var(--candy-text)',
-                            outline: 'none',
-                            resize: 'vertical',
-                            fontFamily: 'Poppins, sans-serif'
-                        }}
+                        className="cancel-dialog-textarea"
                     />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <div className="cancel-dialog-actions">
                     <button
                         onClick={onClose}
                         disabled={updating}
-                        style={{
-                            padding: '12px 24px',
-                            borderRadius: '12px',
-                            border: '2px solid rgba(162, 210, 255, 0.3)',
-                            background: 'rgba(255, 255, 255, 0.6)',
-                            color: 'var(--candy-text)',
-                            fontSize: '1rem',
-                            fontWeight: 700,
-                            cursor: updating ? 'not-allowed' : 'pointer',
-                            opacity: updating ? 0.6 : 1
-                        }}
+                        className="cancel-dialog-cancel"
                     >
                         Giữ sự kiện
                     </button>
                     <button
                         onClick={onConfirm}
                         disabled={updating}
-                        style={{
-                            padding: '12px 24px',
-                            borderRadius: '12px',
-                            border: 'none',
-                            background: '#dc2626',
-                            color: '#fff',
-                            fontSize: '1rem',
-                            fontWeight: 700,
-                            cursor: updating ? 'not-allowed' : 'pointer',
-                            opacity: updating ? 0.6 : 1
-                        }}
+                        className="cancel-dialog-confirm"
                     >
                         {updating ? 'Đang hủy...' : 'Xác nhận hủy'}
                     </button>

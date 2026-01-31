@@ -4,6 +4,7 @@ import { getEventDetail } from '../services/api';
 import EventHeader from '../components/eventDetail/EventHeader';
 import EventInfoCard from '../components/eventDetail/EventInfoCard';
 import CancelledEventAlert from '../components/eventDetail/CancelledEventAlert';
+import '../styles/EventDetail.css';
 
 export default function EventDetailPage() {
     const { eventId } = useParams();
@@ -14,8 +15,8 @@ export default function EventDetailPage() {
     const [error, setError] = useState('');
 
     // TODO: lấy từ auth/context
-    const clubId = '69776c80120c12cc18c813bc';
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Nzc2YzgwMTIwYzEyY2MxOGM4MTNiOSIsImlhdCI6MTc2OTYyMjQ5Nn0.799v8HXXSCiVdjVlhZPr8cK-kygJfUDso4nxJrQFqsg';
+    const clubId = localStorage.getItem('clubId');
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         const loadDetail = async () => {
@@ -50,7 +51,7 @@ export default function EventDetailPage() {
             <div className="home-page">
                 <div className="home-overlay" />
                 <div className="myclub-container">
-                    <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
+                    <div className="glass-card event-detail-loading-card">
                         Loading...
                     </div>
                 </div>
@@ -63,7 +64,7 @@ export default function EventDetailPage() {
             <div className="home-page">
                 <div className="home-overlay" />
                 <div className="myclub-container">
-                    <div className="glass-card" style={{ padding: '32px', textAlign: 'center', color: 'red' }}>
+                    <div className="glass-card event-detail-error-card">
                         {error}
                     </div>
                 </div>
@@ -76,12 +77,12 @@ export default function EventDetailPage() {
             <div className="home-page">
                 <div className="home-overlay" />
                 <div className="myclub-container">
-                    <div className="glass-card" style={{ padding: '64px 32px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚠️</div>
-                        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '8px' }}>
+                    <div className="glass-card event-detail-notfound-card">
+                        <div className="event-detail-notfound-icon">⚠️</div>
+                        <h3 className="event-detail-notfound-title">
                             Không tìm thấy sự kiện
                         </h3>
-                        <p style={{ opacity: 0.8, marginBottom: '16px' }}>
+                        <p className="event-detail-notfound-text">
                             Sự kiện này không tồn tại hoặc đã bị xóa
                         </p>
                         <button className="card-button" onClick={() => navigate('/events')}>

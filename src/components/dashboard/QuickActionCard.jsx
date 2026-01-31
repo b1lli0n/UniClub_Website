@@ -1,31 +1,15 @@
+import '../../styles/QuickActionCard.css';
+
 export function QuickActionCard({ title, subtitle, onClick }) {
     return (
         <div
-            className="glass-card"
-            style={{
-                padding: '24px',
-                borderRadius: '16px',
-                textAlign: 'center',
-                cursor: onClick ? 'pointer' : 'default',
-                transition: 'all 0.2s'
-            }}
+            className={`glass-card quick-action-card ${onClick ? 'is-clickable' : ''}`}
             onClick={onClick}
         >
-            <h3 style={{ fontWeight: 700, marginBottom: '8px' }}>{title}</h3>
-            <p style={{ fontSize: '0.875rem', opacity: 0.8, marginBottom: '16px' }}>{subtitle}</p>
-            <div
-                style={{
-                    width: '48px',
-                    height: '48px',
-                    margin: '0 auto',
-                    borderRadius: '50%',
-                    border: '2px dashed rgba(0,0,0,0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
-            >
-                <span style={{ fontSize: '1.5rem' }}>+</span>
+            <h3 className="quick-action-title">{title}</h3>
+            <p className="quick-action-subtitle">{subtitle}</p>
+            <div className="quick-action-icon">
+                <span className="quick-action-icon-text">+</span>
             </div>
         </div>
     );

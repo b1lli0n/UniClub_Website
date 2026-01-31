@@ -1,20 +1,16 @@
+import '../../styles/EventUpdateForm.css';
+
 export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack, eventTitle }) {
     return (
-        <div className="glass-card" style={{ padding: '32px', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '24px' }}>
+        <div className="glass-card event-update-form">
+            <h2 className="event-update-title">
                 Chỉnh sửa: {eventTitle}
             </h2>
 
-            <form onSubmit={onSubmit} style={{ display: 'grid', gap: '24px' }}>
+            <form onSubmit={onSubmit} className="event-update-grid">
                 <div>
-                    <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        marginBottom: '8px',
-                        color: 'var(--candy-text)'
-                    }}>
-                        Tên sự kiện <span style={{ color: '#dc2626' }}>*</span>
+                    <label className="event-update-label">
+                        Tên sự kiện <span className="event-update-required">*</span>
                     </label>
                     <input
                         type="text"
@@ -22,30 +18,12 @@ export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack
                         value={formData.title}
                         onChange={onChange}
                         placeholder="Nhập tên sự kiện"
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            borderRadius: '12px',
-                            border: '2px solid rgba(162, 210, 255, 0.3)',
-                            background: 'rgba(255, 255, 255, 0.6)',
-                            fontSize: '1rem',
-                            color: 'var(--candy-text)',
-                            outline: 'none',
-                            transition: 'all 0.3s ease'
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
-                        onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                        className="event-update-input"
                     />
                 </div>
 
                 <div>
-                    <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        marginBottom: '8px',
-                        color: 'var(--candy-text)'
-                    }}>
+                    <label className="event-update-label">
                         Mô tả
                     </label>
                     <textarea
@@ -54,32 +32,12 @@ export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack
                         onChange={onChange}
                         placeholder="Nhập mô tả chi tiết về sự kiện"
                         rows="4"
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            borderRadius: '12px',
-                            border: '2px solid rgba(162, 210, 255, 0.3)',
-                            background: 'rgba(255, 255, 255, 0.6)',
-                            fontSize: '1rem',
-                            color: 'var(--candy-text)',
-                            outline: 'none',
-                            resize: 'vertical',
-                            fontFamily: 'Poppins, sans-serif',
-                            transition: 'all 0.3s ease'
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
-                        onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                        className="event-update-textarea"
                     />
                 </div>
 
                 <div>
-                    <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        marginBottom: '8px',
-                        color: 'var(--candy-text)'
-                    }}>
+                    <label className="event-update-label">
                         Nội dung chi tiết
                     </label>
                     <textarea
@@ -88,32 +46,12 @@ export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack
                         onChange={onChange}
                         placeholder="Nhập nội dung chi tiết về sự kiện"
                         rows="5"
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            borderRadius: '12px',
-                            border: '2px solid rgba(162, 210, 255, 0.3)',
-                            background: 'rgba(255, 255, 255, 0.6)',
-                            fontSize: '1rem',
-                            color: 'var(--candy-text)',
-                            outline: 'none',
-                            resize: 'vertical',
-                            fontFamily: 'Poppins, sans-serif',
-                            transition: 'all 0.3s ease'
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
-                        onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                        className="event-update-textarea"
                     />
                 </div>
 
                 <div>
-                    <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        marginBottom: '8px',
-                        color: 'var(--candy-text)'
-                    }}>
+                    <label className="event-update-label">
                         Thể loại
                     </label>
                     <input
@@ -122,30 +60,12 @@ export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack
                         value={formData.category}
                         onChange={onChange}
                         placeholder="Ví dụ: Kỹ thuật, Kinh doanh, Thể thao, ..."
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            borderRadius: '12px',
-                            border: '2px solid rgba(162, 210, 255, 0.3)',
-                            background: 'rgba(255, 255, 255, 0.6)',
-                            fontSize: '1rem',
-                            color: 'var(--candy-text)',
-                            outline: 'none',
-                            transition: 'all 0.3s ease'
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
-                        onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                        className="event-update-input"
                     />
                 </div>
 
                 <div>
-                    <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        marginBottom: '8px',
-                        color: 'var(--candy-text)'
-                    }}>
+                    <label className="event-update-label">
                         Địa điểm
                     </label>
                     <input
@@ -154,95 +74,41 @@ export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack
                         value={formData.location}
                         onChange={onChange}
                         placeholder="Nhập địa điểm tổ chức"
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            borderRadius: '12px',
-                            border: '2px solid rgba(162, 210, 255, 0.3)',
-                            background: 'rgba(255, 255, 255, 0.6)',
-                            fontSize: '1rem',
-                            color: 'var(--candy-text)',
-                            outline: 'none',
-                            transition: 'all 0.3s ease'
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
-                        onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                        className="event-update-input"
                     />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="event-update-grid-2">
                     <div>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: 600,
-                            marginBottom: '8px',
-                            color: 'var(--candy-text)'
-                        }}>
-                            Thời gian bắt đầu <span style={{ color: '#dc2626' }}>*</span>
+                        <label className="event-update-label">
+                            Thời gian bắt đầu <span className="event-update-required">*</span>
                         </label>
                         <input
                             type="datetime-local"
                             name="startAt"
                             value={formData.startAt}
                             onChange={onChange}
-                            style={{
-                                width: '100%',
-                                padding: '12px 16px',
-                                borderRadius: '12px',
-                                border: '2px solid rgba(162, 210, 255, 0.3)',
-                                background: 'rgba(255, 255, 255, 0.6)',
-                                fontSize: '1rem',
-                                color: 'var(--candy-text)',
-                                outline: 'none',
-                                transition: 'all 0.3s ease'
-                            }}
-                            onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
-                            onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                            className="event-update-input"
                         />
                     </div>
 
                     <div>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: 600,
-                            marginBottom: '8px',
-                            color: 'var(--candy-text)'
-                        }}>
-                            Thời gian kết thúc <span style={{ color: '#dc2626' }}>*</span>
+                        <label className="event-update-label">
+                            Thời gian kết thúc <span className="event-update-required">*</span>
                         </label>
                         <input
                             type="datetime-local"
                             name="endAt"
                             value={formData.endAt}
                             onChange={onChange}
-                            style={{
-                                width: '100%',
-                                padding: '12px 16px',
-                                borderRadius: '12px',
-                                border: '2px solid rgba(162, 210, 255, 0.3)',
-                                background: 'rgba(255, 255, 255, 0.6)',
-                                fontSize: '1rem',
-                                color: 'var(--candy-text)',
-                                outline: 'none',
-                                transition: 'all 0.3s ease'
-                            }}
-                            onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
-                            onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                            className="event-update-input"
                         />
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="event-update-grid-2">
                     <div>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: 600,
-                            marginBottom: '8px',
-                            color: 'var(--candy-text)'
-                        }}>
+                        <label className="event-update-label">
                             Sức chứa
                         </label>
                         <input
@@ -251,50 +117,19 @@ export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack
                             min="1"
                             value={formData.capacity}
                             onChange={onChange}
-                            style={{
-                                width: '100%',
-                                padding: '12px 16px',
-                                borderRadius: '12px',
-                                border: '2px solid rgba(162, 210, 255, 0.3)',
-                                background: 'rgba(255, 255, 255, 0.6)',
-                                fontSize: '1rem',
-                                color: 'var(--candy-text)',
-                                outline: 'none',
-                                transition: 'all 0.3s ease'
-                            }}
-                            onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
-                            onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                            className="event-update-input"
                         />
                     </div>
 
                     <div>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: 600,
-                            marginBottom: '8px',
-                            color: 'var(--candy-text)'
-                        }}>
+                        <label className="event-update-label">
                             Trạng thái
                         </label>
                         <select
                             name="status"
                             value={formData.status}
                             onChange={onChange}
-                            style={{
-                                width: '100%',
-                                padding: '12px 16px',
-                                borderRadius: '12px',
-                                border: '2px solid rgba(162, 210, 255, 0.3)',
-                                background: 'rgba(255, 255, 255, 0.6)',
-                                fontSize: '1rem',
-                                color: 'var(--candy-text)',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease'
-                            }}
-                            onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
-                            onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                            className="event-update-select"
                         >
                             <option value="draft">Draft (Nháp)</option>
                             <option value="published">Published (Công khai)</option>
@@ -302,40 +137,18 @@ export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px' }}>
+                <div className="event-update-actions">
                     <button
                         type="button"
                         onClick={onBack}
-                        style={{
-                            padding: '12px 24px',
-                            borderRadius: '12px',
-                            border: '2px solid rgba(162, 210, 255, 0.3)',
-                            background: 'rgba(255, 255, 255, 0.6)',
-                            color: 'var(--candy-text)',
-                            fontSize: '1rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.target.style.borderColor = 'var(--candy-skyblue)';
-                            e.target.style.transform = 'translateY(-2px)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)';
-                            e.target.style.transform = 'translateY(0)';
-                        }}
+                        className="event-update-cancel"
                     >
                         Hủy
                     </button>
                     <button
                         type="submit"
                         disabled={updating}
-                        className="card-button"
-                        style={{
-                            opacity: updating ? 0.6 : 1,
-                            cursor: updating ? 'not-allowed' : 'pointer'
-                        }}
+                        className="card-button event-update-submit"
                     >
                         {updating ? 'Đang cập nhật...' : 'Cập nhật'}
                     </button>
