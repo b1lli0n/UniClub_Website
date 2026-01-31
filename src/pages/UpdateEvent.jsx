@@ -15,10 +15,13 @@ function UpdateEventPage() {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        content: '',
+        category: '',
         location: '',
         startAt: '',
         endAt: '',
         capacity: 0,
+        mediaUrls: [],
         status: 'draft',
         progressStatus: 'draft'
     });
@@ -43,10 +46,13 @@ function UpdateEventPage() {
                 setFormData({
                     title: data.event.title,
                     description: data.event.description || '',
+                    content: data.event.content || '',
+                    category: data.event.category || '',
                     location: data.event.location || '',
                     startAt: data.event.startAt.slice(0, 16),
                     endAt: data.event.endAt.slice(0, 16),
                     capacity: data.event.capacity,
+                    mediaUrls: data.event.mediaUrls || [],
                     status: data.event.status,
                     progressStatus: data.event.progressStatus || 'draft'
                 });

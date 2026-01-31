@@ -8,10 +8,13 @@ export default function CreateEventPage() {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        content: '',
+        category: '',
         location: '',
         startAt: '',
         endAt: '',
         capacity: 30,
+        mediaUrls: [],
         status: 'draft',
         progressStatus: 'draft'
     });
@@ -22,10 +25,11 @@ export default function CreateEventPage() {
     const clubId = '69776c80120c12cc18c813bc';
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Nzc2YzgwMTIwYzEyY2MxOGM4MTNiOSIsImlhdCI6MTc2OTYyMjQ5Nn0.799v8HXXSCiVdjVlhZPr8cK-kygJfUDso4nxJrQFqsg';
 
-    const handleChange = (field, value) => {
+    const handleChange = (e) => {
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [field]: value
+            [name]: name === 'capacity' ? parseInt(value) || 1 : value
         }));
         setError('');
     };
@@ -123,9 +127,10 @@ export default function CreateEventPage() {
                                 </label>
                                 <input
                                     type="text"
+                                    name="title"
                                     placeholder="Nhập tên sự kiện"
                                     value={formData.title}
-                                    onChange={(e) => handleChange('title', e.target.value)}
+                                    onChange={handleChange}
                                     style={{
                                         width: '100%',
                                         padding: '10px 12px',
@@ -151,10 +156,11 @@ export default function CreateEventPage() {
                                     Mô tả
                                 </label>
                                 <textarea
+                                    name="description"
                                     placeholder="Nhập mô tả chi tiết về sự kiện"
                                     rows={4}
                                     value={formData.description}
-                                    onChange={(e) => handleChange('description', e.target.value)}
+                                    onChange={handleChange}
                                     style={{
                                         width: '100%',
                                         padding: '10px 12px',
@@ -166,6 +172,68 @@ export default function CreateEventPage() {
                                         outline: 'none',
                                         resize: 'vertical',
                                         fontFamily: 'inherit'
+                                    }}
+                                />
+                            </div>
+
+                            {/* Content */}
+                            <div>
+                                <label style={{
+                                    display: 'block',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    marginBottom: '8px',
+                                    color: 'var(--candy-text)'
+                                }}>
+                                    Nội dung chi tiết
+                                </label>
+                                <textarea
+                                    name="content"
+                                    placeholder="Nhập nội dung chi tiết về sự kiện"
+                                    rows={5}
+                                    value={formData.content}
+                                    onChange={handleChange}
+                                    style={{
+                                        width: '100%',
+                                        padding: '10px 12px',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(0,0,0,0.1)',
+                                        background: 'rgba(255,255,255,0.9)',
+                                        fontSize: '0.875rem',
+                                        color: 'var(--candy-text)',
+                                        outline: 'none',
+                                        resize: 'vertical',
+                                        fontFamily: 'inherit'
+                                    }}
+                                />
+                            </div>
+
+                            {/* Category */}
+                            <div>
+                                <label style={{
+                                    display: 'block',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    marginBottom: '8px',
+                                    color: 'var(--candy-text)'
+                                }}>
+                                    Thể loại
+                                </label>
+                                <input
+                                    type="text"
+                                    name="category"
+                                    placeholder="Ví dụ: Kỹ thuật, Kinh doanh, Thể thao, ..."
+                                    value={formData.category}
+                                    onChange={handleChange}
+                                    style={{
+                                        width: '100%',
+                                        padding: '10px 12px',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(0,0,0,0.1)',
+                                        background: 'rgba(255,255,255,0.9)',
+                                        fontSize: '0.875rem',
+                                        color: 'var(--candy-text)',
+                                        outline: 'none'
                                     }}
                                 />
                             </div>
@@ -183,9 +251,10 @@ export default function CreateEventPage() {
                                 </label>
                                 <input
                                     type="text"
+                                    name="location"
                                     placeholder="Nhập địa điểm tổ chức"
                                     value={formData.location}
-                                    onChange={(e) => handleChange('location', e.target.value)}
+                                    onChange={handleChange}
                                     style={{
                                         width: '100%',
                                         padding: '10px 12px',
@@ -213,8 +282,9 @@ export default function CreateEventPage() {
                                     </label>
                                     <input
                                         type="datetime-local"
+                                        name="startAt"
                                         value={formData.startAt}
-                                        onChange={(e) => handleChange('startAt', e.target.value)}
+                                        onChange={handleChange}
                                         style={{
                                             width: '100%',
                                             padding: '10px 12px',
@@ -240,8 +310,9 @@ export default function CreateEventPage() {
                                     </label>
                                     <input
                                         type="datetime-local"
+                                        name="endAt"
                                         value={formData.endAt}
-                                        onChange={(e) => handleChange('endAt', e.target.value)}
+                                        onChange={handleChange}
                                         style={{
                                             width: '100%',
                                             padding: '10px 12px',
@@ -270,9 +341,10 @@ export default function CreateEventPage() {
                                     </label>
                                     <input
                                         type="number"
+                                        name="capacity"
                                         min={1}
                                         value={formData.capacity}
-                                        onChange={(e) => handleChange('capacity', parseInt(e.target.value) || 1)}
+                                        onChange={handleChange}
                                         style={{
                                             width: '100%',
                                             padding: '10px 12px',
@@ -297,8 +369,9 @@ export default function CreateEventPage() {
                                         Trạng thái
                                     </label>
                                     <select
+                                        name="status"
                                         value={formData.status}
-                                        onChange={(e) => handleChange('status', e.target.value)}
+                                        onChange={handleChange}
                                         style={{
                                             width: '100%',
                                             padding: '10px 12px',

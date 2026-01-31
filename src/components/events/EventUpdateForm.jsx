@@ -80,6 +80,72 @@ export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack
                         marginBottom: '8px',
                         color: 'var(--candy-text)'
                     }}>
+                        Nội dung chi tiết
+                    </label>
+                    <textarea
+                        name="content"
+                        value={formData.content}
+                        onChange={onChange}
+                        placeholder="Nhập nội dung chi tiết về sự kiện"
+                        rows="5"
+                        style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            borderRadius: '12px',
+                            border: '2px solid rgba(162, 210, 255, 0.3)',
+                            background: 'rgba(255, 255, 255, 0.6)',
+                            fontSize: '1rem',
+                            color: 'var(--candy-text)',
+                            outline: 'none',
+                            resize: 'vertical',
+                            fontFamily: 'Poppins, sans-serif',
+                            transition: 'all 0.3s ease'
+                        }}
+                        onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
+                        onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                    />
+                </div>
+
+                <div>
+                    <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        marginBottom: '8px',
+                        color: 'var(--candy-text)'
+                    }}>
+                        Thể loại
+                    </label>
+                    <input
+                        type="text"
+                        name="category"
+                        value={formData.category}
+                        onChange={onChange}
+                        placeholder="Ví dụ: Kỹ thuật, Kinh doanh, Thể thao, ..."
+                        style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            borderRadius: '12px',
+                            border: '2px solid rgba(162, 210, 255, 0.3)',
+                            background: 'rgba(255, 255, 255, 0.6)',
+                            fontSize: '1rem',
+                            color: 'var(--candy-text)',
+                            outline: 'none',
+                            transition: 'all 0.3s ease'
+                        }}
+                        onFocus={(e) => (e.target.style.borderColor = 'var(--candy-skyblue)')}
+                        onBlur={(e) => (e.target.style.borderColor = 'rgba(162, 210, 255, 0.3)')}
+                    />
+                </div>
+
+                <div>
+                    <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        marginBottom: '8px',
+                        color: 'var(--candy-text)'
+                    }}>
                         Địa điểm
                     </label>
                     <input
