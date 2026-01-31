@@ -8,7 +8,7 @@ import eventService from '../services/eventService';
 import { Form } from "react-bootstrap";
 
 const CATEGORY_BADGE_MAP = {
-    Workshop: 'Workshop, Học tập',
+    'Workshop': 'Workshop, Học tập',
     'Thể thao': 'Thể thao, Sức khoẻ',
     'Giải trí': 'Giải trí, Trải nghiệm',
     'Cộng đồng': 'Hoạt động, Cộng đồng',
@@ -81,12 +81,14 @@ const Event = () => {
         };
     }, []);
 
-    // Lấy danh sách sự kiện từ backend
+    // Lấy danh sách sự kiện từ backend (userId để xem event private nếu backend hỗ trợ)
     useEffect(() => {
         const fetchEvents = async () => {
             setLoading(true);
             try {
-                const res = await eventService.getEvents();
+                const userId = localStorage.getItem("userId");
+                const params = userId ? { userId } : {};
+                const res = await eventService.getEvents(params);
                 setEvents(res.data.data || []);
             } catch (err) {
                 setEvents([]);
@@ -123,13 +125,13 @@ const Event = () => {
             sorted.sort((a, b) => {
                 const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
                 const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
-                return bDate - aDate;
+                return bDate - aDate; //mới nhất
             });
         } else if (sortBy === 'date-asc') {
             sorted.sort((a, b) => {
                 const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
                 const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
-                return aDate - bDate;
+                return aDate - bDate;//cũ nhất
             });
         } else if (sortBy === 'name') {
             sorted.sort((a, b) => a.title.localeCompare(b.title));

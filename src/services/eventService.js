@@ -23,6 +23,9 @@ const eventService = {
     // Xem feedbacks của sự kiện
     getFeedbacks: (id, params) => axios.get(`${BASE_URL}/${id}/feedback`, { params }),
 
+    // Gửi feedback (POST /api/events/:id/feedback body: { userId, rating, comment })
+    submitFeedback: (id, payload) => axios.post(`${BASE_URL}/${id}/feedback`, payload),
+
     // Xem chi tiết sự kiện
     getEventById: (id, userId) => axios.get(`${BASE_URL}/${id}`, { params: userId ? { userId } : undefined }),
 };

@@ -12,6 +12,27 @@ const CATEGORY_BADGE_MAP = {
   "Cộng đồng": "Hoạt động, Cộng đồng",
 };
 
+function formatDate(date) {
+  if (!date) return "—";
+  const d = new Date(date);
+  if (isNaN(d)) return "—";
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+}
+
+function getEventTime(e) {
+  const t = e.end_time ?? e.start_time ?? e.endDate ?? e.startDate ?? e.dateText;
+  if (!t) return 0;
+  if (typeof t === "string" && t.includes("T")) return new Date(t).getTime();
+  if (typeof t === "string" && t.includes("/")) {
+    const parts = t.split("/");
+    if (parts.length >= 3) {
+      const [dd, mm, yyyy] = parts.map((p) => parseInt(p, 10));
+      return new Date(yyyy, mm - 1, dd).getTime();
+    }
+  }
+  return new Date(t).getTime();
+}
+
 const MyEvent = () => {
   const [sortBy, setSortBy] = useState("date-desc");
   const [activeNav, setActiveNav] = useState("events");
@@ -41,31 +62,23 @@ const MyEvent = () => {
     fetchMyEvents();
   }, []);
 
-  function parseDate(dateStr) {
-    const parts = String(dateStr).split("/");
-    if (parts.length !== 3) return 0;
-    const [dd, mm, yyyy] = parts.map((p) => parseInt(p, 10));
-    if (!dd || !mm || !yyyy) return 0;
-    return new Date(yyyy, mm - 1, dd).getTime();
-  }
-
-  // Sắp xếp sự kiện theo sortBy
+  // Sắp xếp sự kiện theo sortBy (backend past events trả start_time, end_time ISO)
   const sortedEvents = useMemo(() => {
     const events = [...myEvents];
     if (sortBy === "date-desc") {
       events.sort((a, b) => {
-        const aDate = parseDate(a.endDate ?? a.startDate ?? "");
-        const bDate = parseDate(b.endDate ?? b.startDate ?? "");
+        const aDate = getEventTime(a);
+        const bDate = getEventTime(b);
         return bDate - aDate;
       });
     } else if (sortBy === "date-asc") {
       events.sort((a, b) => {
-        const aDate = parseDate(a.endDate ?? a.startDate ?? "");
-        const bDate = parseDate(b.endDate ?? b.startDate ?? "");
+        const aDate = getEventTime(a);
+        const bDate = getEventTime(b);
         return aDate - bDate;
       });
     } else if (sortBy === "name") {
-      events.sort((a, b) => a.title.localeCompare(b.title));
+      events.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
     }
     return events;
   }, [myEvents, sortBy]);
@@ -159,11 +172,13 @@ const MyEvent = () => {
                           <div className="myevent-cardBadges">
                             <span className="myevent-badge">{badgeText}</span>
                             <span className="myevent-badge">
-                              {e.startDate ?? e.dateText} / {e.endDate ?? e.dateText}
+                              {formatDate(e.start_time)} – {formatDate(e.end_time)}
                             </span>
                           </div>
                           <h3 className="myevent-cardTitle">{e.title}</h3>
-                          <div className="myevent-cardHost">Clb đảm nhận sự kiện: {e.host ?? "UniClub"}</div>
+                          <div className="myevent-cardHost">
+                            Clb đảm nhận sự kiện: {e.club_id?.name ?? e.host ?? "UniClub"}
+                          </div>
                           <Button as={Link} to={`/event/${e._id || e.id}`} className="myevent-cardBtn">
                             Xem sự kiện
                           </Button>
