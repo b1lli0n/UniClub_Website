@@ -19,6 +19,9 @@ const Header = () => {
             <Nav.Link className="text-white" href="/contacts">
               Contacts
             </Nav.Link>
+            <Nav.Link className="text-white" href="/my-requests">
+              📬 My Requests
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
