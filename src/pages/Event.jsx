@@ -2,110 +2,50 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import '../styles/Event.css';
-import { EVENTS } from '../data/events';
 import RegistrationModal from '../components/RegistrationModal';
-import { isRegistered } from '../data/eventLocalStore';
-
-// Icon Components
-const IconBase = ({ children, viewBox = '0 0 24 24' }) => (
-    <svg
-        className="event-catIcon"
-        viewBox={viewBox}
-        width="26"
-        height="26"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-    >
-        {children}
-    </svg>
-);
-
-const IconBook = () => (
-    <IconBase>
-        <path
-            d="M6.5 4.8h8.3c1.6 0 2.7 1.3 2.7 2.9v11.1c0 .8-.7 1.5-1.6 1.5H7.9c-.8 0-1.4-.7-1.4-1.5V6.3c0-.8.7-1.5 1.6-1.5Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinejoin="round"
-        />
-        <path d="M9.2 8h6.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-        <path d="M9.2 11h6.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-    </IconBase>
-);
-
-const IconShoe = () => (
-    <IconBase>
-        <path
-            d="M6 14.5c1.8 1.4 3.9 2.2 6.2 2.2h6.4c.9 0 1.7.7 1.7 1.7v.7H5.2c-.8 0-1.4-.6-1.4-1.4 0-1.6.8-2.8 2.2-3.2Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinejoin="round"
-        />
-        <path
-            d="M10.2 12.2c.5 1.1 1.3 2.2 2.4 3.1"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-        />
-    </IconBase>
-);
-
-const IconClover = () => (
-    <IconBase>
-        <path
-            d="M12 20c0-3.2-2.4-4.6-4.3-6.1-1.4-1.1-2.7-2.2-2.7-3.9 0-1.5 1.2-2.7 2.7-2.7 1.3 0 2.3.8 2.6 2 .3-1.2 1.3-2 2.6-2 1.5 0 2.7 1.2 2.7 2.7 0 1.7-1.3 2.8-2.7 3.9C14.4 15.4 12 16.8 12 20Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinejoin="round"
-        />
-    </IconBase>
-);
-
-const IconCommunity = () => (
-    <IconBase>
-        <path
-            d="M8.2 11.2c1.4 0 2.5-1.1 2.5-2.5S9.6 6.2 8.2 6.2 5.7 7.3 5.7 8.7s1.1 2.5 2.5 2.5Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-        />
-        <path
-            d="M15.8 11.2c1.4 0 2.5-1.1 2.5-2.5s-1.1-2.5-2.5-2.5-2.5 1.1-2.5 2.5 1.1 2.5 2.5 2.5Z"
-            stroke="currentColor"
-            strokeWidth="1.9"
-        />
-        <path
-            d="M4.8 19.2c.4-2.3 2.4-4 4.9-4h4.6c2.5 0 4.5 1.7 4.9 4"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        />
-    </IconBase>
-);
-
-// Category data
-const DISCOVER_CATEGORIES = [
-    { id: 'workshop', labelTop: 'Workshop,', labelBottom: 'Học tập', mapsTo: 'Workshop', Icon: IconBook },
-    { id: 'sport', labelTop: 'Thể Thao', labelBottom: '', mapsTo: 'Thể thao', Icon: IconShoe },
-    { id: 'entertainment', labelTop: 'Giải trí', labelBottom: '', mapsTo: 'Giải trí', Icon: IconClover },
-    { id: 'community', labelTop: 'Hoạt động', labelBottom: 'cộng đồng', mapsTo: 'Cộng đồng', Icon: IconCommunity },
-];
+import eventService from '../services/eventService';
+import { Form } from "react-bootstrap";
 
 const CATEGORY_BADGE_MAP = {
-    Workshop: 'Workshop, Học tập',
+    'Workshop': 'Workshop, Học tập',
     'Thể thao': 'Thể thao, Sức khoẻ',
     'Giải trí': 'Giải trí, Trải nghiệm',
     'Cộng đồng': 'Hoạt động, Cộng đồng',
 };
 
-const getDateParts = (dateText) => {
-    if (!dateText) return { day: '--', month: '--' };
-    const [day, month] = String(dateText).split('/');
-    return { day: day || '--', month: month || '--' };
+// hàm này để lấy ngày/tháng từ start_time (ISO) hoặc startDate/dateText (DD/MM/YYYY)
+const getDateParts = (event) => {
+    let dateStr = event.start_time || event.startDate || event.dateText || "";
+    if (!dateStr) return { day: '--', month: '--' };
+
+    // Nếu là ISO date (2026-01-28T00:00:00.000Z)
+    if (typeof dateStr === 'object' && dateStr instanceof Date) {
+        // Nếu là object Date
+        return {
+            day: String(dateStr.getDate()).padStart(2, '0'),
+            month: String(dateStr.getMonth() + 1).padStart(2, '0')
+        };
+    }
+    if (dateStr.includes('T')) {
+        const d = new Date(dateStr);
+        return {
+            day: String(d.getDate()).padStart(2, '0'),
+            month: String(d.getMonth() + 1).padStart(2, '0')
+        };
+    }
+    // Nếu là dạng DD/MM/YYYY hoặc DD/MM
+    const parts = dateStr.split('/');
+    if (parts.length >= 2) {
+        return { day: parts[0], month: parts[1] };
+    }
+    return { day: '--', month: '--' };
 };
 
 const parseDate = (dateStr) => {
+    // Ưu tiên ISO date
+    if (dateStr && dateStr.includes('T')) {
+        return new Date(dateStr).getTime();
+    }
     const parts = String(dateStr).split('/');
     if (parts.length !== 3) return 0;
     const [dd, mm, yyyy] = parts.map((p) => parseInt(p, 10));
@@ -113,13 +53,25 @@ const parseDate = (dateStr) => {
     return new Date(yyyy, mm - 1, dd).getTime();
 };
 
+const DISCOVER_CATEGORIES = [
+    { id: 'all', labelTop: 'Tất cả', labelBottom: '', mapsTo: 'Tất cả', icon: " 🌟" },
+    { id: 'workshop', labelTop: 'Work Shop,', labelBottom: 'Học tập', mapsTo: 'Workshop', icon: "💡" },
+    { id: 'sport', labelTop: 'Thể Thao', labelBottom: '', mapsTo: 'Thể thao', icon: "🏀" },
+    { id: 'entertainment', labelTop: 'Giải trí', labelBottom: '', mapsTo: 'Giải trí', icon: "🎮" },
+    { id: 'community', labelTop: 'Hoạt động', labelBottom: 'cộng đồng', mapsTo: 'Cộng đồng', icon: "🤝" },
+];
+
 const Event = () => {
+    const [query, setQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('Tất cả');
     const [sortBy, setSortBy] = useState('date-desc');
     const [showRegister, setShowRegister] = useState(false);
     const [registerEventTitle, setRegisterEventTitle] = useState('Sự kiện');
     const [registerEventId, setRegisterEventId] = useState(null);
     const [regVersion, setRegVersion] = useState(0);
+
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         document.body.classList.add('event-body');
@@ -128,46 +80,74 @@ const Event = () => {
         };
     }, []);
 
+    // Lấy danh sách sự kiện từ backend (userId để xem event private nếu backend hỗ trợ)
+    useEffect(() => {
+        const fetchEvents = async () => {
+            setLoading(true);
+            try {
+                const userId = localStorage.getItem("userId");
+                const params = userId ? { userId } : {};
+                const res = await eventService.getEvents(params);
+                setEvents(res.data.data || []);
+            } catch (err) {
+                setEvents([]);
+            }
+            setLoading(false);
+        };
+        fetchEvents();
+    }, [regVersion]);
+
     const categories = useMemo(() => {
-        const set = new Set(EVENTS.map((e) => e.category));
+        // Lọc bỏ null/undefined và chuẩn hóa về đúng kiểu
+        const set = new Set(events.map((e) => (e.category ? e.category.trim() : '')).filter(Boolean));
         return ['Tất cả', ...Array.from(set)];
-    }, []);
+    }, [events]);
 
     const filteredEvents = useMemo(() => {
-        const filtered = EVENTS.filter((e) => {
-            const byCategory = activeCategory === 'Tất cả' ? true : e.category === activeCategory;
-            return byCategory;
+        const q = query.trim().toLowerCase();
+        const filtered = events.filter((e) => {
+            const eventCat = e.category ? e.category.trim().toLowerCase() : '';
+            const activeCat = activeCategory.trim().toLowerCase();
+            const byCategory = activeCat === 'tất cả'
+                ? true
+                : eventCat === activeCat;
+            const byQuery = !q
+                ? true
+                : `${e.title} ${e.description} ${e.category} ${e.location}`.toLowerCase().includes(q);
+            return byCategory && byQuery;
         });
 
+
+        // Sort
         const sorted = [...filtered];
         if (sortBy === 'date-desc') {
             sorted.sort((a, b) => {
-                const aDate = parseDate(a.endDate ?? a.startDate ?? a.dateText ?? '');
-                const bDate = parseDate(b.endDate ?? b.startDate ?? b.dateText ?? '');
-                return bDate - aDate;
+                const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
+                const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
+                return bDate - aDate; //mới nhất
             });
         } else if (sortBy === 'date-asc') {
             sorted.sort((a, b) => {
-                const aDate = parseDate(a.endDate ?? a.startDate ?? a.dateText ?? '');
-                const bDate = parseDate(b.endDate ?? b.startDate ?? b.dateText ?? '');
-                return aDate - bDate;
+                const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
+                const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
+                return aDate - bDate;//cũ nhất
             });
         } else if (sortBy === 'name') {
             sorted.sort((a, b) => a.title.localeCompare(b.title));
         }
 
         return sorted;
-    }, [activeCategory, sortBy]);
+    }, [events, activeCategory, query, sortBy]);
 
     return (
         <div className="event-container">
-            {/* Hero Section with Categories */}
             <div className="event-hero">
-                <Container className="py-4">
+                
+                <Container className="pb-4">
                     <div className="event-catGrid" role="list">
-                        {DISCOVER_CATEGORIES.map(({ id, labelTop, labelBottom, mapsTo, Icon }) => {
+                        {DISCOVER_CATEGORIES.map(({ id, labelTop, labelBottom, mapsTo, icon }) => {
                             const canMap = categories.includes(mapsTo);
-                            const isActive = canMap && activeCategory === mapsTo;
+                            const isActive = canMap && activeCategory.toLowerCase() === mapsTo.toLowerCase();
                             return (
                                 <button
                                     key={id}
@@ -177,9 +157,7 @@ const Event = () => {
                                     onClick={() => setActiveCategory(canMap ? mapsTo : 'Tất cả')}
                                     aria-label={`${labelTop} ${labelBottom}`}
                                 >
-                                    <div className="event-catCircle">
-                                        <Icon />
-                                    </div>
+                                    <div className="event-catCircle">{icon}</div>
                                     <div className="event-catLabel">
                                         <div>{labelTop}</div>
                                         {labelBottom && <div>{labelBottom}</div>}
@@ -191,7 +169,6 @@ const Event = () => {
                 </Container>
             </div>
 
-            {/* Events List */}
             <Container className="pb-5">
                 <div className="event-sectionHead">
                     <div>
@@ -199,7 +176,7 @@ const Event = () => {
                             {activeCategory === 'Tất cả' ? 'Sự kiện' : `Sự kiện • ${activeCategory}`}
                         </h3>
                         <p className="event-sectionSub">
-                            {filteredEvents.length} sự kiện.
+                            {filteredEvents.length} sự kiện{query ? ' (đã lọc theo tìm kiếm)' : ''}.
                         </p>
                     </div>
                     <div className="event-sort">
@@ -216,14 +193,21 @@ const Event = () => {
                     </div>
                 </div>
 
-                {filteredEvents.length === 0 ? (
+                {loading ? (
+                    <div className="event-empty glass-panel">
+                        <div className="event-emptyTitle">Đang tải dữ liệu...</div>
+                    </div>
+                ) : filteredEvents.length === 0 ? (
                     <div className="event-empty glass-panel">
                         <div className="event-emptyTitle">Không tìm thấy sự kiện phù hợp</div>
-                        <div className="event-emptySub">Thử đổi danh mục khác nhé.</div>
+                        <div className="event-emptySub">Thử đổi danh mục hoặc từ khóa khác nhé.</div>
                         <Button
                             className="event-secondaryBtn mt-3"
                             type="button"
-                            onClick={() => setActiveCategory('Tất cả')}
+                            onClick={() => {
+                                setQuery('');
+                                setActiveCategory('Tất cả');
+                            }}
                         >
                             Xoá bộ lọc
                         </Button>
@@ -231,21 +215,29 @@ const Event = () => {
                 ) : (
                     <div className="event-rowList">
                         {filteredEvents.map((e) => {
-                            const { day, month } = getDateParts(e.dateText);
+                            const { day, month } = getDateParts(e);
                             const badgeText = CATEGORY_BADGE_MAP[e.category] ?? e.category;
-                            const registered = regVersion >= 0 ? isRegistered(e.id) : false;
                             return (
-                                <div key={e.id} className="event-row glass-panel">
+                                <div key={e._id || e.id} className="event-row glass-panel">
                                     <div className="event-rowMedia" aria-hidden="true">
-                                        <div className="event-rowMediaOverlay" />
+                                        {e.media_urls && e.media_urls.length > 0 ? (
+                                            <img
+                                                src={`http://localhost:5000${e.media_urls[0]}`}
+                                                alt={e.title}
+                                                className="event-rowImg"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
+                                            />
+                                        ) : (
+                                            <div className="event-rowMediaOverlay" />
+                                        )}
                                     </div>
 
                                     <div className="event-rowBody">
                                         <div className="event-rowTitleWrap">
-                                            <div className="event-rowBadge">{badgeText}</div>
-                                            <Link className="event-rowTitle" to={`/events/${e.id}`}>
+                                            <Link className="event-rowTitle" to={`/event/${e._id || e.id}`}>
                                                 {e.title}
                                             </Link>
+                                            <div className="event-rowBadge">{badgeText}</div>
                                         </div>
 
                                         <div className="event-rowMeta">
@@ -264,15 +256,15 @@ const Event = () => {
                                         </div>
 
                                         <Button
-                                            className={`event-rowBtn ${registered ? 'registered' : ''}`}
+                                            className="event-rowBtn"
                                             type="button"
                                             onClick={() => {
                                                 setRegisterEventTitle(e.title);
-                                                setRegisterEventId(e.id);
+                                                setRegisterEventId(e._id || e.id);
                                                 setShowRegister(true);
                                             }}
                                         >
-                                            {registered ? 'Đã đăng ký ✓' : 'Đăng ký'}
+                                            Đăng ký
                                         </Button>
                                     </div>
 
@@ -287,7 +279,6 @@ const Event = () => {
                 )}
             </Container>
 
-            {/* Registration Modal */}
             <RegistrationModal
                 show={showRegister}
                 onHide={() => setShowRegister(false)}

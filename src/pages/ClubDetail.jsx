@@ -99,8 +99,8 @@ const ClubDetail = () => {
   const rawLibraryImages = club?.libraryImages || club?.libraryImage || [];
 
   // Debug: Log raw data từ BE
-  console.log('[FE DEBUG] Raw libraryImages from API:', rawLibraryImages);
-  console.log('[FE DEBUG] Type:', typeof rawLibraryImages, 'isArray:', Array.isArray(rawLibraryImages));
+  // console.log('[FE DEBUG] Raw libraryImages from API:', rawLibraryImages);
+  // console.log('[FE DEBUG] Type:', typeof rawLibraryImages, 'isArray:', Array.isArray(rawLibraryImages));
 
   const normalizedLibraryImages = (Array.isArray(rawLibraryImages)
     ? rawLibraryImages
@@ -125,8 +125,8 @@ const ClubDetail = () => {
     .filter((img) => img && img.imageUrl);
 
   // Debug: Log sau khi normalize
-  console.log('[FE DEBUG] Normalized libraryImages:', normalizedLibraryImages);
-  console.log('[FE DEBUG] Normalized count:', normalizedLibraryImages.length);
+  // console.log('[FE DEBUG] Normalized libraryImages:', normalizedLibraryImages);
+  // console.log('[FE DEBUG] Normalized count:', normalizedLibraryImages.length);
   
   // Đảm bảo normalizedLibraryImages luôn là array
   const safeLibraryImages = Array.isArray(normalizedLibraryImages) ? normalizedLibraryImages : [];
