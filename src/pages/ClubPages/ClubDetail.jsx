@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { getClubById, getEventsByClub } from '../api/clubApi';
-import '../styles/ClubDetail.css';
+import { getClubById, getEventsByClub } from '../../api/clubApi';
+import '../../styles/ClubDetail.css';
 
 // Backend base URL để build full URL cho logo_url / imageUrl nếu BE trả về đường dẫn tương đối
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -19,6 +19,7 @@ const buildImageSrc = (raw) => {
 
 const ClubDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [isJoined, setIsJoined] = useState(false);
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -228,7 +229,16 @@ const ClubDetail = () => {
 
         {/* Organized Events Section */}
         <section className="clubdetail-section">
-          <h2 className="clubdetail-section-title">Sự kiện đã tổ chức</h2>
+          <div className="clubdetail-section-header">
+            <h2 className="clubdetail-section-title">Sự kiện</h2>
+            <button
+              type="button"
+              className="clubdetail-view-all-btn"
+              onClick={() => navigate(`/club/${id}/events`)}
+            >
+              Xem tất cả →
+            </button>
+          </div>
           <div className="clubdetail-events-grid">
             {organizedEvents.length > 0 ? (
               organizedEvents.map((event) => (

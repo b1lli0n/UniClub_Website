@@ -160,7 +160,6 @@ const Header = () => {
                   </div>
                   <div className="header-user-text">
                     <div className="header-user-name">{user?.fullName || 'User'}</div>
-                    <div className="header-user-role">{user?.role || 'Member'}</div>
                   </div>
                   <span className={`header-dropdown-arrow ${isDropdownOpen ? 'is-open' : ''}`}>
                     ▼

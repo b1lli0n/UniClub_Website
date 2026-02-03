@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import ClubDetailCard from '../components/ClubDetailCard';
-import { getAllClubs } from '../api/clubApi';
-import '../styles/ListOfClubs.css';
+import ClubDetailCard from '../../components/ClubDetailCard';
+import { getAllClubs } from '../../api/clubApi';
+import '../../styles/ListOfClubs.css';
 
 // Icon Components
 const IconBase = ({ children, viewBox = '0 0 24 24' }) => (

@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import "../styles/Event.css";
-import eventService from "../services/eventService";
+import "../../styles/Event.css";
+import eventService from "../../services/eventService";
 
 const CATEGORY_BADGE_MAP = {
   Workshop: "Workshop, Học tập",
@@ -50,8 +50,8 @@ const MyEvent = () => {
     const fetchMyEvents = async () => {
       setLoading(true);
       try {
-        const userId = localStorage.getItem("userId");
-        const res = await eventService.getPastEvents({ userId });
+       
+        const res = await eventService.getPastEvents();
         setMyEvents(res.data.data || []);
       } catch (err) {
         setMyEvents([]);

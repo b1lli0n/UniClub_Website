@@ -15,7 +15,6 @@ export const register = async (userData) => {
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
     }
-
     return response.data;
   } catch (error) {
     console.error('Register error:', error);
@@ -35,6 +34,7 @@ export const login = async (credentials) => {
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
+      console.log('User logged in:', accessToken, user);
     }
 
     return response.data;

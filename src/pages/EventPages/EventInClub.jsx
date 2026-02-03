@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import '../styles/Event.css';
-import RegistrationModal from '../components/RegistrationModal';
-import eventService from '../services/eventService';
+import { Link, useParams } from 'react-router-dom';
+import '../../styles/Event.css';
+import RegistrationModal from '../../components/RegistrationModal';
+import eventService from '../../services/eventService';
 import { Form } from "react-bootstrap";
 
 const CATEGORY_BADGE_MAP = {
@@ -62,6 +62,7 @@ const DISCOVER_CATEGORIES = [
 ];
 
 const Event = () => {
+    const { clubId } = useParams();
     const [query, setQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('Tất cả');
     const [sortBy, setSortBy] = useState('date-desc');
@@ -80,22 +81,22 @@ const Event = () => {
         };
     }, []);
 
-    // Lấy danh sách sự kiện từ backend (userId để xem event private nếu backend hỗ trợ)
+    // Lấy danh sách sự kiện từ backend theo club
     useEffect(() => {
         const fetchEvents = async () => {
             setLoading(true);
             try {
-                const userId = localStorage.getItem("userId");
-                const params = userId ? { userId } : {};
-                const res = await eventService.getEvents(params);
+                console.log('Fetching events for clubId:', clubId);
+                const res = await eventService.getEventsByClub(clubId);
                 setEvents(res.data.data || []);
             } catch (err) {
+                console.error('Error fetching events:', err);
                 setEvents([]);
             }
             setLoading(false);
         };
         fetchEvents();
-    }, [regVersion]);
+    }, [regVersion, clubId]);
 
     const categories = useMemo(() => {
         // Lọc bỏ null/undefined và chuẩn hóa về đúng kiểu
@@ -234,7 +235,7 @@ const Event = () => {
 
                                     <div className="event-rowBody">
                                         <div className="event-rowTitleWrap">
-                                            <Link className="event-rowTitle" to={`/event/${e._id || e.id}`}>
+                                            <Link className="event-rowTitle" to={`/club/${clubId}/events/${e._id}`}>
                                                 {e.title}
                                             </Link>
                                             <div className="event-rowBadge">{badgeText}</div>
@@ -279,13 +280,13 @@ const Event = () => {
                 )}
             </Container>
 
-            <RegistrationModal
+            {/* <RegistrationModal
                 show={showRegister}
                 onHide={() => setShowRegister(false)}
                 onChanged={() => setRegVersion((v) => v + 1)}
                 eventId={registerEventId}
                 eventTitle={registerEventTitle}
-            />
+            /> */}
         </div>
     );
 };

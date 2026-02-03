@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { login as loginService } from '../api/authApi';
-import { useAuth } from '../context/AuthContext';
-import logoImage from '../image/logo.png';
-import '../styles/Login.css';
+import { login as loginService } from '../../api/authApi';
+import { useAuth } from '../../context/AuthContext';
+import logoImage from '../../image/logo.png';
+import '../../styles/Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -134,9 +134,8 @@ const Login = () => {
       if (response.success) {
         // Cập nhật auth context
         login(response.data.user);
-
+        
         toast.success(response.message || 'Đăng nhập thành công!');
-
         // Chuyển hướng về trang chủ
         navigate('/');
       } else {

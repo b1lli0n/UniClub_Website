@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { register as registerService } from '../api/authApi';
-import { useAuth } from '../context/AuthContext';
-import logoImage from '../image/logo.png';
-import '../styles/Register.css';
+import { register as registerService } from '../../api/authApi';
+import { useAuth } from '../../context/AuthContext';
+import logoImage from '../../image/logo.png';
+import '../../styles/Register.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({

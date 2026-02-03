@@ -183,12 +183,43 @@ body.clubdetail-body #root {
   margin-bottom: 2rem;
 }
 
+.clubdetail-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
 .clubdetail-section-title {
-  margin: 0 0 1rem 0;
+  margin: 0;
   font-size: 20px;
   font-weight: 950;
   color: var(--clubdetail-ink);
   letter-spacing: -0.2px;
+}
+
+.clubdetail-view-all-btn {
+  padding: 8px 16px;
+  background: rgba(255, 175, 204, 0.4);
+  border: 1px solid rgba(255, 175, 204, 0.6);
+  border-radius: 8px;
+  color: var(--clubdetail-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.clubdetail-view-all-btn:hover {
+  background: rgba(255, 175, 204, 0.6);
+  border-color: rgba(255, 175, 204, 0.8);
+  transform: translateX(2px);
+}
+
+.clubdetail-view-all-btn:active {
+  transform: translateX(0);
 }
 
 /* Organized Events */

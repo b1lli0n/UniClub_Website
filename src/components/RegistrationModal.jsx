@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { isRegistered, registerEvent, unregisterEvent } from '../data/eventLocalStore';
-import '../styles/RegistrationModal.css';
+// import { isRegistered, registerEvent, unregisterEvent } from '../data/eventLocalStore';
+// import '../styles/RegistrationModal.css';
 
 const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle }) => {
     const [registered, setRegistered] = useState(false);

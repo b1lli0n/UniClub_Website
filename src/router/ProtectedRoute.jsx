@@ -8,7 +8,13 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   if (!user) return <Navigate to="/login" />
 
-  if (requiredRole && user.role !== requiredRole) {
+  // Map role: 1 = admin, 0 = user
+  const roleMap = {
+    'admin': 1,
+    'user': 0
+  }
+
+  if (requiredRole && user.role !== roleMap[requiredRole]) {
     return <Navigate to="/" />
   }
 

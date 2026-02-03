@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Badge, Button, Container, Spinner } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import "../styles/Event.css";
-import RegistrationModal from "../components/RegistrationModal";
-import eventService from "../services/eventService";
+import "../../styles/Event.css";
+import RegistrationModal from "../../components/RegistrationModal";
+import eventService from "../../services/eventService";
 
 const CATEGORY_BADGE_MAP = {
   Workshop: "Workshop, Học tập",
@@ -42,7 +42,7 @@ function getProfile() {
 }
 
 const EventDetail = () => {
-  const { eventId } = useParams();
+  const { clubId, eventId } = useParams();
   const [showRegister, setShowRegister] = useState(false);
   const [regVersion, setRegVersion] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
@@ -74,9 +74,7 @@ const EventDetail = () => {
     setLoading(true);
     const fetchEvent = async () => {
       try {
-        const profile = getProfile();
-        const userIdentifier = profile.userId || profile.email;
-        const res = await eventService.getEventById(eventId, userIdentifier || undefined);
+        const res = await eventService.getEventById(clubId, eventId);
         const ev = res.data.data;
         setEvent(ev);
         setRegistered(
