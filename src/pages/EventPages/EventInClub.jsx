@@ -3,7 +3,7 @@ import { Container, Button } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import '../../styles/Event.css';
 import RegistrationModal from '../../components/RegistrationModal';
-import eventService from '../../services/eventService';
+import eventApi from '../../api/eventApi';
 import { Form } from "react-bootstrap";
 
 const CATEGORY_BADGE_MAP = {
@@ -87,7 +87,7 @@ const Event = () => {
             setLoading(true);
             try {
                 console.log('Fetching events for clubId:', clubId);
-                const res = await eventService.getEventsByClub(clubId);
+                const res = await eventApi.getEventsByClub(clubId);
                 setEvents(res.data.data || []);
             } catch (err) {
                 console.error('Error fetching events:', err);
@@ -143,7 +143,7 @@ const Event = () => {
     return (
         <div className="event-container">
             <div className="event-hero">
-                
+
                 <Container className="pb-4">
                     <div className="event-catGrid" role="list">
                         {DISCOVER_CATEGORIES.map(({ id, labelTop, labelBottom, mapsTo, icon }) => {

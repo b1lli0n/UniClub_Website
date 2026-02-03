@@ -14,6 +14,7 @@ import ListOfClubs from '../pages/ClubPages/ListOfClubs'
 import ClubDetail from '../pages/ClubPages/ClubDetail'
 
 import Event from '../pages/EventPages/EventInClub'
+import EventPublic from '../pages/EventPages/EventPublic'
 import MyEvent from '../pages/EventPages/MyEvent';
 import EventDetail from '../pages/EventPages/EventDetail'
 
@@ -44,6 +45,7 @@ const AppRouter = () => {
         <Route index element={<Home />} />
         <Route path="/clubs" element={<ListOfClubs />} />
         <Route path="/clubs/:id" element={<ClubDetail />} />
+        <Route path="/events" element={<EventPublic />} />
         <Route path="/club/:clubId/events" element={<Event />} />
         <Route path="/club/:clubId/events/:eventId" element={<EventDetail />} />
         <Route path="/my-events" element={<MyEvent />} />

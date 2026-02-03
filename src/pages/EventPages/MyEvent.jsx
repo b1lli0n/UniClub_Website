@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import "../../styles/Event.css";
-import eventService from "../../services/eventService";
+import eventApi from "../../api/eventApi";
 
 const CATEGORY_BADGE_MAP = {
   Workshop: "Workshop, Học tập",
@@ -50,8 +50,8 @@ const MyEvent = () => {
     const fetchMyEvents = async () => {
       setLoading(true);
       try {
-       
-        const res = await eventService.getPastEvents();
+
+        const res = await eventApi.getPastEvents();
         setMyEvents(res.data.data || []);
       } catch (err) {
         setMyEvents([]);
@@ -174,9 +174,19 @@ const MyEvent = () => {
                           <div className="myevent-cardHost">
                             Clb đảm nhận sự kiện: {e.club_id?.name ?? e.host ?? "UniClub"}
                           </div>
-                          <Button as={Link} to={`/event/${e._id || e.id}`} className="myevent-cardBtn">
-                            Xem sự kiện
-                          </Button>
+                          {(() => {
+                            const clubId = e.club_id?._id || e.club_id?.id || e.club_id;
+                            // If no clubId found, might need fallback or keep '#'
+                            const linkTarget = clubId
+                              ? `/club/${clubId}/events/${e._id || e.id}`
+                              : '#';
+
+                            return (
+                              <Button as={Link} to={linkTarget} className="myevent-cardBtn">
+                                Xem sự kiện
+                              </Button>
+                            );
+                          })()}
                         </Col>
                       </Row>
                     </div>

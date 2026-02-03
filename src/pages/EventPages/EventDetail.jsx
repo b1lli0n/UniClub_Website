@@ -4,7 +4,8 @@ import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../../styles/Event.css";
 import RegistrationModal from "../../components/RegistrationModal";
-import eventService from "../../services/eventService";
+import eventApi from "../../api/eventApi";
+import { getCurrentUser } from "../../api/authApi";
 
 const CATEGORY_BADGE_MAP = {
   Workshop: "Workshop, Học tập",
@@ -32,12 +33,14 @@ function formatDate(date) {
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-// Hàm giả lập lấy profile user 
+// Hàm lấy profile user thực tế từ authApi
 function getProfile() {
+  const user = getCurrentUser();
+  if (!user) return { userId: null, fullName: "Bạn", email: "" };
   return {
-    userId: localStorage.getItem("userId"),
-    fullName: localStorage.getItem("fullName") || "Bạn",
-    email: localStorage.getItem("email") || "",
+    userId: user._id || user.id,
+    fullName: user.fullName || user.name || "Bạn",
+    email: user.email || "",
   };
 }
 
@@ -74,7 +77,7 @@ const EventDetail = () => {
     setLoading(true);
     const fetchEvent = async () => {
       try {
-        const res = await eventService.getEventById(clubId, eventId);
+        const res = await eventApi.getEventById(clubId, eventId);
         const ev = res.data.data;
         setEvent(ev);
         setRegistered(
@@ -98,7 +101,7 @@ const EventDetail = () => {
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const res = await eventService.getFeedbacks(eventId);
+        const res = await eventApi.getFeedbacks(eventId);
         const data = res.data?.data;
         const list = Array.isArray(data) ? data : (data?.feedbacks || []);
         setFeedbackList(list);
@@ -115,7 +118,7 @@ const EventDetail = () => {
     setCheckinError(null);
     try {
       const profile = getProfile();
-      const res = await eventService.checkInEvent(eventId, profile.email);
+      const res = await eventApi.checkInEvent(eventId, profile.email);
       setCheckedIn(true);
       setCheckinTime(
         res.data?.data?.checkInTime ??
@@ -147,10 +150,10 @@ const EventDetail = () => {
     if (!userId || !feedbackText.trim()) return;
     setFeedbackSubmitting(true);
     try {
-      await eventService.submitFeedback(eventId, {
+      await eventApi.submitFeedback(eventId, {
         userId,
         rating: feedbackRating,
-        comment: feedbackText.trim(),
+        comments: feedbackText.trim(),
       });
       setFeedbackText("");
       setFeedbackRating(5);
@@ -182,7 +185,7 @@ const EventDetail = () => {
             <div className="event-detailNotFoundSub">
               Sự kiện này có thể đã bị xoá hoặc đường dẫn không đúng.
             </div>
-            <Button as={Link} to="/event" className="event-secondaryBtn mt-3">
+            <Button as={Link} to="/events" className="event-secondaryBtn mt-3">
               Quay lại danh sách
             </Button>
           </div>
@@ -282,11 +285,6 @@ const EventDetail = () => {
                   <div className="event-sideMiniValue">{event.location ?? "—"}</div>
                 </div>
                 <div className="event-sideParticipants">
-                  <div className="event-sideAvatars" aria-hidden="true">
-                    <span />
-                    <span />
-                    <span />
-                  </div>
                   <div className="event-sideParticipantsText">
                     {typeof event.registrationCount === "number"
                       ? `${event.registrationCount} người sẽ tham gia sự kiện này`
@@ -296,8 +294,35 @@ const EventDetail = () => {
                   </div>
                 </div>
               </div>
-              <Button className="event-sideRegisterBtn" type="button" onClick={() => setShowRegister(true)}>
-                {registered ? "Huỷ/Chỉnh sửa đăng ký" : "Đăng ký"}
+              <Button
+                className={`event-sideRegisterBtn ${registered && !hasEnded ? 'is-registered' : ''}`}
+                type="button"
+                onClick={async () => {
+                  if (registered && !hasEnded) {
+                    if (window.confirm("Bạn có chắc chắn muốn hủy đăng ký tham gia sự kiện này?")) {
+                      setLoading(true);
+                      try {
+                        const profile = getProfile();
+                        await eventApi.cancelRegistration(eventId, profile.userId);
+                        toast.info("Đã hủy đăng ký thành công.");
+                        setRegVersion(v => v + 1);
+                      } catch (err) {
+                        toast.error(err.response?.data?.message || "Hủy đăng ký thất bại.");
+                      } finally {
+                        setLoading(false);
+                      }
+                    }
+                  } else {
+                    setShowRegister(true);
+                  }
+                }}
+                disabled={hasEnded || loading}
+              >
+                {hasEnded
+                  ? "Sự kiện đã kết thúc"
+                  : registered
+                    ? "✓ Đã đăng ký (Hủy?)"
+                    : "Đăng ký tham gia"}
               </Button>
               {registered && isOngoing && (() => {
                 const checkInStatus = event.check_in_status ?? 0;
@@ -399,7 +424,7 @@ const EventDetail = () => {
                 <div key={f._id || f.id} className="event-feedbackItem">
                   <div className="event-feedbackItemTop">
                     <div className="event-feedbackName">
-                      {f.user_id?.name ?? f.userName ?? "Ẩn danh"}
+                      {f.user_id?.fullName ?? f.user_id?.name ?? f.userFullName ?? f.userName ?? "Ẩn danh"}
                     </div>
                     <div className="event-feedbackDate">
                       {(f.created_at ?? f.createdAt)
@@ -410,7 +435,7 @@ const EventDetail = () => {
                   {f.rating != null && (
                     <div className="event-feedbackRating">⭐ {f.rating}/5</div>
                   )}
-                  <div className="event-feedbackText">{f.comment ?? f.text ?? ""}</div>
+                  <div className="event-feedbackText">{f.comments ?? f.comment ?? f.commentText ?? f.text ?? f.content ?? ""}</div>
                 </div>
               ))
             )}
@@ -456,6 +481,8 @@ const EventDetail = () => {
           onChanged={() => setRegVersion((v) => v + 1)}
           eventId={eventId}
           eventTitle={event.title}
+          eventImage={event.media_urls?.[0]}
+          isRegistered={registered}
         />
       </Container>
     </div>
