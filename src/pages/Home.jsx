@@ -1,10 +1,11 @@
-import React from 'react';
+import React,  { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import '../styles/Home.css';
-
+import CreateClubModal from '../components/CreateClubModal';
 const Home = () => {
   const navigate = useNavigate();
+  const [showCreateClub, setShowCreateClub] = useState(false);
 
   return (
     <div className="home-page">
@@ -20,12 +21,22 @@ const Home = () => {
                   Kết nối với cộng đồng, tham gia sự kiện và tận hưởng màu sắc cuộc sống.
                 </p>
                 <div className="hero-buttons">
-                  <button 
-                    className="btn-primary"
-                    onClick={() => navigate('/clubs')}
-                  >
-                    Khám phá ngay
-                  </button>
+                  <Button 
+        variant="primary" 
+        size="lg"
+        onClick={() => {
+          // console.log('🔘 Button clicked, opening modal...');
+          setShowCreateClub(true);
+        }}
+        className="mb-4"
+      >
+        ➕ Create Club
+      </Button>
+
+      <CreateClubModal 
+        show={showCreateClub} 
+        onHide={() => setShowCreateClub(false)} 
+      />
                   <button className="btn-secondary">Xem video</button>
                 </div>
               </Col>

@@ -40,3 +40,17 @@ export const updateProfile = async (profileData) => {
   }
 };
 
+
+// Lấy danh sách tất cả users
+export const getAllUsers = async () => {
+  try {
+    console.log('Fetching users from: /users/getAllUsers');
+    const response = await userAPI.get('/users/getAllUsers');
+    console.log('Users response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching users:', error.message);
+    throw error.response?.data || error.message;
+  }
+};
+

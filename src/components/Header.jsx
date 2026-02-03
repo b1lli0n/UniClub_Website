@@ -190,6 +190,13 @@ const Header = () => {
                       <span className="dropdown-icon"></span>
                       My Event
                     </button>
+                     <button
+                      className="header-dropdown-item"
+                      onClick={() => handleMenuClick('/my-requests')}
+                    >
+                      <span className="dropdown-icon"></span>
+                      My Requests
+                    </button>
                     <div className="header-dropdown-divider"></div>
                     <button
                       className="header-dropdown-item logout-item"
