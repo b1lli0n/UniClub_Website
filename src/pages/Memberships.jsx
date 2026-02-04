@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchJoinRequests } from '../services/api';
-import { mapMembership } from '../services/dataMappers';
+import { getJoinRequests } from '../api/clubApi';
 import '../styles/Memberships.css';
 
 function Memberships() {
@@ -8,26 +7,55 @@ function Memberships() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // TODO: lấy từ auth/context
     const clubId = localStorage.getItem('clubId');
-    const token = localStorage.getItem('token');
 
     useEffect(() => {
         const loadMemberships = async () => {
+            if (!clubId) {
+                setError('Không tìm thấy Club ID');
+                setLoading(false);
+                return;
+            }
+
             try {
                 setLoading(true);
-                const data = await fetchJoinRequests(clubId, token);
-                const mappedRequests = data.map(mapMembership);
-                setMemberships(mappedRequests);
+                console.log('📄 Loading join requests for club:', clubId);
+                const response = await getJoinRequests(clubId);
+                console.log('✅ Join requests response:', response);
+
+                // Handle different response formats
+                let requests = [];
+                if (Array.isArray(response)) {
+                    requests = response;
+                } else if (response.data && Array.isArray(response.data)) {
+                    requests = response.data;
+                } else if (response.memberships && Array.isArray(response.memberships)) {
+                    requests = response.memberships;
+                }
+
+                // Map to FE format
+                const mapped = requests.map(req => ({
+                    membershipId: req._id || req.id,
+                    user: {
+                        userId: req.user_id?._id || req.user_id,
+                        name: req.user_id?.fullName || req.user_id?.email?.split('@')[0] || 'Unknown',
+                        email: req.user_id?.email || 'No email'
+                    },
+                    status: req.status === 0 ? 'pending' : req.status === 1 ? 'approved' : req.status === 2 ? 'rejected' : 'unknown',
+                    requestedAt: req.joined_at || new Date().toISOString()
+                }));
+
+                setMemberships(mapped);
                 setError('');
             } catch (err) {
+                console.error('❌ Load memberships error:', err);
                 setError(err.message || 'Không thể kết nối đến server');
             } finally {
                 setLoading(false);
             }
         };
         loadMemberships();
-    }, []);
+    }, [clubId]);
 
     if (loading) {
         return (
@@ -70,18 +98,67 @@ function Memberships() {
         );
     }
 
-    const handleApprove = (membershipId) => {
-        console.log('Approve:', membershipId);
-        setMemberships(memberships.map(req =>
-            req.membershipId === membershipId ? { ...req, status: 'approved' } : req
-        ));
+    const handleApprove = async (membershipId) => {
+        try {
+            console.log('📝 Approving membership:', membershipId);
+            const response = await fetch(
+                `http://localhost:5000/api/clubs/${clubId}/memberships/${membershipId}/approve`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ role: 0 }) // Default role: Member
+                }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Approve failed');
+            }
+
+            console.log('✅ Approved successfully');
+            // Update UI
+            setMemberships(memberships.map(req =>
+                req.membershipId === membershipId ? { ...req, status: 'approved' } : req
+            ));
+            alert('Đã chấp nhận thành viên!');
+        } catch (err) {
+            console.error('❌ Approve error:', err);
+            alert(err.message || 'Không thể chấp nhận thành viên');
+        }
     };
 
-    const handleReject = (membershipId) => {
-        console.log('Reject:', membershipId);
-        setMemberships(memberships.map(req =>
-            req.membershipId === membershipId ? { ...req, status: 'rejected' } : req
-        ));
+    const handleReject = async (membershipId) => {
+        try {
+            console.log('📝 Rejecting membership:', membershipId);
+            const response = await fetch(
+                `http://localhost:5000/api/clubs/${clubId}/memberships/${membershipId}/reject`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Reject failed');
+            }
+
+            console.log('✅ Rejected successfully');
+            // Update UI
+            setMemberships(memberships.map(req =>
+                req.membershipId === membershipId ? { ...req, status: 'rejected' } : req
+            ));
+            alert('Đã từ chối thành viên!');
+        } catch (err) {
+            console.error('❌ Reject error:', err);
+            alert(err.message || 'Không thể từ chối thành viên');
+        }
     };
 
     const getStatusLabel = (status) => {

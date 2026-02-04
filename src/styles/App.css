@@ -1,3 +1,15 @@
+#root {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    width: 100%;
+}
+
 :root {
     --candy-purple: #cdb4db;
     --candy-lightpink: #ffc8dd;

@@ -1,0 +1,20 @@
+/* Main layout wrapper */
+.main-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+}
+
+.main-layout-body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.main-layout-content {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+    background: transparent;
+}

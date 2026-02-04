@@ -75,29 +75,67 @@ export const unmapEvent = (event) => {
     const statusKeyFE = Object.entries(EVENT_STATUS_MAP).find(([_, v]) => v === event.status)?.[0];
     const progressStatusKeyFE = Object.entries(PROGRESS_STATUS_MAP).find(([_, v]) => v === event.progressStatus)?.[0];
 
-    return {
-        event_id: event._id || event.eventId,
-        club_id: event.clubId,
+    const resolvedStatus = event.statusCode !== undefined
+        ? event.statusCode
+        : typeof event.status === 'number'
+            ? event.status
+            : parseInt(statusKeyFE || 0);
+
+    const resolvedProgressStatus = event.progressStatusCode !== undefined
+        ? event.progressStatusCode
+        : typeof event.progressStatus === 'number'
+            ? event.progressStatus
+            : parseInt(progressStatusKeyFE || 0);
+
+    const payload = {
         title: event.title,
         description: event.description,
         content: event.content || '',
         category: event.category || '',
         location: event.location,
-        start_at: event.startAt,
-        end_at: event.endAt,
+        start_time: event.startAt ? new Date(event.startAt).toISOString() : event.startAt,
+        end_time: event.endAt ? new Date(event.endAt).toISOString() : event.endAt,
         capacity: event.capacity,
-        is_public: event.public,
-        media_urls: event.mediaUrls || [],
-        status: event.statusCode !== undefined ? event.statusCode : parseInt(statusKeyFE || 0),
-        progress_status: event.progressStatusCode !== undefined ? event.progressStatusCode : parseInt(progressStatusKeyFE || 0),
-        created_by: event.createdBy?._id || event.createdBy?.user_id,
-        created_at: event.createdAt,
-        updated_at: event.updatedAt,
-        canceled_at: event.canceledAt,
-        cancel_reason: event.cancelReason,
-        qr_code: event.qrCode,
-        feedback_summary: event.feedbackSummary
+        is_public: event.public !== undefined ? event.public : true,
+        progress_status: resolvedProgressStatus
     };
+
+    // Only include optional fields if they exist
+    if (event._id || event.eventId) {
+        payload.event_id = event._id || event.eventId;
+    }
+    if (event.clubId) {
+        payload.club_id = event.clubId;
+    }
+    if (event.public !== undefined) {
+        payload.is_public = event.public;
+    }
+    if (event.mediaUrls && event.mediaUrls.length > 0) {
+        payload.media_urls = event.mediaUrls;
+    }
+    if (event.createdBy) {
+        payload.created_by = event.createdBy?._id || event.createdBy?.user_id;
+    }
+    if (event.createdAt) {
+        payload.created_at = event.createdAt;
+    }
+    if (event.updatedAt) {
+        payload.updated_at = event.updatedAt;
+    }
+    if (event.canceledAt) {
+        payload.canceled_at = event.canceledAt;
+    }
+    if (event.cancelReason) {
+        payload.cancel_reason = event.cancelReason;
+    }
+    if (event.qrCode) {
+        payload.qr_code = event.qrCode;
+    }
+    if (event.feedbackSummary) {
+        payload.feedback_summary = event.feedbackSummary;
+    }
+
+    return payload;
 };
 
 /**

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getEventDetail, updateEvent, cancelEvent } from '../services/api';
 import '../styles/UpdateEvent.css';
 import { unmapEvent } from '../services/dataMappers';
 import StatusBadge from '../components/events/StatusBadge';
@@ -33,39 +32,67 @@ function UpdateEventPage() {
     const [cancelReason, setCancelReason] = useState('');
     const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-    // TODO: lấy từ auth/context
     const clubId = localStorage.getItem('clubId');
-    const token = localStorage.getItem('token');
 
     useEffect(() => {
         const loadEvent = async () => {
+            if (!clubId) {
+                setError('Không tìm thấy Club ID');
+                setLoading(false);
+                return;
+            }
+
             try {
                 setLoading(true);
-                const data = await getEventDetail(clubId, eventId, token);
-                setEvent(data.event);
-                setRegistrationsCount(data.registrationsCount || 0);
+                console.log('📄 Loading event:', eventId, 'for club:', clubId);
+
+                const response = await fetch(
+                    `http://localhost:5000/api/clubs/${clubId}/events/${eventId}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Không thể tải sự kiện');
+                }
+
+                const data = await response.json();
+                console.log('✅ Event loaded:', data);
+
+                // Handle different response formats
+                let eventData = data.event || data;
+
+                setEvent(eventData);
+                setRegistrationsCount(eventData.registrations?.length || 0);
                 setFormData({
-                    title: data.event.title,
-                    description: data.event.description || '',
-                    content: data.event.content || '',
-                    category: data.event.category || '',
-                    location: data.event.location || '',
-                    startAt: data.event.startAt.slice(0, 16),
-                    endAt: data.event.endAt.slice(0, 16),
-                    capacity: data.event.capacity,
-                    mediaUrls: data.event.mediaUrls || [],
-                    status: data.event.status,
-                    progressStatus: data.event.progressStatus || 'draft'
+                    title: eventData.title,
+                    description: eventData.description || '',
+                    content: eventData.content || '',
+                    category: eventData.category || '',
+                    location: eventData.location || '',
+                    startAt: eventData.startAt ? eventData.startAt.slice(0, 16) : '',
+                    endAt: eventData.endAt ? eventData.endAt.slice(0, 16) : '',
+                    capacity: eventData.capacity || 0,
+                    mediaUrls: eventData.mediaUrls || [],
+                    status: eventData.status || 'draft',
+                    progressStatus: eventData.progressStatus || 'draft'
                 });
                 setError('');
             } catch (err) {
-                setError(err.message || 'Failed to load event');
+                console.error('❌ Load event error:', err);
+                setError(err.message || 'Không thể tải sự kiện');
             } finally {
                 setLoading(false);
             }
         };
         loadEvent();
-    }, [eventId, clubId, token]);
+    }, [eventId, clubId]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -94,17 +121,40 @@ function UpdateEventPage() {
         try {
             setUpdating(true);
             setError('');
-            // Map FE format to BE format
+
+            console.log('📝 Updating event:', eventId);
+
             const beData = unmapEvent(formData);
-            const data = await updateEvent(clubId, eventId, token, beData);
-            setEvent(data.event);
+            console.log('📄 BE data:', beData);
+
+            const response = await fetch(
+                `http://localhost:5000/api/clubs/${clubId}/events/${eventId}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(beData)
+                }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Cập nhật thất bại');
+            }
+
+            const data = await response.json();
+            console.log('✅ Event updated:', data);
+            setEvent(data.event || data);
             setMessage('Cập nhật thành công!');
             setTimeout(() => {
                 setMessage('');
                 navigate(`/events/${eventId}`);
             }, 1200);
         } catch (err) {
-            setError(err.message || 'Update failed');
+            console.error('❌ Update error:', err);
+            setError(err.message || 'Cập nhật thất bại');
         } finally {
             setUpdating(false);
         }
@@ -114,8 +164,29 @@ function UpdateEventPage() {
         try {
             setUpdating(true);
             setError('');
-            const data = await cancelEvent(clubId, eventId, token, { reason: cancelReason });
-            setEvent(data.event);
+
+            console.log('🚫 Canceling event:', eventId);
+
+            const response = await fetch(
+                `http://localhost:5000/api/clubs/${clubId}/events/${eventId}/cancel`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: cancelReason })
+                }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Hủy sự kiện thất bại');
+            }
+
+            const data = await response.json();
+            console.log('✅ Event canceled:', data);
+            setEvent(data.event || data);
             setMessage(`Đã hủy sự kiện. Thông báo đã gửi: ${data.notificationsSent || 0}`);
             setShowCancelDialog(false);
             setCancelReason('');
@@ -124,7 +195,8 @@ function UpdateEventPage() {
                 navigate('/events');
             }, 1500);
         } catch (err) {
-            setError(err.message || 'Cancel failed');
+            console.error('❌ Cancel error:', err);
+            setError(err.message || 'Hủy sự kiện thất bại');
         } finally {
             setUpdating(false);
         }

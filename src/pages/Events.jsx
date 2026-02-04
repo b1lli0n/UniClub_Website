@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getEvents } from '../services/api';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getEventsByClub } from '../api/clubApi';
 import EventCard from '../components/events/EventCard';
 import EventsFilter from '../components/events/EventsFilter';
 import EmptyEventState from '../components/events/EmptyEventState';
@@ -8,21 +9,44 @@ import '../styles/Events.css';
 
 export default function EventsPage() {
     const navigate = useNavigate();
+    const { clubId: paramClubId } = useParams();
+    const { user } = useAuth();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
-    // TODO: lấy từ auth/context
-    const clubId = localStorage.getItem('clubId');
-    const token = localStorage.getItem('token');
+    // Get clubId from params, user context, or localStorage
+    const clubId = paramClubId || user?.clubId || localStorage.getItem('clubId');
 
     const loadEvents = async () => {
+        if (!clubId) {
+            setError('Bạn chưa chọn câu lạc bộ. Vui lòng quay lại trang chính và chọn một câu lạc bộ.');
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
+            setError('');
             const filterValue = statusFilter === 'all' ? null : statusFilter;
-            const data = await getEvents(clubId, token, filterValue);
-            setEvents(data);
+            const params = filterValue ? { status: filterValue } : {};
+            const response = await getEventsByClub(clubId, params);
+            console.log('✅ Events response:', response);
+            const eventsData = response?.data || response?.events || response || [];
+            console.log('✅ Events data:', eventsData);
+
+            // Sort events by start date
+            const sortedEvents = [...(Array.isArray(eventsData) ? eventsData : [])].sort((a, b) => {
+                const dateA = new Date(a.start_time || a.startAt || a.start_at);
+                const dateB = new Date(b.start_time || b.startAt || b.start_at);
+                return dateA - dateB;
+            });
+            setEvents(sortedEvents);
+        } catch (err) {
+            console.error('❌ Failed to load events:', err);
+            setError(err.message || 'Không thể tải danh sách sự kiện');
+            setEvents([]);
         } finally {
             setLoading(false);
         }
@@ -30,12 +54,13 @@ export default function EventsPage() {
 
     useEffect(() => {
         loadEvents();
-    }, [statusFilter]);
+    }, [statusFilter, clubId]);
 
     const filteredEvents = useMemo(() => {
         let eventsList = [...events];
         // Sort by start date (earliest first)
-        eventsList.sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+        const dateKey = events[0]?.startAt ? 'startAt' : (events[0]?.start_time ? 'start_time' : 'start_at');
+        eventsList.sort((a, b) => new Date(a[dateKey]).getTime() - new Date(b[dateKey]).getTime());
         return eventsList;
     }, [events]);
 
@@ -80,10 +105,6 @@ export default function EventsPage() {
         <div className="home-page">
             <div className="home-overlay" />
             <div className="myclub-container">
-                <header className="myclub-header">
-                    <h1 className="myclub-title">Sự kiện</h1>
-                </header>
-
                 {/* Header with title and create button */}
                 <div className="myclub-hero glass-card events-hero">
                     <div className="myclub-hero-content">

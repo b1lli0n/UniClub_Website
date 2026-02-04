@@ -1,7 +1,7 @@
 import StatusBadge from '../events/StatusBadge';
 import '../../styles/EventListCard.css';
 
-export function EventListCard({ title = 'Sự kiện', events = [], clubName, onCreate, onView, onEdit, onSeeAll }) {
+export function EventListCard({ title = 'Sự kiện', events = [], clubName, onCreate, onView, onEdit, onSeeAll, loading = false }) {
     const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN');
 
     return (
@@ -14,9 +14,17 @@ export function EventListCard({ title = 'Sự kiện', events = [], clubName, on
             </div>
 
             <div className="event-list-grid">
-                {events.map((event) => (
+                {loading ? (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        Đang tải sự kiện...
+                    </div>
+                ) : events.length === 0 ? (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        Chưa có sự kiện nào. Hãy tạo sự kiện đầu tiên!
+                    </div>
+                ) : events.map((event) => (
                     <div
-                        key={event.id}
+                        key={event._id || event.id}
                         className="myclub-card event-list-item"
                     >
                         <div className="event-list-thumb">
@@ -27,10 +35,10 @@ export function EventListCard({ title = 'Sự kiện', events = [], clubName, on
                             <h4 className="event-list-item-title">{event.title}</h4>
                             <p className="event-list-club">{clubName}</p>
                             <div className="event-list-actions">
-                                <button className="card-button event-list-action" onClick={() => onView?.(event.id)}>
+                                <button className="card-button event-list-action" onClick={() => onView?.(event._id || event.id)}>
                                     Xem sự kiện
                                 </button>
-                                <button className="card-button event-list-action" onClick={() => onEdit?.(event.id)}>
+                                <button className="card-button event-list-action" onClick={() => onEdit?.(event._id || event.id)}>
                                     Chỉnh sửa
                                 </button>
                             </div>
@@ -45,12 +53,14 @@ export function EventListCard({ title = 'Sự kiện', events = [], clubName, on
                     </div>
                 ))}
 
-                <button
-                    onClick={onSeeAll}
-                    className="event-list-see-all"
-                >
-                    Xem tất cả sự kiện
-                </button>
+                {!loading && (
+                    <button
+                        onClick={onSeeAll}
+                        className="event-list-see-all"
+                    >
+                        Xem tất cả sự kiện
+                    </button>
+                )}
             </div>
         </div>
     );

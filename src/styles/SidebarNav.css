@@ -1,12 +1,124 @@
-.sidebar-text {
-    max-width: 100px;
+/* Sidebar base */
+.sidebar {
+    width: 56px;
+    min-height: 100%;
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 0;
+    transition: width 220ms ease;
     overflow: hidden;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    align-self: flex-start;
 }
 
-.sidebar-link {
+.sidebar:hover {
+    width: 200px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 12px;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: #2563eb;
     text-decoration: none;
+    font-weight: 500;
+    position: relative;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-item:hover {
+    background: #f3f4f6;
+}
+
+.sidebar-item.active {
+    background: #eaf2ff;
+    color: #2563eb;
+    font-weight: 600;
 }
 
 .sidebar-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.sidebar-label {
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 160ms ease;
+}
+
+.sidebar:hover .sidebar-label {
     opacity: 1;
+}
+
+.sidebar-active-indicator {
+    display: none;
+}
+
+.sidebar-item.active .sidebar-active-indicator {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: #2563eb;
+    border-radius: 0 6px 6px 0;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 12px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #111827;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.sidebar-button:hover {
+    background: #f3f4f6;
+}
+
+.sidebar-button.danger {
+    color: #ef4444;
+}
+
+.sidebar-button.danger:hover {
+    background: #fee2e2;
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        width: 170px;
+    }
 }

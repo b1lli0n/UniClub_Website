@@ -1,11 +1,13 @@
+import React from 'react';
+import '../styles/Footer.css';
+
 const Footer = () => {
   return (
-    <>
-      <p className="text-center text-white mt-4 p-4 bg-dark">
-        &copy; PE TEST SUMMER 2025 FER202 Spring 2025 Book Store. All Rights
-        Reserved.
-      </p>
-    </>
+    <footer className="main-footer">
+      <div className="footer-content">
+        <p>&copy; 2024 UniClub. All Rights Reserved.</p>
+      </div>
+    </footer>
   );
 };
 
