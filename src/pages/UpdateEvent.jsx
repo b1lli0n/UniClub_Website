@@ -22,8 +22,8 @@ function UpdateEventPage() {
         endAt: '',
         capacity: 0,
         mediaUrls: [],
-        status: 'draft',
-        progressStatus: 'draft'
+        public: true,
+        progressStatus: 0
     });
     const [loading, setLoading] = useState(false);
     const [updating, setUpdating] = useState(false);
@@ -76,12 +76,12 @@ function UpdateEventPage() {
                     content: eventData.content || '',
                     category: eventData.category || '',
                     location: eventData.location || '',
-                    startAt: eventData.startAt ? eventData.startAt.slice(0, 16) : '',
-                    endAt: eventData.endAt ? eventData.endAt.slice(0, 16) : '',
+                    startAt: eventData.start_time ? eventData.start_time.slice(0, 16) : '',
+                    endAt: eventData.end_time ? eventData.end_time.slice(0, 16) : '',
                     capacity: eventData.capacity || 0,
-                    mediaUrls: eventData.mediaUrls || [],
-                    status: eventData.status || 'draft',
-                    progressStatus: eventData.progressStatus || 'draft'
+                    mediaUrls: eventData.media_urls || [],
+                    public: eventData.is_public !== undefined ? eventData.is_public : true,
+                    progressStatus: eventData.progress_status || 0
                 });
                 setError('');
             } catch (err) {

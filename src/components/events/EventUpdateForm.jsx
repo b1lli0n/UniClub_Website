@@ -52,14 +52,14 @@ export function EventUpdateForm({ formData, onChange, onSubmit, updating, onBack
 
                 <div>
                     <label className="event-update-label">
-                        Thể loại
+                        Công loại
                     </label>
                     <input
                         type="text"
                         name="category"
                         value={formData.category}
                         onChange={onChange}
-                        placeholder="Ví dụ: Kỹ thuật, Kinh doanh, Thể thao, ..."
+                        placeholder="Ví dụ: Giải trí, Kỹ thuật, Thể thao, ..."
                         className="event-update-input"
                     />
                 </div>
