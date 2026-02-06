@@ -31,9 +31,7 @@ const CreateClubModal = ({ show, onHide }) => {
 
   // Fetch danh sách users khi modal mở
   useEffect(() => {
-    // console.log('📌 useEffect triggered, show =', show);
-    if (show) {
-      // console.log('✨ Calling fetchUsers...');
+    if (show) {;
       fetchUsers();
     }
   }, [show]);
@@ -41,52 +39,30 @@ const CreateClubModal = ({ show, onHide }) => {
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      // console.log('🔄 Starting fetchUsers...');
+      //Fetch all users
       const response = await getAllUsers();
-      // console.log('📦 Raw response:', response);
-      // console.log('📦 Response type:', typeof response);
-      // console.log('📦 Is array?', Array.isArray(response));
-      
-      // Backend trả về object với users array
-      let users = [];
-      if (Array.isArray(response)) {
-        users = response;
-        console.log('✅ Response is array with', users.length, 'users');
-      } else if (response && response.users && Array.isArray(response.users)) {
-        users = response.users;
-        // console.log('✅ Response.users is array with', users.length, 'users');
-      } else if (response && response.length) {
-        users = response;
-        // console.log('✅ Response has length:', users.length);
-      } else {
-        // console.warn('⚠️ Response format not recognized:', response);
-        users = [];
-      }
-      
-      // console.log('👥 Users to map:', users);
-      
-      if (users.length === 0) {
-        // console.warn('⚠️ No users found!');
-        toast.warning('Không có thành viên nào');
-      }
+
+      //Gán object users từ response
+      let users = response.users;
+
+      // if (users.length === 0) {
+      //   toast.warning('Không có thành viên nào');
+      // }
       
       const options = users.map(user => {
-        // console.log('Mapping user:', user);
         return {
-          value: user._id,
-          label: user.full_name || 'Chưa có tên',
-          userId: user._id,
-          userName: user.full_name
+          value: user._id, //Dữ liệu lấy được
+          label: user.fullName || 'Chưa có tên', //Hiển thị trong dropdown
+          fullName: user.fullName
         };
       });
       
-      // console.log('✅ Final options:', options);
       setUserOptions(options);
       
     //   if (options.length > 0) {
-    //     // console.log('✅ Thành công! Có', options.length, 'thành viên');
     //     toast.success(`✅ Lấy được ${options.length} thành viên`);
     //   }
+
     } catch (error) {
       console.error('❌ Error in fetchUsers:', error);
       toast.error('❌ Lỗi: ' + error);
@@ -99,8 +75,8 @@ const CreateClubModal = ({ show, onHide }) => {
     if (selectedOption) {
       // Lưu object {userId, name} để tracking
       setMemberEmail(JSON.stringify({
-        userId: selectedOption.userId,
-        name: selectedOption.userName
+        userId: selectedOption.value,
+        fullName: selectedOption.fullName
       }));
     }
   };
@@ -225,12 +201,6 @@ const CreateClubModal = ({ show, onHide }) => {
         leader_id: firstMember.userId
       };
       
-      // Log data trước khi gửi
-      console.log('📊 Form data đang gửi:', dataToSubmit);
-      console.log('📋 Members IDs:', dataToSubmit.members);
-      console.log('👤 Leader ID:', dataToSubmit.leader_id);
-      console.log('🖼️ Logo URL length:', dataToSubmit.logo_url?.length);
-      
       // Gửi dữ liệu đến API backend
       await createClub(dataToSubmit);
       toast.success('✅ Club được tạo thành công!');
@@ -317,7 +287,7 @@ const CreateClubModal = ({ show, onHide }) => {
                         flex: 1
                       })
                     }}
-                  />
+                  /> 
                   <Button 
                     variant="outline-primary" 
                     onClick={handleAddMember}

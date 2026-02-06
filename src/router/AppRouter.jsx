@@ -22,7 +22,7 @@ import Profile from '../pages/Profile'
 
 import About from '../pages/About'
 import Contacts from '../pages/Contacts'
-import ViewJoinRequests from '../pages/ViewJoinRequests'
+// import ViewJoinRequests from '../pages/ViewJoinRequests'
 import NotFound from '../pages/NotFound'
 
 //Admin Pages
@@ -51,7 +51,7 @@ const AppRouter = () => {
         <Route path="/club/:clubId/events/:eventId" element={<EventDetail />} />
 
         <Route path="/my-events" element={<MyEvent />} />
-        <Route path="/my-requests" element={<ViewJoinRequests />} />
+        {/* <Route path="/my-requests" element={<ViewJoinRequests />} /> */}
 
 
         <Route path="/about" element={<About />} />
