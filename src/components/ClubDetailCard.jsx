@@ -6,12 +6,35 @@ import '../styles/ClubDetailCard.css';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const ASSET_BASE = API_BASE.replace(/\/api\/?$/, '');
 
+// Role mapping - match with BE database
+const ROLE_DISPLAY = {
+  0: { label: 'Member', color: '#e471ed' },
+  1: { label: 'Leader', color: '#ed3414' },
+  2: { label: 'Sub Leader', color: '#FFB84D' },
+  3: { label: 'Secretary', color: '#13C2C2' },
+  4: { label: 'Treasurer', color: '#52C41A' },
+};
+
 const ClubDetailCard = ({ club }) => {
   const navigate = useNavigate();
 
   const handleSeeMore = () => {
     const clubId = club.id || club._id;
-    navigate(`/clubs/${clubId}`);
+    const roleNum = club.membershipRole ?? club.role;
+
+    // Management roles (Leader, Sub Leader, Secretary, Treasurer) can access dashboard
+    // Role: 1=leader, 2=sub_leader, 3=secretary, 4=treasurer
+    if (roleNum > 0) {
+      navigate(`/clubs/${clubId}/dashboard`);
+    } else {
+      // Regular members go to club detail page
+      navigate(`/clubs/${clubId}`);
+    }
+  };
+
+  const handleCardClick = () => {
+    // Bấm vào thẻ cũng có hành động tương tự
+    handleSeeMore();
   };
 
   const rawLogo = club.logo_url;
@@ -20,6 +43,10 @@ const ClubDetailCard = ({ club }) => {
       ? rawLogo
       : `${ASSET_BASE}${rawLogo}`
     : null;
+
+  // Get role display info
+  const roleNum = club.membershipRole ?? club.role;
+  const roleInfo = typeof roleNum === 'number' ? ROLE_DISPLAY[roleNum] : null;
 
   return (
     <div className="club-detail-card">
@@ -73,6 +100,23 @@ const ClubDetailCard = ({ club }) => {
             {club.events ?? club.event_total ?? 0} sự kiện
           </span>
           <span className="club-detail-category">{club.category || 'Khác'}</span>
+          {roleInfo && (
+            <span className="club-detail-role" style={{
+              display: 'inline-block',
+              paddingLeft: '8px',
+              paddingRight: '8px',
+              paddingTop: '4px',
+              paddingBottom: '4px',
+              backgroundColor: `${roleInfo.color}20`,
+              color: roleInfo.color,
+              borderRadius: '12px',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              whiteSpace: 'nowrap'
+            }}>
+              {roleInfo.icon} {roleInfo.label}
+            </span>
+          )}
         </div>
         <button className="club-detail-see-more" onClick={handleSeeMore}>
           Xem thêm
@@ -93,7 +137,7 @@ const ClubDetailCard = ({ club }) => {
           </svg>
         </button>
       </div>
-      <div className="club-detail-image">
+      <div className="club-detail-image" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
         {logoSrc ? (
           <img
             src={logoSrc}

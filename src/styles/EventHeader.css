@@ -1,0 +1,21 @@
+.event-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.event-header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.event-header-title {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--candy-text);
+    margin: 0;
+}

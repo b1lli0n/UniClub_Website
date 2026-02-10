@@ -54,3 +54,20 @@ export const getAllUsers = async () => {
   }
 };
 
+/**
+ * Lấy danh sách CLB user đã tham gia
+ * @param {string} userId
+ * @returns {Promise<{success: boolean, data?: object, message?: string}>}
+ */
+export const getUserClubs = async (userId) => {
+  try {
+    const response = await userAPI.get(`/users/${userId}/clubs`);
+    return response.data;
+  } catch (error) {
+    console.error('Get user clubs error:', error);
+    throw error.response?.data || {
+      message: error?.message || 'Không thể tải danh sách câu lạc bộ',
+    };
+  }
+};
+

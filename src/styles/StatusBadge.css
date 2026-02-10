@@ -1,0 +1,34 @@
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--candy-text);
+}
+
+.status-published,
+.status-active {
+    background: var(--candy-paleblue);
+}
+
+.status-draft,
+.status-pending {
+    background: var(--candy-lightpink);
+}
+
+.status-completed {
+    background: var(--candy-purple);
+}
+
+.status-paused {
+    background: rgba(255, 200, 221, 0.8);
+}
+
+.status-canceled,
+.status-rejected {
+    background: #fee2e2;
+}
+
+.status-left {
+    background: #f3f4f6;
+}

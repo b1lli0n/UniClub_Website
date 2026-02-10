@@ -1,0 +1,76 @@
+.member-list-card {
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.member-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.member-list-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.member-list-add {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.member-list-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.member-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.member-list-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--candy-paleblue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--candy-text);
+}
+
+.member-list-info {
+    flex: 1;
+}
+
+.member-list-name {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.member-list-role {
+    font-size: 0.875rem;
+    opacity: 0.7;
+}
+
+.member-list-manage {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: var(--candy-text);
+    font-weight: 700;
+    cursor: pointer;
+}

@@ -3,15 +3,17 @@ import { Routes, Route } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 
 import AdminLayout from '../layouts/AdminLayout'
-import UserLayout from '../layouts/UserLayout'  
+import UserLayout from '../layouts/UserLayout'
+import MainLayout from '../layouts/MainLayout'
 
 import Register from '../pages/Auth/Register'
 import Login from '../pages/Auth/Login'
 
-import Home from '../pages/Home'
 
 import ListOfClubs from '../pages/ClubPages/ListOfClubs'
 import ClubDetail from '../pages/ClubPages/ClubDetail'
+import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
+import DashboardLeaderClub from '../pages/DashboardLeaderClub'
 
 import Event from '../pages/EventPages/EventInClub'
 import EventPublic from '../pages/EventPages/EventPublic'
@@ -32,7 +34,14 @@ import ClubList from '../pages/admin/ClubList'
 import ClubDetailAdmin from '../pages/admin/ClubDetail'
 import ClubMembers from '../pages/admin/ClubMembers'
 import PlaceholderPage from '../pages/admin/PlaceholderPage'
-import Dashboard from '../pages/admin/Dashboard'
+import AdminDashboard from '../pages/admin/Dashboard'
+import MembershipsPage from '../pages/Memberships';
+import EventsPage from '../pages/Events';
+import EventDetailPage from '../pages/EventDetail';
+import CreateEventPage from '../pages/CreateEvent';
+import UpdateEventPage from '../pages/UpdateEvent';
+import NotificationsPage from '../pages/Notifications';
+import Home from '../pages/Home';
 
 const AppRouter = () => {
   return (
@@ -47,28 +56,38 @@ const AppRouter = () => {
         <Route path="/clubs" element={<ListOfClubs />} />
         <Route path="/clubs/:id" element={<ClubDetail />} />
         <Route path="/events" element={<EventPublic />} />
+        <Route path="/my-clubs" element={<ListOfMyClubs />} />
         <Route path="/club/:clubId/events" element={<Event />} />
         <Route path="/club/:clubId/events/:eventId" element={<EventDetail />} />
 
         <Route path="/my-events" element={<MyEvent />} />
         {/* <Route path="/my-requests" element={<ViewJoinRequests />} /> */}
 
-
-        <Route path="/about" element={<About />} />
-        <Route path="/contacts" element={<Contacts />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
 
+      {/* Dashboard/Club Routes with MainLayout (includes Sidebar) */}
+      <Route element={<MainLayout />}>
+        <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
+        <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/events/create" element={<CreateEventPage />} />
+        <Route path="/events/:eventId" element={<EventDetailPage />} />
+        <Route path="/events/:eventId/update" element={<UpdateEventPage />} />
+        <Route path="/memberships" element={<MembershipsPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+      </Route>
+
       {/* Admin Routes with ProtectedRoute */}
-      <Route 
-        path="/admin" 
+      <Route
+        path="/admin"
         element={
           <ProtectedRoute requiredRole="admin">
             <AdminLayout />
           </ProtectedRoute>
-        } 
+        }
       >
-        <Route index element={<Dashboard />} />
+        <Route index element={<AdminDashboard />} />
         <Route path="clubs-request" element={<ClubRequests />} />
         <Route path="club-request-detail/:id" element={<ClubRequestDetail />} />
         <Route path="list-clubs" element={<ClubList />} />

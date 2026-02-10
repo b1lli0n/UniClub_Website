@@ -34,6 +34,7 @@ a {
   color: var(--color-cerulean);
   text-decoration: inherit;
 }
+
 a:hover {
   color: var(--color-periwinkle);
 }
@@ -48,9 +49,11 @@ button {
   cursor: pointer;
   transition: all 0.25s;
 }
+
 button:hover {
   opacity: 0.9;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;

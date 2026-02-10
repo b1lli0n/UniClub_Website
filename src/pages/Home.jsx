@@ -134,17 +134,17 @@ const Home = () => {
               <div className="logo-content">LOGO</div>
             </div>
           </div>
-          
+
           <div className="featured-event-body">
             <Row>
               <Col md={8}>
                 <span className="event-category">Workshop Online</span>
                 <h1 className="featured-event-title">Làm Bánh Ngọt Candy</h1>
                 <p className="featured-event-description">
-                  Học cách làm những chiếc bánh macaron màu pastel tuyệt đẹp với công thức độc quyền. 
+                  Học cách làm những chiếc bánh macaron màu pastel tuyệt đẹp với công thức độc quyền.
                   Phù hợp cho người mới bắt đầu.
                 </p>
-                
+
                 <div className="event-tags">
                   <span className="tag tag-1">#Cooking</span>
                   <span className="tag tag-2">#Pastel</span>
@@ -152,7 +152,7 @@ const Home = () => {
                 </div>
 
                 <div className="event-actions">
-                  <button 
+                  <button
                     className="register-btn"
                     onClick={() => navigate('/events')}
                   >
@@ -161,7 +161,7 @@ const Home = () => {
                   <button className="favorite-btn">♥</button>
                 </div>
               </Col>
-              
+
               <Col md={4}>
                 <div className="event-info-card">
                   <h3 className="info-card-title">Thông tin</h3>
