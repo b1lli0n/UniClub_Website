@@ -1,23 +1,38 @@
-import axios from 'axios';
+import api from './api';
 
-const API_BASE_URL = 'http://localhost:5000/api/clubs';
+const clubAPI = api;
 
-// Tạo instance axios
-const clubAPI = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
+export const getAllClubs = async (params = {}) => {
+  try {
+    const response = await clubAPI.get('/clubs', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Get all clubs error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể lấy danh sách câu lạc bộ' };
   }
-});
+};
 
-// Thêm token vào mỗi request
-clubAPI.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Lấy thông tin chi tiết một club
+export const getClubById = async (id) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get club by id error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể lấy thông tin câu lạc bộ' };
   }
-  return config;
-});
+};
+
+// Lấy danh sách sự kiện của một club
+export const getEventsByClub = async (clubId, params = {}) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/events`, { params });
+    return response.data;
+  } catch (error) {
+    console.error('Get events by club error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể lấy danh sách sự kiện của câu lạc bộ' };
+  }
+};
 
 export const getAllClubs = async (params = {}) => {
   try {
@@ -186,3 +201,4 @@ export const leaveClub = async (clubId) => {
 };
 
 export default clubAPI;
+ 
