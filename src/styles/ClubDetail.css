@@ -521,3 +521,96 @@ body.clubdetail-body footer a:hover {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.clubdetail-fab-wrapper {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 999;
+}
+
+.clubdetail-fab-achievement {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(31, 42, 68, 0.12);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.3s ease;
+  color: var(--clubdetail-ink);
+  position: relative;
+}
+
+.clubdetail-fab-achievement:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 15px 35px rgba(255, 175, 204, 0.35);
+}
+
+.clubdetail-fab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clubdetail-fab-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--clubdetail-hot-pink);
+  color: white;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-weight: 800;
+  min-width: 24px;
+  text-align: center;
+}
+
+.clubdetail-fab-menu {
+  position: absolute;
+  right: 0;
+  bottom: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.clubdetail-fab-mini {
+  width: 60px;
+  height: 60px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clubdetail-ink);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+  transition: opacity 0.18s ease, transform 0.18s ease,
+    box-shadow 0.18s ease;
+  pointer-events: none;
+}
+
+.clubdetail-fab-mini svg {
+  width: 22px;
+  height: 22px;
+}
+
+.clubdetail-fab-menu-open .clubdetail-fab-mini {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.clubdetail-fab-mini:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}

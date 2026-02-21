@@ -21,7 +21,7 @@ clubAPI.interceptors.request.use((config) => {
 
 export const getAllClubs = async (params = {}) => {
   try {
-    const response = await clubAPI.get('/clubs', { params });
+    const response = await clubAPI.get('/', { params });
     return response.data;
   } catch (error) {
     console.error('Get all clubs error:', error);
@@ -32,7 +32,7 @@ export const getAllClubs = async (params = {}) => {
 // Lấy thông tin chi tiết một club
 export const getClubById = async (id) => {
   try {
-    const response = await clubAPI.get(`/clubs/${id}`);
+    const response = await clubAPI.get(`/${id}`);
     return response.data;
   } catch (error) {
     console.error('Get club by id error:', error);
@@ -43,7 +43,7 @@ export const getClubById = async (id) => {
 // Lấy danh sách sự kiện của một club
 export const getEventsByClub = async (clubId, params = {}) => {
   try {
-    const response = await clubAPI.get(`/clubs/${clubId}/events`, { params });
+    const response = await clubAPI.get(`/${clubId}/events`, { params });
     return response.data;
   } catch (error) {
     console.error('Get events by club error:', error);

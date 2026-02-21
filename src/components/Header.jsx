@@ -72,22 +72,6 @@ const Header = () => {
     setIsDropdownOpen(false);
   };
 
-  // Build avatar URL từ user.avatar_url / user.avatar
-  const rawAvatar = (user?.avatar_url || user?.avatar || '').trim().replace(/"/g, '');
-  let avatarSrc = '';
-  if (rawAvatar) {
-    if (rawAvatar.startsWith('http')) {
-      // Đường dẫn tuyệt đối
-      avatarSrc = rawAvatar;
-    } else if (rawAvatar.startsWith('/uploads') || rawAvatar.startsWith('/assets')) {
-      // Đường dẫn tương đối trên BE (/uploads..., /assets...)
-      avatarSrc = `${ASSET_BASE}${rawAvatar}`;
-    } else {
-      // Ảnh static từ FE (public/...), giữ nguyên
-      avatarSrc = rawAvatar;
-    }
-  }
-
   const initials = (user?.fullName || '')
     .split(' ')
     .filter(Boolean)
@@ -144,18 +128,22 @@ const Header = () => {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 >
                   <div className="header-avatar">
-                    {avatarSrc ? (
+                    {user.avatar ? (
                       <img
-                        src={avatarSrc}
+                        src={
+                          user.avatar.startsWith('http')
+                            ? user.avatar
+                            : `${ASSET_BASE}${user.avatar}`
+                        }
                         alt={user?.fullName || 'Avatar'}
-                        className="header-avatar-img"
+                        className="profile-avatar-image"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
                           e.currentTarget.src = '/images/default-avatar.png';
                         }}
                       />
                     ) : (
-                      <span className="header-avatar-initials">{initials || 'UC'}</span>
+                      <div className="profile-avatar">{initials || 'UC'}</div>
                     )}
                   </div>
                   <div className="header-user-text">
@@ -190,7 +178,7 @@ const Header = () => {
                       <span className="dropdown-icon"></span>
                       My Event
                     </button>
-                     <button
+                    <button
                       className="header-dropdown-item"
                       onClick={() => handleMenuClick('/my-requests')}
                     >

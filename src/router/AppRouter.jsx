@@ -12,6 +12,8 @@ import Login from '../pages/Auth/Login'
 
 import ListOfClubs from '../pages/ClubPages/ListOfClubs'
 import ClubDetail from '../pages/ClubPages/ClubDetail'
+import PointsHistory from '../pages/ClubPages/PointsHistory'
+import ClubLeaderboard from '../pages/ClubPages/ClubLeaderboard'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
 
@@ -55,6 +57,8 @@ const AppRouter = () => {
         <Route index element={<Home />} />
         <Route path="/clubs" element={<ListOfClubs />} />
         <Route path="/clubs/:id" element={<ClubDetail />} />
+        <Route path="/clubs/:id/points-history" element={<PointsHistory />} />
+        <Route path="/clubs/:id/leaderboard" element={<ClubLeaderboard />} />
         <Route path="/events" element={<EventPublic />} />
         <Route path="/my-clubs" element={<ListOfMyClubs />} />
         <Route path="/club/:clubId/events" element={<Event />} />

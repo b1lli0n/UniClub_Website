@@ -1,0 +1,214 @@
+:root {
+  --leaderboard-primary: #6366f1;
+  --leaderboard-bg-gradient: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
+  --leaderboard-glass: rgba(255, 255, 255, 0.7);
+  --leaderboard-gold: #f59e0b;
+  --leaderboard-silver: #94a3b8;
+  --leaderboard-bronze: #b45309;
+  --leaderboard-text-dark: #1e293b;
+}
+
+body.leaderboard-body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--leaderboard-text-dark);
+  background: var(--leaderboard-bg-gradient);
+}
+
+body.leaderboard-body #root {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.leaderboard-page {
+  /* min-height: 100vh; */
+  padding: 20px 1rem 100px 1rem;
+}
+
+.leaderboard-container {
+  max-width: 1200px;
+  width: calc(100% - 2rem);
+  margin: 0 auto;
+}
+
+
+.leaderboard-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.leaderboard-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -2px;
+}
+
+.leaderboard-header h1 span {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  color: var(--leaderboard-primary);
+}
+
+.leaderboard-month-display {
+  display: inline-block;
+  background: var(--leaderboard-glass);
+  padding: 8px 20px;
+  border-radius: 50px;
+  border: 1px solid #fff;
+  margin-top: 15px;
+  font-weight: 700;
+  color: var(--leaderboard-primary);
+  font-size: 0.9rem;
+}
+
+.leaderboard-podium {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 0.8fr;
+  gap: 15px;
+  align-items: flex-end;
+  margin-bottom: 30px;
+}
+
+.leaderboard-podium-card {
+  background: var(--leaderboard-glass);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 24px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  position: relative;
+  min-height: 300px;
+}
+
+.leaderboard-podium-card.leaderboard-first {
+  height: 400px;
+  border: 2px solid var(--leaderboard-gold);
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
+}
+
+.leaderboard-rank-tag {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.leaderboard-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  margin: 0 auto 10px;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--leaderboard-text-dark);
+  overflow: hidden;
+}
+
+.leaderboard-podium-card.leaderboard-first .leaderboard-avatar {
+  width: 70px;
+  height: 70px;
+}
+
+.leaderboard-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.leaderboard-list {
+  background: var(--leaderboard-glass);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 10px;
+  overflow: hidden;
+}
+
+.leaderboard-list-header {
+  opacity: 0.5;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.leaderboard-list-item {
+  display: grid;
+  grid-template-columns: 60px 50px 1fr 100px 100px;
+  align-items: center;
+  padding: 12px 15px;
+  border-radius: 20px;
+  transition: background 0.2s ease;
+}
+
+.leaderboard-list-item:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.leaderboard-rank-num {
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.leaderboard-rank-1 {
+  color: var(--leaderboard-gold);
+}
+
+.leaderboard-rank-2 {
+  color: var(--leaderboard-silver);
+}
+
+.leaderboard-rank-3 {
+  color: var(--leaderboard-bronze);
+}
+
+.leaderboard-user-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.leaderboard-stat-badge {
+  text-align: center;
+}
+
+.leaderboard-stat-badge .val {
+  display: block;
+  font-weight: 800;
+  color: var(--leaderboard-text-dark);
+}
+
+.leaderboard-stat-badge .lbl {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .leaderboard-page {
+    padding: 16px 12px 90px 12px;
+  }
+
+  .leaderboard-podium {
+    grid-template-columns: 1fr;
+  }
+
+  .leaderboard-list-item {
+    grid-template-columns: 40px 40px 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 6px;
+  }
+}
