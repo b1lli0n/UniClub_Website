@@ -4,15 +4,19 @@ import api from './api';
 const eventAPI = api;
 
 const eventApi = {
-  // Lấy danh sách sự kiện của câu lạc bộ
-  getEvents: (clubId) => eventAPI.get(`/events/${clubId}/event`),
-
-  // Lấy sự kiện đã tham gia
-  getPastEvents: () => eventAPI.get('/events/past'),
-
-  // Lấy sự kiện theo club
+  // ===== MY CLUB - Lấy sự kiện theo câu lạc bộ cụ thể =====
+  // GET /api/events/club/:clubId
   getEventsByClub: (clubId, params) => eventAPI.get(`/events/club/${clubId}`, { params }),
 
+  // ===== MY EVENTS - Lấy sự kiện user đã đăng ký (bắt buộc token) =====
+  // GET /api/events/my-events
+  getMyEvents: (params) => eventAPI.get('/events/my-events', { params }),
+
+  // Alias cũ (deprecated, giữ để tương thích code cũ)
+  getEvents: (clubId) => eventAPI.get(`/events/club/${clubId}`),
+  getPastEvents: () => eventAPI.get('/events/my-events', { params: { status: 'past' } }),
+
+  // ===== EVENT REGISTRATION =====
   // Đăng ký tham gia sự kiện
   registerForEvent: (id, userId) => eventAPI.post(`/events/${id}/register`, { userId }),
 
@@ -22,14 +26,30 @@ const eventApi = {
   // Check-in sự kiện
   checkInEvent: (id, email) => eventAPI.post(`/events/${id}/check-in`, { email }),
 
-  // Xem feedbacks của sự kiện (GET /api/events/:id/feedback)
+  // ===== FEEDBACK =====
+  // Xem feedbacks của sự kiện
   getFeedbacks: (id) => eventAPI.get(`/events/${id}/feedback`),
 
-  // Gửi feedback (POST /api/events/:id/feedback body: { userId, rating, comment })
+  // Gửi feedback
   submitFeedback: (id, payload) => eventAPI.post(`/events/${id}/feedback`, payload),
 
-  // Xem chi tiết sự kiện
+  // ===== EVENT DETAIL =====
+  // Xem chi tiết sự kiện (dùng endpoint club-specific)
   getEventById: (clubId, eventId) => eventAPI.get(`/events/club/${clubId}/event/${eventId}`),
 };
 
 export default eventApi;
+
+// Named exports để tương thích các page đang import
+export const {
+  getEventsByClub,
+  getMyEvents,
+  getEvents,
+  getPastEvents,
+  registerForEvent,
+  cancelRegistration,
+  checkInEvent,
+  getFeedbacks,
+  submitFeedback,
+  getEventById,
+} = eventApi;
