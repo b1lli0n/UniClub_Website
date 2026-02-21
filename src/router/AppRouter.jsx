@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 
 import AdminLayout from '../layouts/AdminLayout'
@@ -70,10 +70,14 @@ const AppRouter = () => {
       <Route element={<MainLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/events/create" element={<CreateEventPage />} />
-        <Route path="/events/:eventId" element={<EventDetailPage />} />
-        <Route path="/events/:eventId/update" element={<UpdateEventPage />} />
+
+        <Route path="/clubEvent" element={<EventsPage />} />
+        <Route path="/clubEvent/create" element={<CreateEventPage />} />
+        <Route path="/clubEvent/:eventId" element={<EventDetailPage />} />
+        <Route path="/clubEvent/:eventId/update" element={<UpdateEventPage />} />
+
+        <Route path="/events" element={<Navigate to="/clubEvent" replace />} />
+
         <Route path="/memberships" element={<MembershipsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
       </Route>

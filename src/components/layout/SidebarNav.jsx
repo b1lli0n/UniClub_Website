@@ -4,12 +4,11 @@ import '../../styles/SidebarNav.css';
 
 const getNavItems = (clubId) => [
     { icon: Home, label: 'Dashboard', path: clubId ? `/clubs/${clubId}/dashboard` : '/dashboard' },
-    // Sửa path để dẫn đến events của club cụ thể
-    { icon: LayoutGrid, label: 'Sự kiện', path: clubId ? `/clubs/${clubId}/events` : '/events' },
+    { icon: LayoutGrid, label: 'Sự kiện', path: '/clubEvent' }, // đổi từ '/events'
     { icon: Users, label: 'Thành viên', path: '/memberships' },
     { icon: Bell, label: 'Thông báo', path: '/notifications' },
     { icon: Info, label: 'Thông tin', path: '/about' },
-];
+]
 
 export function SidebarNav() {
     const clubId = localStorage.getItem('clubId');

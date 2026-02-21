@@ -113,7 +113,7 @@ export default function EventsPage() {
                     </div>
                     <button
                         className="myclub-add"
-                        onClick={() => navigate('/events/create')}
+                        onClick={() => navigate('/clubEvent/create')}
                     >
                         + Tạo sự kiện
                     </button>
@@ -132,13 +132,13 @@ export default function EventsPage() {
                             <EventCard
                                 key={event._id}
                                 event={event}
-                                onViewDetails={(id) => navigate(`/events/${id}`)}
+                                onViewDetails={(id) => navigate(`/clubEvent/${id}`)}
                                 formatDateTime={formatDateTime}
                             />
                         ))}
                     </div>
                 ) : (
-                    <EmptyEventState onCreateEvent={() => navigate('/events/create')} />
+                    <EmptyEventState onCreateEvent={() => navigate('/clubEvent/create')} />
                 )}
             </div>
         </div>
