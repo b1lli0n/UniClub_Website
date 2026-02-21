@@ -138,7 +138,7 @@ const ListOfClubs = () => {
         const category = selectedCategory === 'all' ? null : selectedCategory;
         const response = await getAllClubs({
           category,
-          sortBy,
+          sortBy: sortBy || null,
           search: searchQuery.trim() || null,
         });
 
