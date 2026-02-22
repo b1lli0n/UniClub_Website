@@ -42,6 +42,10 @@ import CreateEventPage from '../pages/CreateEvent';
 import UpdateEventPage from '../pages/UpdateEvent';
 import NotificationsPage from '../pages/Notifications';
 import Home from '../pages/Home';
+import ViewRewards from '../pages/RewardPages/ViewRewards';
+import ViewRewardDetail from '../pages/RewardPages/ViewRewardDetail';
+import ViewRedemptionHistory from '../pages/RewardPages/ViewRedemptionHistory';
+import RedeemReward from '../pages/RewardPages/RedeemReward';
 
 const AppRouter = () => {
   return (
@@ -59,6 +63,24 @@ const AppRouter = () => {
         <Route path="/my-clubs" element={<ListOfMyClubs />} />
         <Route path="/club/:clubId/events" element={<Event />} />
         <Route path="/club/:clubId/events/:eventId" element={<EventDetail />} />
+        <Route path="/club/:clubId/rewards" element={<ViewRewards />} />
+        <Route path="/club/:clubId/rewards/:rewardId" element={<ViewRewardDetail />} />
+        <Route
+          path="/club/:clubId/rewards/history"
+          element={
+            <ProtectedRoute>
+              <ViewRedemptionHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/club/:clubId/rewards/:rewardId/redeem"
+          element={
+            <ProtectedRoute>
+              <RedeemReward />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/my-events" element={<MyEvent />} />
         {/* <Route path="/my-requests" element={<ViewJoinRequests />} /> */}

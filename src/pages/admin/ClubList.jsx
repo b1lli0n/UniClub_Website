@@ -3,6 +3,21 @@ import { useNavigate } from 'react-router-dom'
 import { getClubs, updateClubStatus as updateClubStatusAPI } from '../../api/adminapi'
 import { toast } from 'react-toastify'
 
+const STATUS_TO_API = {
+    pending: 0,
+    active: 1,
+    inactive: 2,
+    rejected: 3
+}
+
+const normalizeStatus = (status) => {
+    if (status === 0 || status === 'pending') return 'pending'
+    if (status === 1 || status === 'active' || status === 'approved') return 'active'
+    if (status === 2 || status === 'paused' || status === 'inactive') return 'inactive'
+    if (status === 3 || status === 'rejected') return 'rejected'
+    return 'inactive'
+}
+
 const ClubList = () => {
     const navigate = useNavigate()
     const [search, setSearch] = useState('')
@@ -23,8 +38,15 @@ const ClubList = () => {
             setLoading(true)
             setError(null)
 
-            // ✅ GỌI API 2 LẦN: Lấy cả Active (status=1) và Paused (status=2)
-            const [activeResponse, pausedResponse] = await Promise.all([
+            // Lấy đầy đủ trạng thái: pending/active/paused/rejected
+            const [pendingResponse, activeResponse, pausedResponse, rejectedResponse] = await Promise.all([
+                getClubs({
+                    page: 1,
+                    limit: 100,
+                    status: 0,
+                    sortBy: 'createdAt',
+                    sortOrder: 'desc'
+                }),
                 getClubs({
                     page: 1,
                     limit: 100,
@@ -38,11 +60,20 @@ const ClubList = () => {
                     status: 2, // Paused clubs
                     sortBy: 'createdAt',
                     sortOrder: 'desc'
+                }),
+                getClubs({
+                    page: 1,
+                    limit: 100,
+                    status: 3,
+                    sortBy: 'createdAt',
+                    sortOrder: 'desc'
                 })
             ])
 
+            console.log('Pending Response:', pendingResponse)
             console.log('Active Response:', activeResponse)
             console.log('Paused Response:', pausedResponse)
+            console.log('Rejected Response:', rejectedResponse)
 
             // Helper function to extract clubs array from response
             const extractClubs = (response) => {
@@ -59,24 +90,17 @@ const ClubList = () => {
             }
 
             // Extract and merge clubs from both responses
+            const pendingClubs = extractClubs(pendingResponse)
             const activeClubs = extractClubs(activeResponse)
             const pausedClubs = extractClubs(pausedResponse)
-            const clubsData = [...activeClubs, ...pausedClubs]
+            const rejectedClubs = extractClubs(rejectedResponse)
+            const clubsData = [...pendingClubs, ...activeClubs, ...pausedClubs, ...rejectedClubs]
 
-            console.log(`Total clubs: ${clubsData.length} (Active: ${activeClubs.length}, Paused: ${pausedClubs.length})`)
+            console.log(`Total clubs: ${clubsData.length} (Pending: ${pendingClubs.length}, Active: ${activeClubs.length}, Paused: ${pausedClubs.length}, Rejected: ${rejectedClubs.length})`)
 
             // Map API response to match component structure
             const mappedClubs = clubsData.map(club => {
-                // ✅ MAPPING ĐÚNG THEO BACKEND:
-                // 1 = active (đã duyệt, đang hoạt động)
-                // 2 = paused (tạm dừng)
-                let status = 'inactive' // Default cho status 2 (paused)
-
-                if (club.status === 1 || club.status === 'active') {
-                    status = 'active'
-                } else if (club.status === 2 || club.status === 'paused') {
-                    status = 'inactive' // UI hiển thị "Dừng hoạt động" cho paused
-                }
+                const status = normalizeStatus(club.status)
 
                 return {
                     id: club._id || club.id,
@@ -97,10 +121,10 @@ const ClubList = () => {
             // Fallback to mock data if API is not available (for development)
             console.warn('Using mock data as fallback')
             const mockClubs = [
-                { id: 101, name: 'CLB Nhiếp ảnh', manager: 'Nguyễn Thy', members: 45, status: 'active', created: '2023-12-20' },
+                { id: 101, name: 'CLB Nhiếp ảnh', manager: 'Nguyễn Thy', members: 45, status: 'pending', created: '2023-12-20' },
                 { id: 102, name: 'CLB Tiếng Anh', manager: 'Trần Minh', members: 120, status: 'active', created: '2024-05-15' },
                 { id: 103, name: 'CLB IT', manager: 'Hoàng Nam', members: 88, status: 'inactive', created: '2025-01-10' },
-                { id: 104, name: 'CLB Âm nhạc', manager: 'Lê Hương', members: 67, status: 'active', created: '2024-03-22' },
+                { id: 104, name: 'CLB Âm nhạc', manager: 'Lê Hương', members: 67, status: 'rejected', created: '2024-03-22' },
                 { id: 105, name: 'CLB Thể thao', manager: 'Phạm Dũng', members: 95, status: 'active', created: '2024-08-10' },
             ]
             setClubs(mockClubs)
@@ -130,8 +154,11 @@ const ClubList = () => {
 
     const updateClubStatus = async (id, statusString) => {
         try {
-            // Logic: 1 = Active, 2 = Inactive/Pause
-            const apiStatus = statusString === 'active' ? 1 : 2
+            const apiStatus = STATUS_TO_API[statusString]
+            if (apiStatus === undefined) {
+                toast.error('Trạng thái không hợp lệ')
+                return
+            }
 
             console.log(`Sending API Request: PUT /clubs/${id}/status`, { status: apiStatus })
 
@@ -139,16 +166,27 @@ const ClubList = () => {
             setClubs((prev) => prev.map((c) => (c.id === id ? { ...c, status: statusString } : c)))
 
             // 2. Gọi API để update trên server
-            const result = await updateClubStatusAPI(id, apiStatus)
-            console.log('Update Result:', result)
+            await updateClubStatusAPI(id, apiStatus)
 
-            toast.success(statusString === 'active' ? 'Đã kích hoạt câu lạc bộ' : 'Đã dừng hoạt động câu lạc bộ')
+            const successMap = {
+                active: 'Đã duyệt/kích hoạt câu lạc bộ',
+                inactive: 'Đã tạm dừng câu lạc bộ',
+                rejected: 'Đã từ chối câu lạc bộ'
+            }
+            toast.success(successMap[statusString] || 'Đã cập nhật trạng thái câu lạc bộ')
         } catch (err) {
             console.error('Error updating club status:', err)
             // Nếu lỗi, revert lại state cũ bằng cách load lại từ server
             toast.error('Không thể cập nhật trạng thái: ' + (err.message || 'Lỗi server'))
             fetchClubs()
         }
+    }
+
+    const getStatusLabel = (status) => {
+        if (status === 'pending') return 'Chờ duyệt'
+        if (status === 'active') return 'Hoạt động'
+        if (status === 'rejected') return 'Từ chối'
+        return 'Tạm dừng'
     }
 
     return (
@@ -228,30 +266,49 @@ const ClubList = () => {
                                         <div className="admin-col admin-col--date">{c.members}</div>
                                         <div className="admin-col admin-col--status">
                                             <span className={`admin-status admin-status--${c.status}`}>
-                                                {c.status === 'active' ? 'Hoạt động' : 'Dừng hoạt động'}
+                                                {getStatusLabel(c.status)}
                                             </span>
                                         </div>
                                         <div className="admin-col admin-col--action">
                                             <div className="admin-status-actions">
-                                                {c.status === 'active' ? (
+                                                {c.status === 'pending' ? (
+                                                    <>
+                                                        <button
+                                                            type="button"
+                                                            className="admin-status-btn admin-status-btn--approve"
+                                                            onClick={() => updateClubStatus(c.id, 'active')}
+                                                            title="Duyệt câu lạc bộ"
+                                                        >
+                                                            <i className="fa-solid fa-check" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="admin-status-btn admin-status-btn--reject"
+                                                            onClick={() => updateClubStatus(c.id, 'rejected')}
+                                                            title="Từ chối câu lạc bộ"
+                                                        >
+                                                            <i className="fa-solid fa-xmark" />
+                                                        </button>
+                                                    </>
+                                                ) : c.status === 'active' ? (
                                                     // Đang Active -> Hiển thị icon Mở khóa (Xanh) -> Bấm vào để Lock
                                                     <button
                                                         type="button"
-                                                        className="admin-status-btn admin-status-btn--approve"
-                                                        onClick={() => updateClubStatus(c.id, 'inactive')}
-                                                        title="Đang hoạt động - Bấm để dừng"
-                                                    >
-                                                        <i className="fa-solid fa-lock-open" />
-                                                    </button>
-                                                ) : (
-                                                    // Đang Inactive -> Hiển thị icon Khóa (Đỏ) -> Bấm vào để Unlock
-                                                    <button
-                                                        type="button"
                                                         className="admin-status-btn admin-status-btn--reject"
-                                                        onClick={() => updateClubStatus(c.id, 'active')}
-                                                        title="Đang dừng - Bấm để kích hoạt"
+                                                        onClick={() => updateClubStatus(c.id, 'inactive')}
+                                                        title="Deactivate câu lạc bộ"
                                                     >
                                                         <i className="fa-solid fa-lock" />
+                                                    </button>
+                                                ) : (
+                                                    // Inactive hoặc Rejected -> Activate
+                                                    <button
+                                                        type="button"
+                                                        className="admin-status-btn admin-status-btn--approve"
+                                                        onClick={() => updateClubStatus(c.id, 'active')}
+                                                        title="Activate câu lạc bộ"
+                                                    >
+                                                        <i className="fa-solid fa-lock-open" />
                                                     </button>
                                                 )}
                                             </div>
