@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/CreateEvent.css';
+import '../styles/Events.css';
 import { unmapEvent } from '../services/dataMappers';
 
 export default function CreateEventPage() {
@@ -179,12 +180,12 @@ export default function CreateEventPage() {
       <div className="home-overlay" />
       <div className="myclub-container">
         <header className="myclub-header">
-          <h1 className="myclub-title">Tạo sự kiện</h1>
+          <h1 className="myclub-title">createClubEvent</h1>
         </header>
 
         {/* Back button */}
         <div className="create-event-back">
-          <button className="card-button create-event-back-button" onClick={() => navigate('/events')}>
+          <button className="card-button create-event-back-button clubevent-primary-btn" onClick={() => navigate('/clubEvent')}>
             ← Quay lại
           </button>
         </div>
