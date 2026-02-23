@@ -1,0 +1,213 @@
+#root {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    width: 100%;
+}
+
+:root {
+    --candy-purple: #cdb4db;
+    --candy-lightpink: #ffc8dd;
+    --candy-hotpink: #ffafcc;
+    --candy-paleblue: #bde0fe;
+    --candy-skyblue: #a2d2ff;
+    --candy-text: #4a4a6a;
+}
+
+#root {
+    width: 100%;
+    min-height: 100vh;
+    text-align: initial;
+}
+
+.home-page {
+    width: 100%;
+    min-height: calc(100vh - 0px);
+    background: linear-gradient(135deg, var(--candy-skyblue) 0%, var(--candy-lightpink) 50%, var(--candy-purple) 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 0 0 80px;
+}
+
+.home-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.5), transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.4), transparent 28%),
+        radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.35), transparent 30%);
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.hero-section {
+    padding: 4rem 0 3rem;
+    position: relative;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: var(--candy-hotpink);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(255, 175, 204, 0.3);
+}
+
+.hero-title {
+    font-size: clamp(2.4rem, 3vw, 3rem);
+    font-weight: 900;
+    color: var(--candy-text);
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.hero-description {
+    font-size: 1.125rem;
+    color: var(--candy-text);
+    opacity: 0.75;
+    margin-bottom: 2rem;
+    font-weight: 500;
+    max-width: 680px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    background: var(--candy-text);
+    color: white;
+    padding: 0.875rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(74, 74, 106, 0.2);
+}
+
+.btn-primary:hover {
+    background: var(--candy-hotpink);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 175, 204, 0.4);
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--candy-text);
+    padding: 0.875rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary:hover {
+    background: #f9f9f9;
+    transform: translateY(-2px);
+}
+
+.hero-decoration {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.decoration-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.6;
+    mix-blend-mode: multiply;
+}
+
+.blob-1 {
+    width: 200px;
+    height: 200px;
+    background: var(--candy-skyblue);
+    top: 0;
+    left: 0;
+    animation: pulse 3s ease-in-out infinite;
+}
+
+.blob-2 {
+    width: 160px;
+    height: 160px;
+    background: var(--candy-lightpink);
+    bottom: 0;
+    right: 0;
+    animation: pulse 3s ease-in-out infinite 1.5s;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.section-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--candy-text);
+    margin: 0;
+}
+
+.section-link {
+    color: var(--candy-hotpink);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.section-link:hover {
+    text-decoration: underline;
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}

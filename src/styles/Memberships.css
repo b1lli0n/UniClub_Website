@@ -1,0 +1,193 @@
+.memberships-loading-card {
+    padding: 60px 32px;
+    text-align: center;
+}
+
+.memberships-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #CDB4DB;
+    border-top-color: transparent;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: memberships-spin 1s linear infinite;
+}
+
+@keyframes memberships-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.memberships-loading-text {
+    font-size: 1rem;
+    color: var(--candy-text);
+    opacity: 0.7;
+}
+
+.memberships-error-card {
+    padding: 60px 32px;
+    text-align: center;
+}
+
+.memberships-error-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+}
+
+.memberships-error-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--candy-text);
+}
+
+.memberships-error-text {
+    font-size: 0.95rem;
+    color: var(--candy-text);
+    opacity: 0.7;
+    margin-bottom: 24px;
+}
+
+.memberships-retry-button {
+    padding: 10px 24px;
+    background: #CDB4DB;
+    color: #4A4A6A;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.memberships-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.memberships-item {
+    padding: 20px;
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.memberships-item-content {
+    flex: 1;
+}
+
+.memberships-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.memberships-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--candy-hotpink);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.memberships-user-name {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--candy-text);
+}
+
+.memberships-user-email {
+    margin: 4px 0 0 0;
+    font-size: 0.85rem;
+    color: var(--candy-text);
+    opacity: 0.6;
+}
+
+.memberships-requested-at {
+    margin: 8px 0 0 60px;
+    font-size: 0.8rem;
+    color: var(--candy-text);
+    opacity: 0.5;
+}
+
+.memberships-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.memberships-status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #4A4A6A;
+}
+
+.memberships-status-badge.status-pending {
+    background: #CDB4DB;
+}
+
+.memberships-status-badge.status-approved {
+    background: #BDE0FE;
+}
+
+.memberships-status-badge.status-rejected {
+    background: #FFAFCC;
+}
+
+.memberships-action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.memberships-approve {
+    padding: 8px 16px;
+    background: #BDE0FE;
+    color: #4A4A6A;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.memberships-reject {
+    padding: 8px 16px;
+    background: #FFAFCC;
+    color: #4A4A6A;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.memberships-empty {
+    padding: 40px;
+    text-align: center;
+    border-radius: 16px;
+}
+
+.memberships-empty-text {
+    font-size: 1.1rem;
+    color: var(--candy-text);
+    opacity: 0.6;
+}

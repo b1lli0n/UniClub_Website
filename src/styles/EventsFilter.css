@@ -1,0 +1,23 @@
+.events-filter {
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.events-filter-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--candy-text);
+}
+
+.events-filter-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: white;
+    font-weight: 600;
+    color: var(--candy-text);
+    cursor: pointer;
+}

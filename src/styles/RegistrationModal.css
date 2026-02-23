@@ -1,0 +1,210 @@
+.custom-registration-modal .modal-content {
+    border-radius: 20px;
+    border: none;
+    overflow: hidden;
+}
+
+.reg-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: none;
+}
+
+.reg-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.reg-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    position: absolute;
+    right: 15px;
+    top: 10px;
+}
+
+.reg-modal-body {
+    padding: 0 20px 20px;
+}
+
+.reg-image-wrapper {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    background-color: #f0f0f0;
+}
+
+.reg-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.reg-event-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+/* User Card (View Mode) */
+.reg-user-card {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.reg-user-avatar {
+    width: 60px;
+    height: 60px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.reg-user-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.reg-avatar-placeholder {
+    font-size: 30px;
+    color: #adb5bd;
+}
+
+.reg-user-info {
+    flex-grow: 1;
+}
+
+.reg-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.reg-info-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.reg-edit-icon {
+    font-size: 12px;
+    color: #999;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.reg-edit-icon:hover {
+    color: #007bff;
+}
+
+.reg-info-row {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reg-info-label {
+    color: #888;
+    margin-right: 5px;
+}
+
+/* Form (Edit Mode) */
+.reg-edit-form {
+    margin-bottom: 20px;
+}
+
+.reg-form-group {
+    margin-bottom: 12px;
+}
+
+.reg-form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.reg-form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.reg-form-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.reg-submit-btn {
+    width: 100%;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    transition: background-color 0.2s;
+}
+
+.reg-submit-btn:hover {
+    background-color: #0056b3;
+}
+
+.reg-submit-btn:disabled {
+    background-color: #a0cfff;
+    cursor: not-allowed;
+}
+
+.reg-cancel-btn {
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.reg-cancel-btn:hover {
+    background-color: #fff5f5;
+}
+
+.reg-success-message {
+    padding: 20px;
+    text-align: center;
+}

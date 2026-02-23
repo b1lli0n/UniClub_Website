@@ -1,0 +1,27 @@
+.empty-event {
+    padding: 64px 32px;
+    text-align: center;
+}
+
+.empty-event-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 2rem;
+}
+
+.empty-event-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.empty-event-text {
+    opacity: 0.8;
+    margin-bottom: 16px;
+}

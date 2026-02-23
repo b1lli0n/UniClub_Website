@@ -1,6 +1,6 @@
 import React from 'react'
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import '../../styles/admin.css'
+import '../styles/admin.css'
 
 const AdminLayout = () => {
     const location = useLocation()

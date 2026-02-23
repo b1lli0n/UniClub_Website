@@ -1,0 +1,230 @@
+.notifications-loading-card {
+    padding: 32px;
+    text-align: center;
+}
+
+.notifications-error-card {
+    padding: 32px;
+    text-align: center;
+    color: red;
+}
+
+.notifications-header {
+    margin-bottom: 24px;
+}
+
+.notifications-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--candy-text);
+    margin: 0;
+}
+
+.notifications-subtitle {
+    font-size: 0.875rem;
+    color: var(--candy-text);
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
+.notifications-filter-card {
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.notifications-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.notifications-filter-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--candy-text);
+    opacity: 0.8;
+}
+
+.notifications-filter-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--candy-text);
+    cursor: pointer;
+    min-width: 200px;
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.notification-item {
+    padding: 16px;
+    border-radius: 16px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.notification-item.is-read {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.notification-item.is-unread {
+    border: 2px solid var(--candy-paleblue);
+    background: rgba(226, 236, 246, 0.826);
+}
+
+.notification-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.notification-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0;
+    color: var(--candy-text);
+}
+
+.notification-body {
+    font-size: 0.875rem;
+    color: var(--candy-text);
+    opacity: 0.8;
+    margin-bottom: 8px;
+}
+
+.notification-event-info {
+    margin-top: 8px;
+    padding: 12px;
+    background: rgba(162, 210, 255, 0.1);
+    border-left: 3px solid var(--candy-paleblue);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--candy-text);
+}
+
+.notification-event-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.notification-event-time {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.notification-date {
+    font-size: 0.75rem;
+    color: var(--candy-text);
+    opacity: 0.6;
+    margin-top: 8px;
+}
+
+.notification-status {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.notification-status-read {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.notification-status-unread {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--candy-paleblue);
+    font-weight: 700;
+}
+
+.notification-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--candy-paleblue);
+    display: inline-block;
+}
+
+.notification-type-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--candy-text);
+}
+
+.notification-type-event-canceled {
+    background: var(--candy-lightpink);
+}
+
+.notification-type-join-request-approved {
+    background: var(--candy-paleblue);
+}
+
+.notification-type-join-request-rejected {
+    background: #fee2e2;
+}
+
+.notification-type-event-reminder {
+    background: var(--candy-purple);
+}
+
+.notification-type-general {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.notifications-empty {
+    padding: 64px 32px;
+    text-align: center;
+}
+
+.notifications-empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 2rem;
+}
+
+.notifications-empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--candy-text);
+}
+
+.notifications-empty-text {
+    opacity: 0.8;
+    color: var(--candy-text);
+}

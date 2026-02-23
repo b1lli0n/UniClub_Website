@@ -1,0 +1,523 @@
+/* src/styles/ClubDetail.css */
+:root {
+  --clubdetail-hot-pink: #ffafcc;
+  --clubdetail-powder-blue: #bde0fe;
+  --clubdetail-lavender: #cdb4db;
+  --clubdetail-ink: #1f2a44;
+  --clubdetail-muted: rgba(31, 42, 68, 0.72);
+}
+
+/* Body class for club detail page */
+body.clubdetail-body {
+  margin: 0;
+  min-height: 100vh;
+  display: block;
+  place-items: unset;
+  color: var(--clubdetail-ink);
+  background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
+}
+
+body.clubdetail-body #root {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.clubdetail-container {
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+/* Glass Panel */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 16px 50px rgba(31, 42, 68, 0.10);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 22px;
+}
+
+/* Labels */
+.clubdetail-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--clubdetail-muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Club Information Section */
+.clubdetail-info {
+  padding: 24px;
+  margin-bottom: 2rem;
+}
+
+.clubdetail-info-grid {
+  display: grid;
+  grid-template-columns: 120px 1fr 1.2fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Logo */
+.clubdetail-logo {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.clubdetail-logo-wrapper {
+  width: 200px;   /* khung vuông lớn hơn theo yêu cầu */
+  height: 200px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 30px rgba(31, 42, 68, 0.15);
+}
+
+.clubdetail-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.clubdetail-logo-placeholder {
+  width: 200px;
+  height: 200px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(135deg, rgba(189, 224, 254, 0.95), rgba(255, 175, 204, 0.92));
+  border: 2px solid rgba(20, 20, 20, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(31, 42, 68, 0.4);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+/* Main Info */
+.clubdetail-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.clubdetail-name-section {
+  margin-bottom: 8px;
+}
+
+.clubdetail-name {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 950;
+  color: var(--clubdetail-ink);
+  letter-spacing: -0.3px;
+}
+
+.clubdetail-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.clubdetail-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.clubdetail-stat-value {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--clubdetail-ink);
+}
+
+.clubdetail-join-btn {
+  align-self: flex-start;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, rgba(255, 175, 204, 1), rgba(189, 224, 254, 1));
+  color: var(--clubdetail-ink);
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 20px rgba(31, 42, 68, 0.15);
+}
+
+.clubdetail-join-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(31, 42, 68, 0.2);
+}
+
+.clubdetail-join-btn.is-joined {
+  background: rgba(76, 175, 80, 0.2);
+  color: rgba(46, 125, 50, 0.95);
+  box-shadow: none;
+}
+
+/* Description */
+.clubdetail-desc {
+  padding-left: 24px;
+  border-left: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.clubdetail-desc-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--clubdetail-muted);
+  font-weight: 600;
+}
+
+/* Section */
+.clubdetail-section {
+  margin-bottom: 2rem;
+}
+
+.clubdetail-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.clubdetail-section-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 950;
+  color: var(--clubdetail-ink);
+  letter-spacing: -0.2px;
+}
+
+.clubdetail-view-all-btn {
+  padding: 8px 16px;
+  background: rgba(255, 175, 204, 0.4);
+  border: 1px solid rgba(255, 175, 204, 0.6);
+  border-radius: 8px;
+  color: var(--clubdetail-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.clubdetail-view-all-btn:hover {
+  background: rgba(255, 175, 204, 0.6);
+  border-color: rgba(255, 175, 204, 0.8);
+  transform: translateX(2px);
+}
+
+.clubdetail-view-all-btn:active {
+  transform: translateX(0);
+}
+
+/* Organized Events */
+.clubdetail-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 16px;
+}
+
+.clubdetail-event-card {
+  display: grid;
+  grid-template-columns: 200px 1fr; /* cột ảnh cố định, vuông to hơn */
+  gap: 16px;
+  padding: 16px;
+  align-items: stretch;
+}
+
+.clubdetail-event-image {
+  width: 200px;
+  height: 200px;      /* khung ảnh vuông, cố định */
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Ảnh sự kiện: tự co giãn cho vừa khung vuông */
+.clubdetail-event-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.clubdetail-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(135deg, rgba(189, 224, 254, 0.95), rgba(255, 175, 204, 0.92));
+  border: 2px solid rgba(20, 20, 20, 0.9);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(31, 42, 68, 0.4);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.clubdetail-event-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clubdetail-event-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.clubdetail-event-category {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--clubdetail-ink);
+}
+
+.clubdetail-event-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--clubdetail-ink);
+}
+
+.clubdetail-event-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--clubdetail-muted);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.clubdetail-event-participants {
+  font-size: 16px;
+  font-weight: 900;
+  color: rgba(255, 97, 166, 0.95);
+}
+
+/* Admin Board */
+.clubdetail-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr)); /* luôn 5 cột trên 1 hàng (màn lớn) */
+  gap: 24px;
+  justify-items: center;
+}
+
+.clubdetail-admin-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 260px; /* mọi card rộng như nhau */
+  min-height: 400px;
+  box-sizing: border-box;
+}
+
+.clubdetail-admin-avatar {
+  width: 180px;
+  height: 220px;
+  border-radius: 18px; /* hình chữ nhật bo góc */
+  overflow: hidden;
+}
+
+/* Ảnh ban quản trị: tự co giãn cho vừa khung */
+.clubdetail-admin-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.clubdetail-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.35)),
+    linear-gradient(135deg, rgba(255, 175, 204, 0.85), rgba(189, 224, 254, 0.85));
+  border: 2px solid rgba(20, 20, 20, 0.9);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(31, 42, 68, 0.4);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.clubdetail-admin-info {
+  text-align: center;
+  max-width: 220px; /* giới hạn bề ngang text để dễ ellipsis */
+  width: 100%;
+  overflow: hidden;
+}
+
+.clubdetail-admin-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--clubdetail-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clubdetail-admin-role {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--clubdetail-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Club Library */
+.clubdetail-library-wrapper {
+  padding: 20px;
+}
+
+.clubdetail-library-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2x2 */
+  gap: 16px;
+}
+
+.clubdetail-library-item {
+  padding: 0;
+}
+
+/* Frame giữ tỉ lệ, ảnh cover nhưng không méo */
+.clubdetail-library-frame {
+  position: relative;
+  width: 100%;
+  padding-top: 65%; /* ~tỉ lệ 3:2, tất cả khung như nhau */
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.clubdetail-library-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* crop nhưng không méo */
+  display: block;
+}
+
+.clubdetail-library-frame .clubdetail-image-placeholder {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+}
+
+/* Footer only when on Club Detail page */
+body.clubdetail-body footer {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: rgba(31, 42, 68, 0.75) !important;
+  padding: 40px 0 !important;
+  margin-top: 40px;
+  text-align: center;
+  font-size: 14px;
+}
+
+body.clubdetail-body footer a,
+body.clubdetail-body footer strong {
+  color: var(--clubdetail-hot-pink) !important;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+body.clubdetail-body footer a:hover {
+  color: var(--clubdetail-lavender) !important;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .clubdetail-info-grid {
+    grid-template-columns: 100px 1fr;
+  }
+
+  .clubdetail-desc {
+    grid-column: 1 / -1;
+    padding-left: 0;
+    border-left: none;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .clubdetail-events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Admin board: giảm cột trên màn vừa */
+  .clubdetail-admin-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .clubdetail-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .clubdetail-main {
+    text-align: center;
+    align-items: center;
+  }
+
+  .clubdetail-stats {
+    justify-content: center;
+  }
+
+  .clubdetail-desc {
+    text-align: center;
+  }
+
+  .clubdetail-event-card {
+    grid-template-columns: 1fr;
+  }
+
+  .clubdetail-event-image {
+    height: 160px;
+  }
+
+  .clubdetail-library-grid {
+    grid-template-columns: 1fr; /* 4 khung xếp dọc trên mobile */
+  }
+
+  .clubdetail-admin-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .clubdetail-info {
+    padding: 16px;
+  }
+
+  .clubdetail-name {
+    font-size: 22px;
+  }
+
+  .clubdetail-library-small-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

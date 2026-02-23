@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getClubCreationRequests, updateClubStatus } from '../../services/adminapi'
+import { getClubCreationRequests, updateClubStatus } from '../../api/adminapi'
 import { toast } from 'react-toastify'
 
 const ClubRequests = () => {

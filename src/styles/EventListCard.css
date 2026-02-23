@@ -1,0 +1,88 @@
+.event-list-card {
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.event-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.event-list-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.event-list-create {
+    padding: 8px 16px;
+}
+
+.event-list-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.event-list-item {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 16px;
+    align-items: center;
+}
+
+.event-list-thumb {
+    height: 80px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.event-list-item-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.event-list-club {
+    font-size: 0.875rem;
+    opacity: 0.7;
+    margin-bottom: 8px;
+}
+
+.event-list-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.event-list-action {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+.event-list-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.event-list-date {
+    font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.event-list-see-all {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: var(--candy-text);
+    font-weight: 700;
+    cursor: pointer;
+}
