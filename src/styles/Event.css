@@ -1876,3 +1876,180 @@ body.event-body footer a:hover {
   font-weight: bold;
   font-size: 16px;
 }
+
+/* ========== Search Bar ========== */
+.event-searchBar {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.event-searchWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+}
+
+.event-searchIcon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+  color: rgba(31, 42, 68, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-searchIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.event-searchWrapper:focus-within .event-searchIcon {
+  color: rgba(255, 97, 166, 0.8);
+}
+
+.event-searchInput {
+  width: 100%;
+  padding: 16px 48px 16px 54px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 24px rgba(31, 42, 68, 0.08);
+  transition: all 0.3s ease;
+  outline: none;
+  color: var(--event-ink);
+}
+
+.event-searchInput:hover {
+  border-color: rgba(255, 175, 204, 0.6);
+  box-shadow: 0 8px 28px rgba(31, 42, 68, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.event-searchInput:focus {
+  border-color: rgba(255, 175, 204, 0.9);
+  box-shadow: 0 8px 32px rgba(255, 175, 204, 0.25);
+  background: #fff;
+}
+
+.event-searchInput::placeholder {
+  color: rgba(31, 42, 68, 0.45);
+  font-weight: 500;
+}
+
+.event-searchClear {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(31, 42, 68, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  color: rgba(31, 42, 68, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.event-searchClear:hover {
+  background: rgba(255, 175, 204, 0.3);
+  color: rgba(31, 42, 68, 0.9);
+}
+
+/* ========== End Search Bar ========== */
+
+@media (max-width: 768px) {
+  /* ...existing code... */
+}
+
+/* ========== Confirm Modal & Registration States ========== */
+.confirm-modal-wrapper .modal-content {
+  background: transparent;
+  border: none;
+}
+
+.confirm-modal-content.glass-panel {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 28px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.confirm-modal-title {
+  font-weight: 900;
+  color: #1f2a44;
+}
+
+.confirm-modal-message {
+  color: rgba(31, 42, 68, 0.8);
+  font-weight: 500;
+}
+
+.confirm-modal-btn {
+  border-radius: 12px;
+  padding: 10px 24px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.confirm-modal-btn.cancel-btn {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  color: #1f2a44;
+}
+
+.confirm-modal-btn.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+.confirm-modal-btn.confirm-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* Button States Classes */
+.btn-pending {
+  background: linear-gradient(135deg, #ffd166 0%, #f7b733 100%) !important;
+  color: #1f2a44 !important;
+}
+
+.btn-approved {
+  background: linear-gradient(135deg, #06d6a0 0%, #27ae60 100%) !important;
+  color: white !important;
+}
+
+.btn-rejected {
+  background: linear-gradient(135deg, #ef476f 0%, #c0392b 100%) !important;
+  color: white !important;
+  opacity: 0.8;
+}
+
+.btn-attended {
+  background: linear-gradient(135deg, #118ab2 0%, #2980b9 100%) !important;
+  color: white !important;
+}
+
+.event-sideRegisterBtn.disabled,
+.event-sideRegisterBtn:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+  opacity: 0.7;
+}
+
+/* ========================================== */

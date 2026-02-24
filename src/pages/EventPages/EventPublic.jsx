@@ -70,16 +70,24 @@ const EventPublic = () => {
     const fetchPublicEvents = async () => {
       setLoading(true);
       try {
-        // Backend hiện không có endpoint public rõ ràng trong FE,
-        // nên gom events bằng cách lấy list clubs rồi fetch events theo từng club.
         const clubsRes = await getAllClubs();
         const clubs = clubsRes?.data || clubsRes?.data?.clubs || clubsRes?.clubs || [];
+
+        // Tạo params để gửi lên BE
+        const params = {
+          q: query || '',
+          category: activeCategory !== 'Tất cả' ? activeCategory : '',
+          sort: sortBy,
+          page: 1,
+          limit: 100
+        };
 
         const results = await Promise.all(
           (clubs || []).map(async (c) => {
             const clubId = c._id || c.id;
             if (!clubId) return [];
-            const res = await eventApi.getEventsByClub(clubId);
+            // Gửi params lên BE
+            const res = await eventApi.getEventsByClub(clubId, params);
             const list = res?.data?.data || [];
             return (Array.isArray(list) ? list : []).map((e) => ({
               ...e,
@@ -96,27 +104,18 @@ const EventPublic = () => {
       setLoading(false);
     };
     fetchPublicEvents();
-  }, []);
+  }, [query, activeCategory, sortBy]); // Thêm dependencies
 
   const categories = useMemo(() => {
     const set = new Set(events.map((e) => (e.category ? e.category.trim() : '')).filter(Boolean));
     return ['Tất cả', ...Array.from(set)];
   }, [events]);
 
-  const filteredEvents = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const activeCat = activeCategory.trim().toLowerCase();
+  // Bỏ filter ở client vì BE đã filter sẵn
+  const filteredEvents = events;
 
-    const filtered = events.filter((e) => {
-      const eventCat = e.category ? e.category.trim().toLowerCase() : '';
-      const byCategory = activeCat === 'tất cả' ? true : eventCat.includes(activeCat);
-      const byQuery = !q
-        ? true
-        : `${e.title} ${e.description} ${e.category} ${e.location} ${e.__clubName || ''}`.toLowerCase().includes(q);
-      return byCategory && byQuery;
-    });
-
-    const sorted = [...filtered];
+  const sortedEvents = useMemo(() => {
+    const sorted = [...filteredEvents];
     if (sortBy === 'date-desc') {
       sorted.sort((a, b) => {
         const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
@@ -133,7 +132,7 @@ const EventPublic = () => {
       sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
     }
     return sorted;
-  }, [events, activeCategory, query, sortBy]);
+  }, [filteredEvents, sortBy]);
 
   return (
     <div className="event-container">
@@ -173,11 +172,56 @@ const EventPublic = () => {
       </div>
 
       <Container className="pb-5">
+        {/* Search Bar */}
+        <div className="event-searchBar mb-4">
+          <div className="event-searchWrapper">
+            <span className="event-searchIcon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </span>
+            <input
+              type="text"
+              className="event-searchInput"
+              placeholder="Tìm kiếm sự kiện..."
+              value={query}
+              onChange={(e) => {
+                const nextQuery = e.target.value;
+                setSearchParams((prev) => {
+                  const next = new URLSearchParams(prev);
+                  if (nextQuery) {
+                    next.set('q', nextQuery);
+                  } else {
+                    next.delete('q');
+                  }
+                  return next;
+                });
+              }}
+            />
+            {query && (
+              <button
+                type="button"
+                className="event-searchClear"
+                onClick={() => {
+                  setSearchParams((prev) => {
+                    const next = new URLSearchParams(prev);
+                    next.delete('q');
+                    return next;
+                  });
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="event-sectionHead">
           <div>
             <h3 className="event-sectionTitle">{activeCategory === 'Tất cả' ? 'Sự kiện' : `Sự kiện • ${activeCategory}`}</h3>
             <p className="event-sectionSub">
-              {filteredEvents.length} sự kiện{query ? ' (đã lọc theo tìm kiếm)' : ''}.
+              {sortedEvents.length} sự kiện{query ? ' (đã lọc theo tìm kiếm)' : ''}.
             </p>
           </div>
 
@@ -206,7 +250,7 @@ const EventPublic = () => {
           <div className="event-empty glass-panel">
             <div className="event-emptyTitle">Đang tải dữ liệu...</div>
           </div>
-        ) : filteredEvents.length === 0 ? (
+        ) : sortedEvents.length === 0 ? (
           <div className="event-empty glass-panel">
             <div className="event-emptyTitle">Không tìm thấy sự kiện phù hợp</div>
             <div className="event-emptySub">Thử đổi danh mục hoặc từ khóa khác nhé.</div>
@@ -222,7 +266,7 @@ const EventPublic = () => {
           </div>
         ) : (
           <div className="event-rowList">
-            {filteredEvents.map((e) => {
+            {sortedEvents.map((e) => {
               const { day, month } = getDateParts(e);
               const badgeText = CATEGORY_BADGE_MAP[e.category] ?? e.category;
               const clubId = e.__clubId || e.club_id?._id || e.club_id?.id || e.clubId;
@@ -286,4 +330,3 @@ const EventPublic = () => {
 };
 
 export default EventPublic;
-

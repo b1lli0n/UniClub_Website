@@ -1,7 +1,7 @@
 import StatusBadge from '../events/StatusBadge';
 import '../../styles/EventListCard.css';
 
-export function EventListCard({ title = 'Sự kiện', events = [], clubName, onCreate, onView, onEdit, onSeeAll, loading = false }) {
+export function EventListCard({ title = 'Sự kiện', events = [], clubName, onCreate, onView, onEdit, onAttend, onSeeAll, loading = false }) {
     const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN');
 
     return (
@@ -40,6 +40,13 @@ export function EventListCard({ title = 'Sự kiện', events = [], clubName, on
                                 </button>
                                 <button className="card-button event-list-action" onClick={() => onEdit?.(event._id || event.id)}>
                                     Chỉnh sửa
+                                </button>
+                                <button
+                                    className="card-button event-list-action"
+                                    style={{ background: 'linear-gradient(135deg, #6c63ff, #a855f7)', color: '#fff', borderColor: 'transparent' }}
+                                    onClick={() => onAttend?.(event._id || event.id)}
+                                >
+                                    📋 Điểm danh
                                 </button>
                             </div>
                         </div>

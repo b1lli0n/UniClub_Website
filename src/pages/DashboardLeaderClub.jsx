@@ -7,6 +7,12 @@ import { MemberListCard } from '../components/dashboard/MemberListCard';
 import { getClubById, getEventsByClub, getClubMembers } from '../api/clubApi';
 import '../styles/DashboardClubLeader.css';
 
+// Import Google Font - Outfit
+const fontLink = document.createElement('link');
+fontLink.href = 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap';
+fontLink.rel = 'stylesheet';
+document.head.appendChild(fontLink);
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { id: clubId } = useParams();
@@ -167,33 +173,39 @@ export default function Dashboard() {
   }, [clubId]);
 
   return (
-    <div className="home-page">
-      <div className="home-overlay" />
-      <div className="myclub-container">
-        <div className="myclub-hero glass-card dashboard-hero">
-          <div className="myclub-hero-content">
-            <h2>
-              Chào mừng{user?.fullName ? `, ${user.fullName}` : ''}
-            </h2>
-            <p>Quản lý câu lạc bộ của bạn</p>
+    <div className="dashboard-page-v2">
+      <div className="dashboard-glass-container">
+        <div className="dashboard-hero-premium">
+          <div className="hero-welcome-area">
+            <h1 className="hero-title">
+              Chào mừng quay trở lại{user?.fullName ? `, ${user.fullName.split(' ').pop()}` : ''} ✨
+            </h1>
+            <p className="hero-subtitle">
+              Bạn đang quản lý câu lạc bộ <strong>{club?.name || '...'}</strong>
+            </p>
           </div>
-          <button className="myclub-add">Tạm dừng hoạt động câu lạc bộ</button>
+          <button className="btn-pause-club">
+            <span className="icon">⏸</span> Tạm dừng hoạt động
+          </button>
         </div>
 
         <div className="dashboard-quick-actions">
           <QuickActionCard
             title="Bổ sung thông tin"
             subtitle="Thông tin cơ bản câu lạc bộ"
+            icon="ℹ️"
             onClick={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/clubs')}
           />
           <QuickActionCard
             title="Tạo trang đại diện"
             subtitle="Trang đại diện công khai của câu lạc bộ"
+            icon="🌐"
             onClick={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/clubs')}
           />
           <QuickActionCard
             title="Thêm thành viên"
             subtitle="Duyệt thành viên vào nhóm"
+            icon="👥"
             onClick={() => navigate('/memberships')}
           />
         </div>
@@ -205,6 +217,7 @@ export default function Dashboard() {
             onCreate={() => navigate('/events/create')}
             onView={(id) => navigate(`/events/${id}`)}
             onEdit={(id) => navigate(`/events/${id}/update`)}
+            onAttend={(id) => navigate(`/clubs/${clubId}/events/${id}/attendance`)}
             onSeeAll={() => {
               localStorage.setItem('clubId', clubId);
               navigate('/events');

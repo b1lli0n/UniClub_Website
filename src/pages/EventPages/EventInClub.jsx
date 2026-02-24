@@ -87,7 +87,17 @@ const Event = () => {
             setLoading(true);
             try {
                 console.log('Fetching events for clubId:', clubId);
-                const res = await eventApi.getEventsByClub(clubId);
+
+                // Tạo params để gửi lên BE
+                const params = {
+                    q: query || '',
+                    category: activeCategory !== 'Tất cả' ? activeCategory : '',
+                    sort: sortBy,
+                    page: 1,
+                    limit: 100
+                };
+
+                const res = await eventApi.getEventsByClub(clubId, params);
                 setEvents(res.data.data || []);
             } catch (err) {
                 console.error('Error fetching events:', err);
@@ -96,7 +106,7 @@ const Event = () => {
             setLoading(false);
         };
         fetchEvents();
-    }, [regVersion, clubId]);
+    }, [regVersion, clubId, query, activeCategory, sortBy]); // Thêm dependencies
 
     const categories = useMemo(() => {
         // Lọc bỏ null/undefined và chuẩn hóa về đúng kiểu
@@ -104,41 +114,8 @@ const Event = () => {
         return ['Tất cả', ...Array.from(set)];
     }, [events]);
 
-    const filteredEvents = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        const filtered = events.filter((e) => {
-            const eventCat = e.category ? e.category.trim().toLowerCase() : '';
-            const activeCat = activeCategory.trim().toLowerCase();
-            const byCategory = activeCat === 'tất cả'
-                ? true
-                : eventCat === activeCat;
-            const byQuery = !q
-                ? true
-                : `${e.title} ${e.description} ${e.category} ${e.location}`.toLowerCase().includes(q);
-            return byCategory && byQuery;
-        });
-
-
-        // Sort
-        const sorted = [...filtered];
-        if (sortBy === 'date-desc') {
-            sorted.sort((a, b) => {
-                const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
-                const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
-                return bDate - aDate; //mới nhất
-            });
-        } else if (sortBy === 'date-asc') {
-            sorted.sort((a, b) => {
-                const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
-                const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
-                return aDate - bDate;//cũ nhất
-            });
-        } else if (sortBy === 'name') {
-            sorted.sort((a, b) => a.title.localeCompare(b.title));
-        }
-
-        return sorted;
-    }, [events, activeCategory, query, sortBy]);
+    // Bỏ filter ở client vì BE đã filter sẵn
+    const filteredEvents = events;
 
     return (
         <div className="event-container">
