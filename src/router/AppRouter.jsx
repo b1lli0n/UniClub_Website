@@ -46,6 +46,7 @@ import ViewRewards from '../pages/RewardPages/ViewRewards';
 import ViewRewardDetail from '../pages/RewardPages/ViewRewardDetail';
 import ViewRedemptionHistory from '../pages/RewardPages/ViewRedemptionHistory';
 import RedeemReward from '../pages/RewardPages/RedeemReward';
+import RewardRequestsLeader from '../pages/RewardPages/RewardRequestsLeader';
 
 const AppRouter = () => {
   return (
@@ -92,6 +93,8 @@ const AppRouter = () => {
       <Route element={<MainLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
+
+        <Route path="/clubs/:clubId/rewards/requests" element={<RewardRequestsLeader />} />
 
         <Route path="/clubEvent" element={<EventsPage />} />
         <Route path="/clubEvent/create" element={<CreateEventPage />} />

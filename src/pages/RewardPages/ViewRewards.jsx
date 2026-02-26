@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { getRewards } from '../../api/rewardApi'
-import '../../styles/Rewards.css'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { getContributionScore, getRewards } from '../../api/rewardApi'
+import '../../styles/RewardsUser.css'
 
 const getRewardList = (payload) => {
     if (Array.isArray(payload)) return payload
@@ -17,9 +17,34 @@ const normalizeStatus = (status) => {
     return 'inactive'
 }
 
+const getCurrentPoints = (payload) => {
+    const candidate =
+        payload?.contributionScore ??
+        payload?.data?.contributionScore ??
+        payload?.current_points ??
+        payload?.currentPoints ??
+        payload?.points ??
+        payload?.point_balance ??
+        payload?.balance ??
+        payload?.data?.current_points ??
+        payload?.data?.currentPoints ??
+        payload?.data?.points ??
+        payload?.data?.point_balance ??
+        payload?.data?.balance ??
+        payload?.user?.current_points ??
+        payload?.user?.points ??
+        payload?.member?.current_points ??
+        payload?.member?.points
+
+    const parsed = Number(candidate)
+    return Number.isFinite(parsed) ? parsed : 0
+}
+
 const ViewRewards = () => {
+    const navigate = useNavigate()
     const { clubId } = useParams()
     const [rewards, setRewards] = useState([])
+    const [currentPoints, setCurrentPoints] = useState(0)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -30,6 +55,13 @@ const ViewRewards = () => {
                 setError('')
                 const payload = await getRewards(clubId)
                 setRewards(getRewardList(payload))
+
+                try {
+                    const contributionPayload = await getContributionScore(clubId)
+                    setCurrentPoints(getCurrentPoints(contributionPayload))
+                } catch {
+                    setCurrentPoints(getCurrentPoints(payload))
+                }
             } catch (err) {
                 setError(err?.response?.data?.message || err?.message || 'Không thể tải danh sách phần thưởng')
             } finally {
@@ -45,17 +77,28 @@ const ViewRewards = () => {
         return { total: rewards.length, active: activeCount }
     }, [rewards])
 
+    const onBackToClub = () => {
+        navigate(`/clubs/${clubId}`)
+    }
+
     return (
         <div className="rewards-page">
             <div className="rewards-shell">
                 <div className="rewards-header">
                     <div>
+                        <button type="button" className="rewards-btn" onClick={onBackToClub}>Quay về trang CLB</button>
+                    </div>
+                    <div>
                         <h1 className="rewards-title">View rewards</h1>
-                        <p className="rewards-subtitle">CLB {clubId} • Tổng {stats.total} phần thưởng • {stats.active} đang mở đổi</p>
                     </div>
                     <div className="rewards-actions">
                         <Link className="rewards-btn" to={`/club/${clubId}/rewards/history`}>View redemption history</Link>
                     </div>
+                </div>
+
+                <div className="reward-points-summary">
+                    <div className="reward-points-summary__label">Điểm hiện có</div>
+                    <div className="reward-points-summary__value">{currentPoints.toLocaleString('vi-VN')}</div>
                 </div>
 
                 {loading && <div className="reward-loading">Đang tải rewards...</div>}

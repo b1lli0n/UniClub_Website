@@ -1,4 +1,7 @@
 import api from './api'
+import axiosInstance from './adminapi'
+
+// ==================== PUBLIC REWARD APIS (User) ====================
 
 export const getRewards = async (clubId, params = {}) => {
     const response = await api.get(`/rewards/${clubId}`, { params })
@@ -15,8 +18,13 @@ export const getRedemptionHistory = async (clubId, params = {}) => {
     return response.data
 }
 
-export const redeemReward = async (clubId, rewardId, payload = {}) => {
-    const response = await api.post(`/rewards/${clubId}/redeem/${rewardId}`, payload)
+export const getContributionScore = async (clubId) => {
+    const response = await api.get(`/users/contributions/${clubId}`)
+    return response.data
+}
+
+export const redeemReward = async (clubId, rewardId) => {
+    const response = await api.post(`/rewards/${clubId}/redeem/${rewardId}`)
     return response.data
 }
 
@@ -25,12 +33,94 @@ export const updateRedemptionStatus = async (clubId, transactionId, payload) => 
     return response.data
 }
 
+// ==================== ADMIN REWARD APIS ====================
+
+/**
+ * Lấy danh sách phần thưởng của một CLB (Admin)
+ * GET /api/admin/clubs/:clubId/rewards?page&limit&search&is_active
+ */
+export const getClubRewards = async (clubId, params = {}) => {
+    const { page = 1, limit = 10, search = '', is_active } = params
+    const query = { page, limit, search }
+    if (is_active !== undefined && is_active !== 'all') {
+        query.is_active = is_active
+    }
+    const response = await axiosInstance.get(`/clubs/${clubId}/rewards`, { params: query })
+    return response.data
+}
+
+/**
+ * Tạo phần thưởng mới cho CLB
+ * POST /api/admin/clubs/:clubId/rewards
+ * body: { name, description, points_required, quantity }
+ */
+export const createReward = async (clubId, data) => {
+    return axiosInstance.post(`/clubs/${clubId}/rewards`, data);
+};
+
+/**
+ * Cập nhật hoặc ẩn/hiện phần thưởng
+ * PUT /api/admin/rewards/:id
+ * body: { name?, description?, points_required?, quantity?, is_active? }
+ */
+export const updateReward = async (id, data) => {
+    return axiosInstance.put(`/rewards/${id}`, data);
+};
+
+/**
+ * Lấy lịch sử đổi thưởng của CLB (Admin)
+ * GET /api/admin/clubs/:clubId/reward-transactions?page&limit&status
+ */
+export const getRedemptionHistoryAdmin = async (clubId, params = {}) => {
+    const { page = 1, limit = 10, status } = params
+    const query = { page, limit }
+    if (status !== undefined && status !== '' && status !== 'all') {
+        query.status = status
+    }
+    const response = await axiosInstance.get(`/clubs/${clubId}/reward-transactions`, { params: query })
+    return response.data
+}
+
+// ==================== ADMIN BADGE APIS ====================
+
+/**
+ * Lấy danh sách tất cả badge templates (Admin)
+ * GET /api/admin/badges?page&limit&search&is_active
+ */
+export const getBadgeTemplates = async (params = {}) => {
+    const { page = 1, limit = 12, search = '', is_active } = params
+    const query = { page, limit, search }
+    if (is_active !== undefined && is_active !== 'all') {
+        query.is_active = is_active
+    }
+    const response = await axiosInstance.get('/badges', { params: query })
+    return response.data
+}
+
+/**
+ * Lấy chi tiết badge template (bao gồm earned_count) (Admin)
+ * GET /api/admin/badges/:id
+ */
+export const getBadgeTemplateDetail = async (id) => {
+    const response = await axiosInstance.get(`/badges/${id}`)
+    return response.data
+}
+
 const rewardApi = {
+    // Public APIs
     getRewards,
     getRewardDetail,
     getRedemptionHistory,
+    getContributionScore,
     redeemReward,
     updateRedemptionStatus,
+    // Admin APIs
+    getClubRewards,
+    createReward,
+    updateReward,
+    getRedemptionHistoryAdmin,
+    getBadgeTemplates,
+    getBadgeTemplateDetail,
 }
 
 export default rewardApi

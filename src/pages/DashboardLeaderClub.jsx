@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { QuickActionCard } from '../components/dashboard/QuickActionCard';
 import { EventListCard } from '../components/dashboard/EventListCard';
 import { MemberListCard } from '../components/dashboard/MemberListCard';
-import { getClubById, getEventsByClub, getClubMembers } from '../api/clubApi';
+import { getClubById, getEventsByClub, getClubMembers, updateClubStatus } from '../api/clubApi';
 import '../styles/DashboardClubLeader.css';
 
 // Import Google Font - Outfit
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showMembersModal, setShowMembersModal] = useState(false);
+  const [isUpdatingClubStatus, setIsUpdatingClubStatus] = useState(false);
 
   const { user } = useAuth();
 
@@ -95,6 +97,46 @@ export default function Dashboard() {
     return { items: Array.isArray(items) ? items : [], pagination };
   };
 
+  const normalizeClubFromResponse = (response) => {
+    const clubPayload =
+      response?.data?.club ||
+      response?.club ||
+      response?.data ||
+      response ||
+      {};
+
+    const normalizedStatus = Number(clubPayload?.status) === 2 ? 2 : 1;
+
+    return {
+      ...(typeof clubPayload === 'object' ? clubPayload : {}),
+      status: normalizedStatus,
+    };
+  };
+
+  const handleUpdateClubStatus = async () => {
+    if (!clubId || !club || isUpdatingClubStatus) return;
+
+    const nextStatus = club.status === 2 ? 1 : 2;
+
+    try {
+      setIsUpdatingClubStatus(true);
+      const response = await updateClubStatus(clubId, nextStatus);
+      const updatedClub = normalizeClubFromResponse(response);
+      setClub((prev) => ({ ...prev, ...updatedClub }));
+
+      toast.success(nextStatus === 1 ? 'Đã chuyển trạng thái sang Active' : 'Đã chuyển trạng thái sang Paused');
+    } catch (error) {
+      const errorMessage =
+        error?.message ||
+        error?.error ||
+        error?.response?.data?.message ||
+        'Không thể cập nhật trạng thái câu lạc bộ';
+      toast.error(errorMessage);
+    } finally {
+      setIsUpdatingClubStatus(false);
+    }
+  };
+
   const fetchAllMembers = async (clubIdValue) => {
     const allMembers = [];
     let page = 1;
@@ -122,9 +164,9 @@ export default function Dashboard() {
         console.log('🔍 Loading data for clubId:', clubId);
 
         // Fetch club details
-        const clubData = await getClubById(clubId);
-        console.log('✅ Club data:', clubData);
-        setClub(clubData);
+        const clubResponse = await getClubById(clubId);
+        console.log('✅ Club data:', clubResponse);
+        setClub(normalizeClubFromResponse(clubResponse));
 
         // Fetch events (including drafts for leaders)
         const eventsResponse = await getEventsByClub(clubId);
@@ -172,6 +214,14 @@ export default function Dashboard() {
     }
   }, [clubId]);
 
+  const isClubPaused = club?.status === 2;
+  const statusButtonLabel = isUpdatingClubStatus
+    ? 'Đang cập nhật...'
+    : isClubPaused
+      ? 'Chuyển sang Active'
+      : 'Chuyển sang Paused';
+  const statusButtonIcon = isUpdatingClubStatus ? '⏳' : isClubPaused ? '▶' : '⏸';
+
   return (
     <div className="dashboard-page-v2">
       <div className="dashboard-glass-container">
@@ -184,8 +234,13 @@ export default function Dashboard() {
               Bạn đang quản lý câu lạc bộ <strong>{club?.name || '...'}</strong>
             </p>
           </div>
-          <button className="btn-pause-club">
-            <span className="icon">⏸</span> Tạm dừng hoạt động
+          <button
+            className={`btn-club-status-toggle ${isClubPaused ? 'is-paused' : 'is-active'}`}
+            onClick={handleUpdateClubStatus}
+            disabled={!club || isUpdatingClubStatus}
+          >
+            <span className="icon">{statusButtonIcon}</span>
+            {statusButtonLabel}
           </button>
         </div>
 

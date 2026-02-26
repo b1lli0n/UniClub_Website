@@ -72,6 +72,16 @@ export const deleteClub = async (clubId) => {
   }
 };
 
+// Cập nhật trạng thái club (1: active, 2: paused)
+export const updateClubStatus = async (clubId, status) => {
+  try {
+    const response = await clubAPI.patch(`/${clubId}/status`, { status });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
 // ===== MEMBER MANAGEMENT (Active Members) =====
 
 // Xem danh sách thành viên active của club

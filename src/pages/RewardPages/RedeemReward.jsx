@@ -1,26 +1,50 @@
 import React, { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { redeemReward } from '../../api/rewardApi'
+import { getContributionScore, getRedemptionHistory, redeemReward } from '../../api/rewardApi'
 import '../../styles/Rewards.css'
 
 const RedeemReward = () => {
     const navigate = useNavigate()
     const { clubId, rewardId } = useParams()
-    const [quantity, setQuantity] = useState(1)
-    const [note, setNote] = useState('')
     const [submitting, setSubmitting] = useState(false)
 
     const onSubmit = async (e) => {
         e.preventDefault()
         try {
             setSubmitting(true)
-            await redeemReward(clubId, rewardId, {
-                quantity: Number(quantity),
-                note,
-            })
+            await redeemReward(clubId, rewardId)
+
+            const [contributionPayload, historyPayload] = await Promise.all([
+                getContributionScore(clubId),
+                getRedemptionHistory(clubId, { page: 1, limit: 10 }),
+            ])
+
+            const contributionScore = Number(
+                contributionPayload?.data?.contributionScore ?? contributionPayload?.contributionScore ?? 0
+            )
+
+            const historyData =
+                historyPayload?.data?.data ||
+                historyPayload?.data?.transactions ||
+                historyPayload?.data?.history ||
+                historyPayload?.transactions ||
+                historyPayload?.history ||
+                []
+
+            const historyPagination =
+                historyPayload?.data?.pagination ||
+                historyPayload?.pagination ||
+                { page: 1, limit: 10, total: Array.isArray(historyData) ? historyData.length : 0, totalPages: 1 }
+
             toast.success('Redeem reward thành công')
-            navigate(`/club/${clubId}/rewards/history`)
+            navigate(`/club/${clubId}/rewards/history`, {
+                state: {
+                    contributionScore,
+                    historyData: Array.isArray(historyData) ? historyData : [],
+                    historyPagination,
+                },
+            })
         } catch (err) {
             toast.error(err?.response?.data?.message || err?.message || 'Redeem reward thất bại')
         } finally {
@@ -42,28 +66,6 @@ const RedeemReward = () => {
                 </div>
 
                 <form className="reward-form" onSubmit={onSubmit}>
-                    <label>
-                        Số lượng
-                        <input
-                            className="reward-input"
-                            type="number"
-                            min={1}
-                            value={quantity}
-                            onChange={(e) => setQuantity(e.target.value)}
-                            required
-                        />
-                    </label>
-
-                    <label>
-                        Ghi chú
-                        <textarea
-                            className="reward-textarea"
-                            value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                            placeholder="Nhập ghi chú nếu có"
-                        />
-                    </label>
-
                     <div className="rewards-actions">
                         <button className="rewards-btn rewards-btn--primary" type="submit" disabled={submitting}>
                             {submitting ? 'Đang gửi...' : 'Xác nhận redeem'}

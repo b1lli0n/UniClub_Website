@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import '../styles/UpdateEvent.css';
 import { unmapEvent } from '../services/dataMappers';
 import StatusBadge from '../components/events/StatusBadge';
 import { EventUpdateForm } from '../components/events/EventUpdateForm';
 import { DangerZoneCard } from '../components/events/DangerZoneCard';
 import { CancelDialog } from '../components/events/CancelDialog';
+import api from '../api/api';
 
 function UpdateEventPage() {
     const { eventId } = useParams();
@@ -167,27 +169,17 @@ function UpdateEventPage() {
 
             console.log('🚫 Canceling event:', eventId);
 
-            const response = await fetch(
-                `http://localhost:5000/api/clubs/${clubId}/events/${eventId}/cancel`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ reason: cancelReason })
-                }
+            const response = await api.patch(
+                `/clubs/${clubId}/events/${eventId}/cancel`,
+                { reason: cancelReason }
             );
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Hủy sự kiện thất bại');
-            }
-
-            const data = await response.json();
+            const data = response.data;
             console.log('✅ Event canceled:', data);
             setEvent(data.event || data);
-            setMessage(`Đã hủy sự kiện. Thông báo đã gửi: ${data.notificationsSent || 0}`);
+            const notificationsSent = data.notificationsSent || 0;
+            setMessage(`Đã hủy sự kiện. Thông báo đã gửi: ${notificationsSent}`);
+            toast.success(`Đã hủy sự kiện thành công. Thông báo đã gửi: ${notificationsSent}`);
             setShowCancelDialog(false);
             setCancelReason('');
             setTimeout(() => {
@@ -196,7 +188,9 @@ function UpdateEventPage() {
             }, 1500);
         } catch (err) {
             console.error('❌ Cancel error:', err);
-            setError(err.message || 'Hủy sự kiện thất bại');
+            const errorMessage = err.response?.data?.message || err.message || 'Hủy sự kiện thất bại';
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setUpdating(false);
         }

@@ -98,8 +98,22 @@ export const getClubMembers = async (clubId, params = {}) => {
  * Cập nhật trạng thái CLB (Approve/Reject/Activate/Deactivate)
  */
 export const updateClubStatus = async (clubId, status) => {
-  console.log('API Calls - updateClubStatus:', { clubId, status, type: typeof status })
-  return axiosInstance.put(`/clubs/${clubId}/status`, { status })
+  const statusMap = {
+    pending: 0,
+    active: 1,
+    paused: 2,
+    rejected: 3
+  }
+
+  const normalizedStatus = Number.isInteger(status)
+    ? status
+    : statusMap[String(status).toLowerCase()]
+
+  if (![0, 1, 2, 3].includes(normalizedStatus)) {
+    throw new Error('Trạng thái CLB không hợp lệ. Cho phép: 0 (pending), 1 (active), 2 (paused), 3 (rejected)')
+  }
+
+  return axiosInstance.put(`/clubs/${clubId}/status`, { status: normalizedStatus })
 }
 
 /**

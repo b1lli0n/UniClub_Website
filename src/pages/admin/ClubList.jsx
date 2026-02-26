@@ -25,6 +25,7 @@ const ClubList = () => {
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [pendingActivationClubId, setPendingActivationClubId] = useState(null)
 
     const [clubs, setClubs] = useState([])
 
@@ -37,43 +38,6 @@ const ClubList = () => {
         try {
             setLoading(true)
             setError(null)
-
-            // Lấy đầy đủ trạng thái: pending/active/paused/rejected
-            const [pendingResponse, activeResponse, pausedResponse, rejectedResponse] = await Promise.all([
-                getClubs({
-                    page: 1,
-                    limit: 100,
-                    status: 0,
-                    sortBy: 'createdAt',
-                    sortOrder: 'desc'
-                }),
-                getClubs({
-                    page: 1,
-                    limit: 100,
-                    status: 1, // Active clubs
-                    sortBy: 'createdAt',
-                    sortOrder: 'desc'
-                }),
-                getClubs({
-                    page: 1,
-                    limit: 100,
-                    status: 2, // Paused clubs
-                    sortBy: 'createdAt',
-                    sortOrder: 'desc'
-                }),
-                getClubs({
-                    page: 1,
-                    limit: 100,
-                    status: 3,
-                    sortBy: 'createdAt',
-                    sortOrder: 'desc'
-                })
-            ])
-
-            console.log('Pending Response:', pendingResponse)
-            console.log('Active Response:', activeResponse)
-            console.log('Paused Response:', pausedResponse)
-            console.log('Rejected Response:', rejectedResponse)
 
             // Helper function to extract clubs array from response
             const extractClubs = (response) => {
@@ -89,14 +53,55 @@ const ClubList = () => {
                 return []
             }
 
-            // Extract and merge clubs from both responses
-            const pendingClubs = extractClubs(pendingResponse)
-            const activeClubs = extractClubs(activeResponse)
-            const pausedClubs = extractClubs(pausedResponse)
-            const rejectedClubs = extractClubs(rejectedResponse)
-            const clubsData = [...pendingClubs, ...activeClubs, ...pausedClubs, ...rejectedClubs]
+            const extractPagination = (response) => {
+                if (response?.pagination) return response.pagination
+                if (response?.data?.pagination) return response.data.pagination
+                return null
+            }
 
-            console.log(`Total clubs: ${clubsData.length} (Pending: ${pendingClubs.length}, Active: ${activeClubs.length}, Paused: ${pausedClubs.length}, Rejected: ${rejectedClubs.length})`)
+            const limit = 100
+            const firstResponse = await getClubs({
+                page: 1,
+                limit,
+                sortBy: 'createdAt',
+                sortOrder: 'desc'
+            })
+
+            const firstPageClubs = extractClubs(firstResponse)
+            const pagination = extractPagination(firstResponse)
+            const totalPages = pagination?.totalPages || pagination?.total_pages || 1
+
+            let clubsData = [...firstPageClubs]
+
+            if (totalPages > 1) {
+                const pageRequests = []
+                for (let currentPage = 2; currentPage <= totalPages; currentPage += 1) {
+                    pageRequests.push(
+                        getClubs({
+                            page: currentPage,
+                            limit,
+                            sortBy: 'createdAt',
+                            sortOrder: 'desc'
+                        })
+                    )
+                }
+
+                const pageResponses = await Promise.all(pageRequests)
+                const otherPagesClubs = pageResponses.flatMap((res) => extractClubs(res))
+                clubsData = [...clubsData, ...otherPagesClubs]
+            }
+
+            // Deduplicate by club id in case backend returns overlapping results
+            const seenIds = new Set()
+            clubsData = clubsData.filter((club) => {
+                const clubId = club?._id || club?.id
+                if (!clubId) return true
+                if (seenIds.has(clubId)) return false
+                seenIds.add(clubId)
+                return true
+            })
+
+            console.log(`Total clubs fetched: ${clubsData.length} (pages: ${totalPages})`)
 
             // Map API response to match component structure
             const mappedClubs = clubsData.map(club => {
@@ -174,12 +179,27 @@ const ClubList = () => {
                 rejected: 'Đã từ chối câu lạc bộ'
             }
             toast.success(successMap[statusString] || 'Đã cập nhật trạng thái câu lạc bộ')
+            if (statusString === 'active') {
+                setPendingActivationClubId(null)
+            }
         } catch (err) {
             console.error('Error updating club status:', err)
             // Nếu lỗi, revert lại state cũ bằng cách load lại từ server
             toast.error('Không thể cập nhật trạng thái: ' + (err.message || 'Lỗi server'))
             fetchClubs()
         }
+    }
+
+    const startActivationConfirmation = (clubId) => {
+        setPendingActivationClubId(clubId)
+    }
+
+    const cancelActivationConfirmation = () => {
+        setPendingActivationClubId(null)
+    }
+
+    const confirmActivation = async (clubId) => {
+        await updateClubStatus(clubId, 'active')
     }
 
     const getStatusLabel = (status) => {
@@ -301,15 +321,36 @@ const ClubList = () => {
                                                         <i className="fa-solid fa-lock" />
                                                     </button>
                                                 ) : (
-                                                    // Inactive hoặc Rejected -> Activate
-                                                    <button
-                                                        type="button"
-                                                        className="admin-status-btn admin-status-btn--approve"
-                                                        onClick={() => updateClubStatus(c.id, 'active')}
-                                                        title="Activate câu lạc bộ"
-                                                    >
-                                                        <i className="fa-solid fa-lock-open" />
-                                                    </button>
+                                                    // Inactive hoặc Rejected -> cần xác nhận trước khi Activate
+                                                    pendingActivationClubId === c.id ? (
+                                                        <>
+                                                            <button
+                                                                type="button"
+                                                                className="admin-status-btn admin-status-btn--approve"
+                                                                onClick={() => confirmActivation(c.id)}
+                                                                title="Xác nhận cho hoạt động"
+                                                            >
+                                                                <i className="fa-solid fa-check" />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="admin-status-btn admin-status-btn--reject"
+                                                                onClick={cancelActivationConfirmation}
+                                                                title="Hủy xác nhận"
+                                                            >
+                                                                <i className="fa-solid fa-xmark" />
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            className="admin-status-btn admin-status-btn--approve"
+                                                            onClick={() => startActivationConfirmation(c.id)}
+                                                            title="Bước 1: Mở xác nhận cho hoạt động"
+                                                        >
+                                                            <i className="fa-solid fa-lock-open" />
+                                                        </button>
+                                                    )
                                                 )}
                                             </div>
                                             <button

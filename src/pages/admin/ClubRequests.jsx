@@ -80,7 +80,9 @@ const ClubRequests = () => {
                     status = 'pending'
                 } else if (req.status === 1 || req.status === 'approved') {
                     status = 'approved'
-                } else if (req.status === 2 || req.status === 'rejected') {
+                } else if (req.status === 2 || req.status === 'paused') {
+                    status = 'paused'
+                } else if (req.status === 3 || req.status === 'rejected') {
                     status = 'rejected'
                 }
 
@@ -252,7 +254,11 @@ const ClubRequests = () => {
                                                 </div>
                                             ) : (
                                                 <span className={`admin-status admin-status--${r.status}`}>
-                                                    {r.status === 'approved' ? 'đã duyệt' : 'từ chối'}
+                                                    {r.status === 'approved'
+                                                        ? 'đã duyệt'
+                                                        : r.status === 'paused'
+                                                            ? 'tạm dừng'
+                                                            : 'từ chối'}
                                                 </span>
                                             )}
                                         </div>
