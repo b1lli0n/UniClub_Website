@@ -657,6 +657,79 @@
   color: #9ca3af;
 }
 
+/* ---------- Reward Point Log ---------- */
+.reward-pointlog-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.reward-pointlog-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.reward-pointlog-total {
+  margin-left: auto;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reward-log-row {
+  align-items: flex-start;
+}
+
+.reward-log-col--time {
+  flex: 1.1;
+}
+
+.reward-log-col--user {
+  flex: 1.5;
+}
+
+.reward-log-col--reward {
+  flex: 1.5;
+}
+
+.reward-log-col--action {
+  flex: 0.8;
+}
+
+.reward-log-col--points {
+  flex: 0.9;
+}
+
+.reward-log-col--balance {
+  flex: 1.2;
+}
+
+.reward-log-col--desc {
+  flex: 1.8;
+}
+
+.reward-point-change {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.reward-point-change.is-minus {
+  color: #dc2626;
+}
+
+.reward-point-change.is-plus {
+  color: #16a34a;
+}
+
+.reward-pointlog-page-text {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
 /* ---------- Badges List Page ---------- */
 .badge-grid {
   display: grid;

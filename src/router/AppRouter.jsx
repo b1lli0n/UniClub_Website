@@ -35,6 +35,14 @@ import ClubDetailAdmin from '../pages/admin/ClubDetail'
 import ClubMembers from '../pages/admin/ClubMembers'
 import PlaceholderPage from '../pages/admin/PlaceholderPage'
 import AdminDashboard from '../pages/admin/Dashboard'
+import RewardsAdmin from '../pages/admin/Rewards'
+import RewardDetailAdmin from '../pages/admin/RewardDetail'
+import RedemptionHistoryAdmin from '../pages/admin/RedemptionHistory'
+import BadgesAdmin from '../pages/admin/Badges'
+import BadgeDetailAdmin from '../pages/admin/BadgeDetail'
+import RewardPointLogs from '../pages/admin/RewardPointLogs'
+import AdminNotifications from '../pages/admin/Notifications'
+import FinancialDashboard from '../pages/FinancialDashboard'
 import MembershipsPage from '../pages/Memberships';
 import EventsPage from '../pages/Events';
 import EventDetailPage from '../pages/EventDetail';
@@ -104,8 +112,14 @@ const AppRouter = () => {
         <Route path="/events" element={<Navigate to="/clubEvent" replace />} />
 
         <Route path="/memberships" element={<MembershipsPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-      </Route>
+        <Route path="/notifications" element={<NotificationsPage />} />        <Route
+          path="/clubs/:clubId/finance"
+          element={
+            <ProtectedRoute>
+              <FinancialDashboard />
+            </ProtectedRoute>
+          }
+        />      </Route>
 
       {/* Admin Routes with ProtectedRoute */}
       <Route
@@ -122,7 +136,13 @@ const AppRouter = () => {
         <Route path="list-clubs" element={<ClubList />} />
         <Route path="club-detail/:id" element={<ClubDetailAdmin />} />
         <Route path="club-members/:id" element={<ClubMembers />} />
-        <Route path="announcements" element={<PlaceholderPage title="Quản lý thông báo" />} />
+        <Route path="rewards" element={<RewardsAdmin />} />
+        <Route path="rewards/:rewardId" element={<RewardDetailAdmin />} />
+        <Route path="reward-history" element={<RedemptionHistoryAdmin />} />
+        <Route path="reward-point-logs" element={<RewardPointLogs />} />
+        <Route path="badges" element={<BadgesAdmin />} />
+        <Route path="badges/:badgeId" element={<BadgeDetailAdmin />} />
+        <Route path="announcements" element={<AdminNotifications />} />
         <Route path="users" element={<PlaceholderPage title="Quản lý người dùng" />} />
       </Route>
 

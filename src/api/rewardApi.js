@@ -81,6 +81,57 @@ export const getRedemptionHistoryAdmin = async (clubId, params = {}) => {
     return response.data
 }
 
+/**
+ * Lấy reward point transaction logs (Admin only)
+ * GET /api/admin/rewards/transactions?page&limit&clubId&membershipId&rewardId&rewardTransactionId&action&from&to
+ */
+export const getAdminRewardPointLogs = async (params = {}) => {
+    const {
+        page = 1,
+        limit = 20,
+        clubId,
+        membershipId,
+        rewardId,
+        rewardTransactionId,
+        action,
+        from,
+        to,
+    } = params
+
+    const query = { page, limit }
+    if (clubId) query.clubId = clubId
+    if (membershipId) query.membershipId = membershipId
+    if (rewardId) query.rewardId = rewardId
+    if (rewardTransactionId) query.rewardTransactionId = rewardTransactionId
+    if (action) query.action = action
+    if (from) query.from = from
+    if (to) query.to = to
+
+    // admin axiosInstance already returns response payload via interceptor,
+    // but this normalization also supports raw axios responses if config changes.
+    const raw = await axiosInstance.get('/rewards/transactions', { params: query })
+    const payload = raw?.data ?? raw
+
+    const logs = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload?.items)
+                ? payload.items
+                : Array.isArray(payload?.logs)
+                    ? payload.logs
+                    : []
+
+    const pagination = payload?.pagination || payload?.meta || {
+        page: Number(payload?.page) || page,
+        limit: Number(payload?.limit) || limit,
+        total: Number(payload?.total) || logs.length,
+        pages: Number(payload?.pages) || Number(payload?.totalPages) || 1,
+    }
+
+    return { data: logs, pagination }
+}
+
 // ==================== ADMIN BADGE APIS ====================
 
 /**
@@ -119,6 +170,7 @@ const rewardApi = {
     createReward,
     updateReward,
     getRedemptionHistoryAdmin,
+    getAdminRewardPointLogs,
     getBadgeTemplates,
     getBadgeTemplateDetail,
 }
