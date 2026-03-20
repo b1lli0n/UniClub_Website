@@ -4,8 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { QuickActionCard } from '../components/dashboard/QuickActionCard';
 import { EventListCard } from '../components/dashboard/EventListCard';
 import { MemberListCard } from '../components/dashboard/MemberListCard';
+import MemberPointModal from '../components/dashboard/MemberPointModal';
 import { getClubById, getEventsByClub, getClubMembers } from '../api/clubApi';
 import '../styles/DashboardClubLeader.css';
+import '../styles/PointHistory.css';
 
 // Import Google Font - Outfit
 const fontLink = document.createElement('link');
@@ -21,6 +23,7 @@ export default function Dashboard() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showMembersModal, setShowMembersModal] = useState(false);
+  const [selectedMemberForPoints, setSelectedMemberForPoints] = useState(null);
 
   const { user } = useAuth();
 
@@ -232,17 +235,16 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Member list modal */}
       {showMembersModal && (
         <div className="members-modal-overlay" onClick={() => setShowMembersModal(false)}>
           <div className="members-modal" onClick={(e) => e.stopPropagation()}>
             <div className="members-modal-header">
               <div>
                 <h3 className="members-modal-title">Tất cả thành viên</h3>
-                <p className="members-modal-count">{members.length} thành viên</p>
+                <p className="members-modal-count">{members.length} thành viên — click để xem lịch sử điểm</p>
               </div>
-              <button className="members-modal-close" onClick={() => setShowMembersModal(false)}>
-                ✕
-              </button>
+              <button className="members-modal-close" onClick={() => setShowMembersModal(false)}>✕</button>
             </div>
             <div className="members-modal-body">
               <div className="members-modal-list">
@@ -250,22 +252,24 @@ export default function Dashboard() {
                   const displayName = getMemberName(member);
                   const roleLabel = getMemberRoleLabel(member);
                   const keyValue =
-                    member?.id ||
-                    member?._id ||
-                    member?.membershipId ||
-                    member?.user_id?._id ||
-                    member?.user?._id ||
-                    index;
+                    member?.id || member?._id || member?.membershipId ||
+                    member?.user_id?._id || member?.user?._id || index;
 
                   return (
-                    <div key={keyValue} className="member-list-item">
-                      <div className="member-list-avatar">
-                        {displayName?.charAt(0) || '?'}
-                      </div>
+                    <div
+                      key={keyValue}
+                      className="member-list-item-clickable"
+                      onClick={() => {
+                        setShowMembersModal(false);
+                        setSelectedMemberForPoints(member);
+                      }}
+                    >
+                      <div className="member-list-avatar">{displayName?.charAt(0) || '?'}</div>
                       <div className="member-list-info">
                         <p className="member-list-name">{displayName}</p>
                         <p className="member-list-role">{roleLabel}</p>
                       </div>
+                      <span className="view-points-hint">📊 Xem điểm →</span>
                     </div>
                   );
                 })}
@@ -273,6 +277,17 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Point history modal (Leader views member's points) */}
+      {selectedMemberForPoints && clubId && (
+        <MemberPointModal
+          member={selectedMemberForPoints}
+          clubId={clubId}
+          onClose={() => setSelectedMemberForPoints(null)}
+          getMemberName={getMemberName}
+          getMemberRoleLabel={getMemberRoleLabel}
+        />
       )}
     </div>
   );

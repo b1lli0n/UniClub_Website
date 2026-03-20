@@ -407,6 +407,11 @@ button:disabled {
   background: #fff3e0;
   color: #ef6c00;
 }
+.att-badge-absent {
+  background: #fff0f0;
+  color: #e74c3c;
+  border: 1px solid #ffcccc;
+}
 
 /* Action btn in row */
 .btn-row-checkin {

@@ -20,6 +20,7 @@ const REG_STATUS_LABEL = {
     1: 'Đã duyệt',
     2: 'Bị từ chối',
     3: 'Đã điểm danh',
+    4: 'Vắng mặt',
 };
 
 function formatDateTime(dateStr) {
@@ -412,10 +413,10 @@ export default function EventAttendanceList() {
                                                 </td>
                                                 <td>
                                                     <span
-                                                        className={`att-badge ${isAttended ? 'att-badge-attended' : isPending ? 'att-badge-pending' : 'att-badge-registered'
+                                                        className={`att-badge ${isAttended ? 'att-badge-attended' : isPending ? 'att-badge-pending' : item.status === 4 ? 'att-badge-absent' : 'att-badge-registered'
                                                             }`}
                                                     >
-                                                        {isAttended ? '✅' : isPending ? '⏳' : '📝'}{' '}
+                                                        {isAttended ? '✅' : isPending ? '⏳' : item.status === 4 ? '❌' : '📝'}{' '}
                                                         {REG_STATUS_LABEL[item.status] ?? 'Không xác định'}
                                                     </span>
                                                 </td>

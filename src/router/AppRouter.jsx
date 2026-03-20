@@ -1,4 +1,3 @@
-import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 
@@ -20,11 +19,10 @@ import Event from '../pages/EventPages/EventInClub'
 import EventPublic from '../pages/EventPages/EventPublic'
 import MyEvent from '../pages/EventPages/MyEvent';
 import EventDetail from '../pages/EventPages/EventDetail'
+import NotificationCenter from "../pages/NotificationCenter";
 
 import Profile from '../pages/Profile'
 
-import About from '../pages/About'
-import Contacts from '../pages/Contacts'
 // import ViewJoinRequests from '../pages/ViewJoinRequests'
 import NotFound from '../pages/NotFound'
 
@@ -60,6 +58,7 @@ const AppRouter = () => {
         <Route path="/my-clubs" element={<ListOfMyClubs />} />
         <Route path="/club/:clubId/events" element={<Event />} />
         <Route path="/club/:clubId/events/:eventId" element={<EventDetail />} />
+        <Route path="/my-notifications" element={<NotificationCenter />} />
 
         <Route path="/my-events" element={<MyEvent />} />
         {/* <Route path="/my-requests" element={<ViewJoinRequests />} /> */}

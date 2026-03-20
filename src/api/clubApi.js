@@ -12,7 +12,7 @@ const clubAPI = axios.create({
 
 // Thêm token vào mỗi request
 clubAPI.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -143,6 +143,26 @@ export const getClubMembers = async (clubId) => {
   }
 };
 
+// Lấy danh sách CLB mà user hiện tại tham gia
+export const getMyClubs = async () => {
+  try {
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    // Thử endpoint phổ biến hơn nếu my-clubs báo lỗi ID
+    const response = await axios.get('http://localhost:5000/api/clubs/user/my-clubs', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    return response.data;
+  } catch (error) {
+    // Nếu vẫn lỗi, thử fallback về endpoint mặc định nhưng xử lý error tốt hơn
+    console.warn("Retrying with default my-clubs endpoint...");
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    const response = await axios.get('http://localhost:5000/api/clubs/my-clubs', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    return response.data;
+  }
+};
+
 // Rời khỏi club
 export const leaveClub = async (clubId) => {
   try {
@@ -166,4 +186,33 @@ export const getEventsByClub = async (clubId, params = {}) => {
 
 export const getAllClubs = getClubs;
 export const getClubById = getClubDetail;
+
+// ===== CONTRIBUTION / POINT HISTORY APIS =====
+
+// Lấy lịch sử điểm của chính mình (Member)
+export const getMyContributions = async (clubId) => {
+  try {
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    const response = await axios.get(`http://localhost:5000/api/clubs/${clubId}/my-contributions`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: error.message || 'Không thể lấy lịch sử điểm' };
+  }
+};
+
+// Lấy lịch sử điểm của 1 thành viên cụ thể (Leader)
+export const getMemberContributions = async (clubId, memberId) => {
+  try {
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    const response = await axios.get(`http://localhost:5000/api/clubs/${clubId}/members/${memberId}/contributions`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: error.message || 'Không thể lấy lịch sử điểm thành viên' };
+  }
+};
+
 export default clubAPI;
