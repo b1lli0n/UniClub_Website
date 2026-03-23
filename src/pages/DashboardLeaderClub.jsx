@@ -159,6 +159,7 @@ export default function Dashboard() {
     };
 
     if (clubId) {
+      localStorage.setItem('clubId', clubId);
       loadData();
     } else {
       console.log('❌ No clubId found');
@@ -195,6 +196,11 @@ export default function Dashboard() {
             title="Thêm thành viên"
             subtitle="Duyệt thành viên vào nhóm"
             onClick={() => navigate('/memberships')}
+          />
+          <QuickActionCard
+            title="Quản lý tài chính"
+            subtitle="Thu chi quỹ câu lạc bộ"
+            onClick={() => navigate(`/clubs/${clubId}/transactions`)}
           />
         </div>
 

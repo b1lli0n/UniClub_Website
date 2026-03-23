@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'
+import ClubBadgeModal from '../../components/ClubBadgeModal';
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { getBadgeTemplates } from '../../api/rewardApi'
+import { getClubBadges } from '../../api/clubBadgeApi'
+import { getAllClubs } from '../../api/clubApi'
 import '../../styles/rewards.css'
 
 const Badges = () => {
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const navigate = useNavigate()
 
     const [badges, setBadges] = useState([])
@@ -12,9 +15,27 @@ const Badges = () => {
     const [page, setPage] = useState(1)
     const [search, setSearch] = useState('')
     const [appliedSearch, setAppliedSearch] = useState('')
-    const [isActiveFilter, setIsActiveFilter] = useState('all')
+    const [isActiveFilter, setIsActiveFilter] = useState('all') // 'all', 'true', 'false'
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    // Sort state
+    const [sortBy, setSortBy] = useState('created_at')
+    const [sortOrder, setSortOrder] = useState('desc')
+    // Club filter state
+    const [clubFilter, setClubFilter] = useState('all')
+    const [clubs, setClubs] = useState([])
+    // Fetch clubs on mount
+    useEffect(() => {
+        const fetchClubs = async () => {
+            try {
+                const res = await getAllClubs()
+                setClubs(res?.clubs || res?.data || [])
+            } catch (err) {
+                setClubs([])
+            }
+        }
+        fetchClubs()
+    }, [])
 
     // ─── Debounce search ───────────────────────────────────────────────────────
     useEffect(() => {
@@ -29,19 +50,25 @@ const Badges = () => {
     useEffect(() => {
         fetchBadges()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, isActiveFilter, appliedSearch])
+    }, [page, isActiveFilter, appliedSearch, sortBy, clubFilter])
 
     const fetchBadges = async () => {
         setLoading(true)
         setError(null)
         try {
-            const res = await getBadgeTemplates({
+            let is_active;
+            if (isActiveFilter === 'true') is_active = true;
+            else if (isActiveFilter === 'false') is_active = false;
+            const params = {
                 page,
                 limit: 12,
                 search: appliedSearch || undefined,
-                is_active: isActiveFilter !== 'all' ? isActiveFilter : undefined,
-            })
-            setBadges(res?.badges || [])
+                club_id: clubFilter !== 'all' ? clubFilter : undefined,
+                sort_by: sortBy,
+            };
+            if (typeof is_active === 'boolean') params.is_active = is_active;
+            const res = await getClubBadges(params);
+            setBadges(res?.badges || res?.data || [])
             setPagination(res?.pagination || { total: 0, page: 1, totalPages: 1 })
         } catch (err) {
             console.error('fetchBadges error:', err)
@@ -56,7 +83,7 @@ const Badges = () => {
     return (
         <div className="admin-panel admin-panel--animate">
             {/* Header */}
-            <div className="admin-panel-header">
+            <div className="admin-panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h2 className="admin-title">Quản lý huy hiệu</h2>
                     <p className="admin-subtitle">
@@ -64,10 +91,27 @@ const Badges = () => {
                         {!loading && ` • ${pagination.total} huy hiệu`}
                     </p>
                 </div>
+                <button
+                    className="reward-create-btn"
+                    onClick={() => setShowCreateModal(true)}
+                >
+                    <i className="fa-solid fa-plus" style={{ marginRight: 8 }} />
+                    Tạo huy hiệu mới
+                </button>
             </div>
+            {/* Modal create badge */}
+            {showCreateModal && (
+                <ClubBadgeModal
+                    open={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    onSuccess={() => fetchBadges()}
+                    mode="create"
+                />
+            )}
 
             {/* Toolbar */}
-            <div className="admin-toolbar">
+            <div className="admin-toolbar" style={{ gap: 16, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Search */}
                 <div className="admin-search">
                     <i className="fa-solid fa-magnifying-glass admin-search-icon" />
                     <input
@@ -77,24 +121,55 @@ const Badges = () => {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
+                {/* Filter by Club */}
                 <div className="reward-filter-group">
-                    {[
-                        { val: 'all', label: 'Tất cả' },
-                        { val: 'true', label: 'Đang hoạt động' },
-                        { val: 'false', label: 'Đã ẩn' },
-                    ].map(({ val, label }) => (
-                        <button
-                            key={val}
-                            type="button"
-                            className={`reward-filter-btn ${isActiveFilter === val ? 'is-active' : ''}`}
-                            onClick={() => {
-                                setIsActiveFilter(val)
-                                setPage(1)
-                            }}
-                        >
-                            {label}
-                        </button>
-                    ))}
+                    <label htmlFor="clubFilter" style={{ fontWeight: 500, marginRight: 4 }}>Lọc theo CLB:</label>
+                    <select
+                        id="clubFilter"
+                        value={clubFilter}
+                        onChange={e => {
+                            setClubFilter(e.target.value)
+                            setPage(1)
+                        }}
+                        style={{ padding: '4px 8px', borderRadius: 4 }}
+                    >
+                        <option value="all">Tất cả</option>
+                        {clubs && clubs.length > 0 && clubs.map(club => (
+                            <option key={club._id || club.id} value={club._id || club.id}>{club.name}</option>
+                        ))}
+                    </select>
+                </div>
+                {/* Sort & Trạng thái */}
+                <div className="reward-sort-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <label htmlFor="isActiveFilter" style={{ fontWeight: 500, marginRight: 4 }}>Trạng thái:</label>
+                    <select
+                        id="isActiveFilter"
+                        value={isActiveFilter}
+                        onChange={e => {
+                            setIsActiveFilter(e.target.value)
+                            setPage(1)
+                        }}
+                        style={{ padding: '4px 8px', borderRadius: 4 }}
+                    >
+                        <option value="all">Tất cả</option>
+                        <option value="true">Hoạt động</option>
+                        <option value="false">Ngừng hoạt động</option>
+                    </select>
+                    <label htmlFor="sortBy" style={{ fontWeight: 500, margin: '0 4px 0 16px' }}>Sắp xếp:</label>
+                    <select
+                        id="sortBy"
+                        value={sortBy}
+                        onChange={e => {
+                            setSortBy(e.target.value)
+                            setPage(1)
+                        }}
+                        style={{ padding: '4px 8px', borderRadius: 4 }}
+                    >
+                        <option value="az">Tên A-Z</option>
+                        <option value="za">Tên Z-A</option>
+                        <option value="newest">Mới nhất</option>
+                        <option value="oldest">Cũ nhất</option>
+                    </select>
                 </div>
             </div>
 
@@ -121,6 +196,7 @@ const Badges = () => {
                 <div className="reward-empty">
                     <i className="fa-solid fa-medal" />
                     <p>Không tìm thấy huy hiệu nào</p>
+                    const [showCreateModal, setShowCreateModal] = useState(false); // Modal state
                 </div>
             ) : (
                 /* Badge Grid */
@@ -128,52 +204,56 @@ const Badges = () => {
                     {badges.map((badge) => (
                         <div
                             key={badge._id}
-                            className={`badge-card ${!badge.is_active ? 'is-hidden' : ''}`}
+                            className="badge-card"
                             onClick={() => navigate(`/admin/badges/${badge._id}`)}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => e.key === 'Enter' && navigate(`/admin/badges/${badge._id}`)}
+                            style={{ boxShadow: '0 2px 8px #e0e7ef', borderRadius: 12, padding: 18, background: '#fff', margin: 8, minWidth: 220, opacity: badge.is_active ? 1 : 0.6 }}
                         >
                             {/* Icon */}
-                            {badge.icon_url ? (
-                                <img
-                                    src={badge.icon_url}
-                                    alt={badge.name}
-                                    className="badge-card-icon"
-                                    onError={(e) => {
-                                        e.currentTarget.onerror = null
-                                        e.currentTarget.style.display = 'none'
-                                    }}
-                                />
-                            ) : (
-                                <div className="badge-card-icon-placeholder">
-                                    <i className="fa-solid fa-medal" />
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 12 }}>
+                                {badge.icon_url ? (
+                                    <img
+                                        src={badge.icon_url}
+                                        alt={badge.name}
+                                        style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', boxShadow: '0 0 8px #e0e7ef' }}
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.style.display = 'none';
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="badge-card-icon-placeholder">
+                                        <i className="fa-solid fa-medal" style={{ fontSize: 48, color: '#d1d5db' }} />
+                                    </div>
+                                )}
+                            </div>
+                            {/* Name */}
+                            <div style={{ fontWeight: 700, fontSize: 18, color: '#374151', marginBottom: 4 }}>{badge.name}</div>
+                            {/* Club name */}
+                            {badge.club_name && (
+                                <div style={{ fontSize: 13, color: '#6366f1', marginBottom: 8 }}>
+                                    <i className="fa-solid fa-users" style={{ marginRight: 4 }} />
+                                    {badge.club_name}
                                 </div>
                             )}
-
-                            {/* Name */}
-                            <p className="badge-card-name">{badge.name}</p>
-
-                            {/* Description */}
-                            <p className="badge-card-desc">{badge.description}</p>
-
-                            {/* Condition */}
-                            <span className="badge-card-condition">
-                                <i className="fa-solid fa-bullseye" />
-                                {badge.condition_type}: {badge.condition_value}
-                            </span>
-
-                            {/* Footer */}
-                            <div className="badge-card-footer">
-                                <span
-                                    className={`admin-status ${badge.is_active ? 'admin-status--active' : 'admin-status--inactive'
-                                        }`}
-                                >
-                                    {badge.is_active ? 'Hoạt động' : 'Đã ẩn'}
+                            {/* Points required */}
+                            <div style={{ fontSize: 14, color: '#2563eb', marginBottom: 6 }}>
+                                <i className="fa-solid fa-bullseye" style={{ marginRight: 4 }} />
+                                Điểm yêu cầu: <b>{badge.points_required}</b>
+                            </div>
+                            {/* Trạng thái */}
+                            <div style={{ fontSize: 13, marginBottom: 6 }}>
+                                <span className={`admin-status ${badge.is_active ? 'admin-status--active' : 'admin-status--inactive'}`}
+                                    style={{ color: badge.is_active ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+                                    {badge.is_active ? 'Hoạt động' : 'Không hoạt động'}
                                 </span>
-                                <span style={{ fontSize: 12, color: '#9ca3af' }}>
-                                    {new Date(badge.created_at).toLocaleDateString('vi-VN')}
-                                </span>
+                            </div>
+                            {/* Ngày tạo */}
+                            <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
+                                <i className="fa-solid fa-calendar" style={{ marginRight: 4 }} />
+                                {badge.created_at ? `Tạo ngày: ${new Date(badge.created_at).toLocaleDateString('vi-VN')}` : ''}
                             </div>
                         </div>
                     ))}

@@ -158,10 +158,10 @@ const RewardDetail = () => {
                         {/* Toggle hide/show */}
                         <button
                             type="button"
-                            className={`reward-toggle-btn ${reward.is_active ? 'hide' : 'show'}`}
+                            className={`reward-toggle-btn ${reward.is_active ? 'show' : 'hide'}`}
                             onClick={handleToggleActive}
                         >
-                            <i className={`fa-solid ${reward.is_active ? 'fa-eye-slash' : 'fa-eye'}`} />
+                            <i className={`fa-solid ${reward.is_active ? 'fa-eye' : 'fa-eye-slash'}`} />
                             {reward.is_active ? 'Ẩn phần thưởng' : 'Hiện phần thưởng'}
                         </button>
                         {/* Edit */}

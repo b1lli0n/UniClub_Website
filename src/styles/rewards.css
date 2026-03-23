@@ -1,3 +1,111 @@
+/* ---------- Badge Detail Actions ---------- */
+.badge-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.badge-action-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-action-btn--edit {
+  background: linear-gradient(135deg, #10b981, #22d3ee);
+  color: #fff;
+}
+
+.badge-action-btn--edit:hover {
+  background: linear-gradient(135deg, #059669, #0ea5e9);
+}
+
+.badge-action-btn--hide {
+  background: linear-gradient(135deg, #ef4444, #f59e42);
+  color: #fff;
+}
+
+.badge-action-btn--hide:hover {
+  background: linear-gradient(135deg, #dc2626, #fbbf24);
+}
+
+.badge-action-btn--show {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+}
+
+.badge-action-btn--show:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+/* ---------- Modal Badge Form ---------- */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 12px;
+}
+
+.modal-label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.modal-input,
+.modal-select,
+.modal-form textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #374151;
+  background: #f9fafb;
+  transition: border-color 0.2s;
+  margin-bottom: 2px;
+}
+
+.modal-input:focus,
+.modal-select:focus,
+.modal-form textarea:focus {
+  border-color: #6366f1;
+  outline: none;
+}
+
+.modal-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  background: #e5e7eb;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.modal-btn--primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+}
+
+.modal-btn--primary:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.modal-btn:hover {
+  background: #d1d5db;
+}
+
 /* =============================================
    REWARDS & BADGES STYLES
    ============================================= */
@@ -25,6 +133,7 @@
   transition: all 0.2s;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
 }
+
 .reward-create-btn:hover {
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
   transform: translateY(-1px);
@@ -45,6 +154,7 @@
   cursor: pointer;
   transition: all 0.2s;
 }
+
 .reward-history-btn:hover {
   border-color: #6366f1;
   color: #6366f1;
@@ -91,6 +201,7 @@
   cursor: pointer;
   transition: border-color 0.2s;
 }
+
 .reward-club-select:focus {
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
@@ -120,10 +231,12 @@
   transition: all 0.18s;
   white-space: nowrap;
 }
+
 .reward-filter-btn:hover {
   border-color: #6366f1;
   color: #6366f1;
 }
+
 .reward-filter-btn.is-active {
   background: #6366f1;
   border-color: #6366f1;
@@ -131,9 +244,18 @@
 }
 
 /* ---------- Table Columns (Reward specific) ---------- */
-.reward-col--name   { flex: 2.5; }
-.reward-col--points { flex: 1.2; }
-.reward-col--qty    { flex: 0.8; text-align: center; }
+.reward-col--name {
+  flex: 2.5;
+}
+
+.reward-col--points {
+  flex: 1.2;
+}
+
+.reward-col--qty {
+  flex: 0.8;
+  text-align: center;
+}
 
 /* ---------- Points Badge ---------- */
 .reward-points-badge {
@@ -148,7 +270,11 @@
   font-weight: 700;
   color: #92400e;
 }
-.reward-points-badge i { font-size: 11px; color: #d97706; }
+
+.reward-points-badge i {
+  font-size: 11px;
+  color: #d97706;
+}
 
 /* ---------- Empty State ---------- */
 .reward-empty {
@@ -161,8 +287,16 @@
   color: #9ca3af;
   text-align: center;
 }
-.reward-empty i  { font-size: 40px; opacity: 0.4; }
-.reward-empty p  { font-size: 15px; margin: 0; }
+
+.reward-empty i {
+  font-size: 40px;
+  opacity: 0.4;
+}
+
+.reward-empty p {
+  font-size: 15px;
+  margin: 0;
+}
 
 /* ---------- Modal ---------- */
 .reward-modal-overlay {
@@ -176,7 +310,16 @@
   padding: 20px;
   animation: fadeIn 0.18s ease;
 }
-@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0
+  }
+
+  to {
+    opacity: 1
+  }
+}
 
 .reward-modal {
   background: #fff;
@@ -186,7 +329,18 @@
   max-width: 520px;
   animation: slideUp 0.22s ease;
 }
-@keyframes slideUp { from { transform: translateY(24px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+
+@keyframes slideUp {
+  from {
+    transform: translateY(24px);
+    opacity: 0
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1
+  }
+}
 
 .reward-modal-header {
   display: flex;
@@ -195,12 +349,14 @@
   padding: 20px 24px 16px;
   border-bottom: 1px solid #f3f4f6;
 }
+
 .reward-modal-header h3 {
   margin: 0;
   font-size: 17px;
   font-weight: 700;
   color: #111827;
 }
+
 .reward-modal-close {
   width: 32px;
   height: 32px;
@@ -215,7 +371,11 @@
   font-size: 15px;
   transition: all 0.18s;
 }
-.reward-modal-close:hover { background: #fee2e2; color: #ef4444; }
+
+.reward-modal-close:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
 
 /* ---------- Form ---------- */
 .reward-form {
@@ -230,12 +390,17 @@
   flex-direction: column;
   gap: 6px;
 }
+
 .reward-form-group label {
   font-size: 13.5px;
   font-weight: 600;
   color: #374151;
 }
-.reward-form-group label .required { color: #ef4444; margin-left: 2px; }
+
+.reward-form-group label .required {
+  color: #ef4444;
+  margin-left: 2px;
+}
 
 .reward-form-group input,
 .reward-form-group textarea,
@@ -250,12 +415,14 @@
   background: #fff;
   resize: vertical;
 }
+
 .reward-form-group input:focus,
 .reward-form-group textarea:focus,
 .reward-form-group select:focus {
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
+
 .reward-form-group input:disabled,
 .reward-form-group textarea:disabled {
   background: #f9fafb;
@@ -277,6 +444,7 @@
   border: 1.5px solid #e5e7eb;
   border-radius: 10px;
 }
+
 .reward-form-checkbox-row input[type="checkbox"] {
   width: 16px;
   height: 16px;
@@ -286,6 +454,7 @@
   border: none;
   box-shadow: none;
 }
+
 .reward-form-checkbox-row label {
   font-size: 14px;
   font-weight: 600;
@@ -312,7 +481,11 @@
   cursor: pointer;
   transition: all 0.18s;
 }
-.reward-btn-cancel:hover { border-color: #9ca3af; color: #374151; }
+
+.reward-btn-cancel:hover {
+  border-color: #9ca3af;
+  color: #374151;
+}
 
 .reward-btn-submit {
   display: inline-flex;
@@ -328,10 +501,15 @@
   cursor: pointer;
   transition: all 0.2s;
 }
+
 .reward-btn-submit:hover:not(:disabled) {
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
 }
-.reward-btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+
+.reward-btn-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
 
 /* ---------- Detail Page ---------- */
 .reward-detail-back {
@@ -350,7 +528,11 @@
   transition: all 0.18s;
   text-decoration: none;
 }
-.reward-detail-back:hover { border-color: #6366f1; color: #6366f1; }
+
+.reward-detail-back:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+}
 
 .reward-detail-card {
   background: #fff;
@@ -382,7 +564,10 @@
   flex-shrink: 0;
 }
 
-.reward-detail-info { flex: 1; }
+.reward-detail-info {
+  flex: 1;
+}
+
 .reward-detail-info h2 {
   margin: 0 0 6px;
   font-size: 22px;
@@ -412,6 +597,7 @@
   flex-direction: column;
   gap: 6px;
 }
+
 .reward-stat-card .stat-label {
   font-size: 12px;
   font-weight: 600;
@@ -419,18 +605,24 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
 .reward-stat-card .stat-value {
   font-size: 24px;
   font-weight: 800;
   color: #111827;
 }
+
 .reward-stat-card.highlight {
   background: linear-gradient(135deg, #f5f3ff, #ede9fe);
   border-color: #c4b5fd;
 }
-.reward-stat-card.highlight .stat-value { color: #7c3aed; }
 
-.reward-desc-section { }
+.reward-stat-card.highlight .stat-value {
+  color: #7c3aed;
+}
+
+.reward-desc-section {}
+
 .reward-desc-section h4 {
   margin: 0 0 8px;
   font-size: 13.5px;
@@ -439,6 +631,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
 .reward-desc-section p {
   margin: 0;
   font-size: 15px;
@@ -471,7 +664,10 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-.reward-edit-btn:hover { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+
+.reward-edit-btn:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
 
 .reward-toggle-btn {
   display: inline-flex;
@@ -486,16 +682,41 @@
   transition: all 0.18s;
   background: #fff;
 }
-.reward-toggle-btn.show  { border-color: #10b981; color: #10b981; }
-.reward-toggle-btn.show:hover  { background: #ecfdf5; }
-.reward-toggle-btn.hide  { border-color: #f59e0b; color: #d97706; }
-.reward-toggle-btn.hide:hover  { background: #fffbeb; }
+
+.reward-toggle-btn.show {
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.reward-toggle-btn.show:hover {
+  background: #ecfdf5;
+}
+
+.reward-toggle-btn.hide {
+  border-color: #f59e0b;
+  color: #d97706;
+}
+
+.reward-toggle-btn.hide:hover {
+  background: #fffbeb;
+}
 
 /* ---------- Transaction / Redemption ---------- */
-.txn-col--user   { flex: 2; }
-.txn-col--reward { flex: 2; }
-.txn-col--points { flex: 1.2; }
-.txn-col--date   { flex: 1.5; }
+.txn-col--user {
+  flex: 2;
+}
+
+.txn-col--reward {
+  flex: 2;
+}
+
+.txn-col--points {
+  flex: 1.2;
+}
+
+.txn-col--date {
+  flex: 1.5;
+}
 
 .txn-status {
   display: inline-flex;
@@ -506,18 +727,132 @@
   font-size: 12px;
   font-weight: 600;
 }
-.txn-status--pending   { background: #fef3c7; color: #92400e; }
-.txn-status--approved  { background: #d1fae5; color: #065f46; }
-.txn-status--rejected  { background: #fee2e2; color: #991b1b; }
-.txn-status--completed { background: #dbeafe; color: #1e40af; }
+
+.txn-status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.txn-status--approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.txn-status--rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.txn-status--completed {
+  background: #dbeafe;
+  color: #1e40af;
+}
 
 .txn-user-cell {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.txn-user-name  { font-size: 14px; font-weight: 600; color: #111827; }
-.txn-user-email { font-size: 12px; color: #9ca3af; }
+
+.txn-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.txn-user-email {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* ---------- Transaction Status & Actions Columns ---------- */
+.txn-col--status {
+  flex: 1.3;
+}
+
+.txn-col--actions {
+  flex: 1.8;
+}
+
+/* Status badges (dùng trong bảng lịch sử đổi thưởng) */
+.txn-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.txn-status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.txn-status--approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.txn-status--rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.txn-status--completed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* Approve/Reject buttons */
+.admin-status-btn--approve {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.admin-status-btn--approve:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #10b981);
+  transform: translateY(-1px);
+}
+
+.admin-status-btn--reject {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.admin-status-btn--reject:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  transform: translateY(-1px);
+}
+
+.admin-status-btn--approve:disabled,
+.admin-status-btn--reject:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
 
 /* ---------- Badges List Page ---------- */
 .badge-grid {
@@ -540,11 +875,13 @@
   transition: all 0.22s;
   text-align: center;
 }
+
 .badge-card:hover {
   border-color: #6366f1;
   box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
   transform: translateY(-3px);
 }
+
 .badge-card.is-hidden {
   opacity: 0.55;
   background: #fafafa;
@@ -557,6 +894,7 @@
   object-fit: cover;
   border: 3px solid #e5e7eb;
 }
+
 .badge-card-icon-placeholder {
   width: 64px;
   height: 64px;
@@ -576,6 +914,7 @@
   color: #111827;
   margin: 0;
 }
+
 .badge-card-desc {
   font-size: 13px;
   color: #6b7280;
@@ -586,6 +925,7 @@
   overflow: hidden;
   margin: 0;
 }
+
 .badge-card-condition {
   display: inline-flex;
   align-items: center;
@@ -598,6 +938,7 @@
   font-weight: 600;
   color: #0369a1;
 }
+
 .badge-card-footer {
   display: flex;
   align-items: center;
@@ -618,6 +959,7 @@
   border-radius: 16px;
   margin-bottom: 20px;
 }
+
 .badge-detail-img {
   width: 100px;
   height: 100px;
@@ -626,6 +968,7 @@
   border: 4px solid #a78bfa;
   box-shadow: 0 6px 24px rgba(139, 92, 246, 0.3);
 }
+
 .badge-detail-img-placeholder {
   width: 100px;
   height: 100px;
@@ -639,27 +982,34 @@
   flex-shrink: 0;
   box-shadow: 0 6px 24px rgba(99, 102, 241, 0.35);
 }
-.badge-detail-hero-info { flex: 1; }
+
+.badge-detail-hero-info {
+  flex: 1;
+}
+
 .badge-detail-hero-info h2 {
   margin: 0 0 6px;
   font-size: 24px;
   font-weight: 800;
   color: #3730a3;
 }
+
 .badge-detail-hero-info p {
   margin: 0;
   font-size: 15px;
   color: #4c1d95;
   line-height: 1.5;
 }
+
 .badge-detail-earned {
   text-align: center;
   padding: 12px 20px;
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
   border-radius: 12px;
-  border: 1px solid rgba(196,181,253,0.5);
+  border: 1px solid rgba(196, 181, 253, 0.5);
   flex-shrink: 0;
 }
+
 .badge-detail-earned .earned-count {
   display: block;
   font-size: 36px;
@@ -667,6 +1017,7 @@
   color: #7c3aed;
   line-height: 1;
 }
+
 .badge-detail-earned .earned-label {
   font-size: 12px;
   font-weight: 600;
@@ -686,6 +1037,7 @@
   border: 1.5px solid #e5e7eb;
   border-radius: 12px;
 }
+
 .badge-info-card .info-label {
   font-size: 12px;
   font-weight: 600;
@@ -694,6 +1046,7 @@
   letter-spacing: 0.5px;
   margin-bottom: 6px;
 }
+
 .badge-info-card .info-value {
   font-size: 16px;
   font-weight: 700;
@@ -708,5 +1061,11 @@
   border-radius: 50%;
   margin-right: 5px;
 }
-.status-dot.active   { background: #10b981; }
-.status-dot.inactive { background: #f59e0b; }
+
+.status-dot.active {
+  background: #10b981;
+}
+
+.status-dot.inactive {
+  background: #f59e0b;
+}

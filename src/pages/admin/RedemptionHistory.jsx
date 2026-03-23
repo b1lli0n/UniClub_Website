@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { getClubs } from '../../api/adminapi'
-import { getRedemptionHistory } from '../../api/rewardApi'
+import { getRedemptionHistory, updateRedemptionStatus } from '../../api/rewardApi'
 import '../../styles/rewards.css'
 
 const extractClubs = (res) => {
@@ -26,6 +26,8 @@ const RedemptionHistory = () => {
     const [pagination, setPagination] = useState({ total: 0, page: 1, totalPages: 1 })
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(false)
+    const [statusFilter, setStatusFilter] = useState('')
+    const [updatingId, setUpdatingId] = useState(null)
     const [error, setError] = useState(null)
 
     // ─── Fetch clubs ───────────────────────────────────────────────────────────
@@ -57,16 +59,15 @@ const RedemptionHistory = () => {
         if (!selectedClubId) return
         fetchHistory()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedClubId, page])
+    }, [selectedClubId, page, statusFilter])
 
     const fetchHistory = async () => {
         setLoading(true)
         setError(null)
         try {
-            const res = await getRedemptionHistory(selectedClubId, {
-                page,
-                limit: 10,
-            })
+            const params = { page, limit: 10 }
+            if (statusFilter !== '') params.status = statusFilter
+            const res = await getRedemptionHistory(selectedClubId, params)
             setTransactions(res?.transactions || [])
             setPagination(res?.pagination || { total: 0, page: 1, totalPages: 1 })
         } catch (err) {
@@ -75,6 +76,25 @@ const RedemptionHistory = () => {
             setTransactions([])
         } finally {
             setLoading(false)
+        }
+    }
+
+    // ─── Duyệt / Từ chối yêu cầu đổi thưởng ──────────────────────────────────
+    const handleUpdateStatus = async (transactionId, newStatus) => {
+        const label = newStatus === 1 ? 'duyệt' : 'từ chối'
+        if (!window.confirm(`Bạn có chắc muốn ${label} yêu cầu đổi thưởng này?`)) return
+
+        setUpdatingId(transactionId)
+        try {
+            const res = await updateRedemptionStatus(selectedClubId, transactionId, newStatus)
+            toast.success(res?.message || `Đã ${label} yêu cầu đổi thưởng`)
+            // Cập nhật lại danh sách
+            fetchHistory()
+        } catch (err) {
+            console.error('handleUpdateStatus error:', err)
+            toast.error(err?.message || `Không thể ${label} yêu cầu đổi thưởng`)
+        } finally {
+            setUpdatingId(null)
         }
     }
 
@@ -132,6 +152,31 @@ const RedemptionHistory = () => {
                 )}
             </div>
 
+            {/* Status Filter */}
+            {selectedClubId && (
+                <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <label style={{ fontSize: 13, color: '#6b7280', fontWeight: 500 }}>
+                        <i className="fa-solid fa-filter" style={{ marginRight: 4 }} />
+                        Trạng thái:
+                    </label>
+                    <select
+                        className="reward-club-select"
+                        style={{ width: 'auto', minWidth: 140 }}
+                        value={statusFilter}
+                        onChange={(e) => {
+                            setStatusFilter(e.target.value)
+                            setPage(1)
+                        }}
+                    >
+                        <option value="">Tất cả</option>
+                        <option value="0">Chờ duyệt</option>
+                        <option value="1">Đã duyệt</option>
+                        <option value="2">Đã từ chối</option>
+                        <option value="3">Hoàn thành</option>
+                    </select>
+                </div>
+            )}
+
             {/* Content */}
             {!selectedClubId ? (
                 <div className="reward-empty">
@@ -146,6 +191,8 @@ const RedemptionHistory = () => {
                         <div className="admin-col txn-col--reward">Phần thưởng</div>
                         <div className="admin-col txn-col--points">Điểm tiêu</div>
                         <div className="admin-col txn-col--date">Ngày giao dịch</div>
+                        <div className="admin-col txn-col--status">Trạng thái</div>
+                        <div className="admin-col txn-col--actions">Hành động</div>
                     </div>
 
                     {/* Table Body */}
@@ -207,6 +254,60 @@ const RedemptionHistory = () => {
                                                 <span style={{ fontSize: 12 }}>
                                                     {new Date(txn.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
+                                            </div>
+                                            {/* Status */}
+                                            <div className="admin-col txn-col--status">
+                                                {txn.status === 0 && (
+                                                    <span className="txn-status-badge txn-status--pending">
+                                                        <i className="fa-solid fa-clock" /> Chờ duyệt
+                                                    </span>
+                                                )}
+                                                {txn.status === 1 && (
+                                                    <span className="txn-status-badge txn-status--approved">
+                                                        <i className="fa-solid fa-check-circle" /> Đã duyệt
+                                                    </span>
+                                                )}
+                                                {txn.status === 2 && (
+                                                    <span className="txn-status-badge txn-status--rejected">
+                                                        <i className="fa-solid fa-times-circle" /> Đã từ chối
+                                                    </span>
+                                                )}
+                                                {txn.status === 3 && (
+                                                    <span className="txn-status-badge txn-status--completed">
+                                                        <i className="fa-solid fa-flag-checkered" /> Hoàn thành
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {/* Actions */}
+                                            <div className="admin-col txn-col--actions">
+                                                {txn.status === 0 ? (
+                                                    <div style={{ display: 'flex', gap: 6 }}>
+                                                        <button
+                                                            className="admin-status-btn admin-status-btn--approve"
+                                                            disabled={updatingId === txn._id}
+                                                            onClick={() => handleUpdateStatus(txn._id, 1)}
+                                                            title="Duyệt yêu cầu"
+                                                        >
+                                                            {updatingId === txn._id
+                                                                ? <i className="fa-solid fa-spinner fa-spin" />
+                                                                : <><i className="fa-solid fa-check" /> Duyệt</>
+                                                            }
+                                                        </button>
+                                                        <button
+                                                            className="admin-status-btn admin-status-btn--reject"
+                                                            disabled={updatingId === txn._id}
+                                                            onClick={() => handleUpdateStatus(txn._id, 2)}
+                                                            title="Từ chối yêu cầu"
+                                                        >
+                                                            {updatingId === txn._id
+                                                                ? <i className="fa-solid fa-spinner fa-spin" />
+                                                                : <><i className="fa-solid fa-xmark" /> Từ chối</>
+                                                            }
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ color: '#9ca3af', fontSize: 13 }}>—</span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

@@ -333,11 +333,11 @@ const Rewards = () => {
                                             {/* Toggle hide/show */}
                                             <button
                                                 type="button"
-                                                className={`admin-status-btn ${r.is_active ? 'admin-status-btn--reject' : 'admin-status-btn--approve'}`}
+                                                className={`admin-status-btn ${r.is_active ? 'admin-status-btn--approve' : 'admin-status-btn--reject'}`}
                                                 onClick={() => handleToggleActive(r)}
                                                 title={r.is_active ? 'Ẩn phần thưởng' : 'Hiện phần thưởng'}
                                             >
-                                                <i className={`fa-solid ${r.is_active ? 'fa-eye-slash' : 'fa-eye'}`} />
+                                                <i className={`fa-solid ${r.is_active ? 'fa-eye' : 'fa-eye-slash'}`} />
                                             </button>
                                             {/* View / Edit detail */}
                                             <button
