@@ -6,3 +6,15 @@
     background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
 }
 
+/* Fix header covering content */
+.main-layout-with-header {
+    padding-top: 110px;
+    min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+    .main-layout-with-header {
+        padding-top: 160px; /* Header might stack on mobile */
+    }
+}
+

@@ -125,7 +125,7 @@ const VerifyOtp = () => {
   if (success) {
     return (
       <div className="verify-otp-page">
-        <div className="verify-otp-card">
+        <div className="verify-otp-card glass-card">
           <div className="verify-otp-success">
             <div className="verify-otp-success-icon">✓</div>
             <h2>Xác thực thành công!</h2>
@@ -140,7 +140,7 @@ const VerifyOtp = () => {
 
   return (
     <div className="verify-otp-page">
-      <div className="verify-otp-card">
+      <div className="verify-otp-card glass-card">
         <div className="verify-otp-header">
           <h2>Xác thực mã OTP</h2>
           <p>

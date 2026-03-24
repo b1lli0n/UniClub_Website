@@ -24,6 +24,7 @@ import DashboardLeaderClub from '../pages/DashboardLeaderClub'
 import EventAttendanceList from '../pages/leader/EventAttendanceList'
 import CreateClub from '../pages/ClubPages/CreateClub'
 import ClubTransactions from '../pages/ClubPages/ClubTransactions'
+import TransactionList from '../pages/TransactionList'
 
 import Event from '../pages/EventPages/EventInClub'
 import EventPublic from '../pages/EventPages/EventPublic'
@@ -124,7 +125,7 @@ const AppRouter = () => {
       {/* Dashboard/Club Routes with MainLayout (includes Sidebar) */}
       <Route element={<LeaderLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
-        <Route path="/clubs/:id/transactions" element={<ClubTransactions />} />
+        <Route path="/clubs/:id/transactions" element={<TransactionList />} />
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/events/:eventId/attendance" element={<EventAttendanceList />} />
         <Route path="/events" element={<EventsPage />} />

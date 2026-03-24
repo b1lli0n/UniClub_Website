@@ -7,7 +7,7 @@ import '../styles/LeaderLayout.css'
 
 const LeaderLayout = () => {
     return (
-        <div className="main-layout">
+        <div className="main-layout main-layout-with-header">
             <Header />
             <div className="main-layout-body">
                 <SidebarNav />

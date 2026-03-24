@@ -3,8 +3,8 @@ import React from 'react'
 const Contacts = () => {
   return (
     <div>
-      <h1>Contacts Page</h1>
-      <p>This is the Contacts page.</p>
+      <h1>Trang Liên Hệ</h1>
+      <p>Đây là trang thông tin liên hệ.</p>
     </div>
   )
 }

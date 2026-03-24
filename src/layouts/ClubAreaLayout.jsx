@@ -96,7 +96,7 @@ const ClubAreaLayout = () => {
     return (
       <>
         <Header />
-        <main className="club-area-loading-main">
+        <main className="club-area-loading-main main-layout-with-header">
           <div className="club-area-loading-inner">Đang tải...</div>
         </main>
         <Footer />
@@ -106,7 +106,7 @@ const ClubAreaLayout = () => {
 
   if (isLeader) {
     return (
-      <div className="main-layout">
+      <div className="main-layout main-layout-with-header">
         <Header />
         <div className="main-layout-body">
           <SidebarNav />
@@ -119,15 +119,15 @@ const ClubAreaLayout = () => {
     );
   }
 
-  return (
-    <>
-      <Header />
-      <main>
-        <Outlet context={outletContext} />
-      </main>
-      <Footer />
-    </>
-  );
+    return (
+      <>
+        <Header />
+        <main className="main-layout-with-header">
+          <Outlet context={outletContext} />
+        </main>
+        <Footer />
+      </>
+    );
 };
 
 export default ClubAreaLayout;

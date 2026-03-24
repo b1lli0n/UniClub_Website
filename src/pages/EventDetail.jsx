@@ -7,6 +7,17 @@ import EventInfoCard from '../components/eventDetail/EventInfoCard';
 import CancelledEventAlert from '../components/eventDetail/CancelledEventAlert';
 import api from '../api/api';
 import '../styles/EventDetail.css';
+import { 
+  ArrowLeft, 
+  Settings, 
+  Calendar, 
+  Trash2, 
+  CheckCircle, 
+  XCircle, 
+  AlertTriangle,
+  Send,
+  Sparkles
+} from 'lucide-react';
 
 export default function EventDetailPage() {
     const { eventId } = useParams();
@@ -51,7 +62,7 @@ export default function EventDetailPage() {
                         setIsRegistered(true);
                     }
                 } else {
-                    setError('Event không tồn tại');
+                    setError('Sự kiện không tồn tại');
                 }
             } catch (err) {
                 console.error('❌ Failed to load event detail:', err);
@@ -156,11 +167,11 @@ export default function EventDetailPage() {
 
     if (loading) {
         return (
-            <div className="home-page">
-                <div className="home-overlay" />
-                <div className="myclub-container">
-                    <div className="glass-card event-detail-loading-card">
-                        Loading...
+            <div className="event-detail-page-wrapper">
+                <div className="event-detail-container">
+                    <div className="glass-card-premium loading-placeholder-premium">
+                        <div className="mini-spinner-large"></div>
+                        <p>Đang tải thông tin sự kiện...</p>
                     </div>
                 </div>
             </div>
@@ -169,11 +180,15 @@ export default function EventDetailPage() {
 
     if (error) {
         return (
-            <div className="home-page">
-                <div className="home-overlay" />
-                <div className="myclub-container">
-                    <div className="glass-card event-detail-error-card">
-                        {error}
+            <div className="event-detail-page-wrapper">
+                <div className="event-detail-container">
+                    <div className="glass-card-premium error-placeholder-premium">
+                        <XCircle size={48} className="error-icon-red" />
+                        <h3 className="error-title-modern">{error}</h3>
+                        <button className="btn-back-soft mt-4" onClick={() => navigate(-1)}>
+                            <ArrowLeft size={18} />
+                            <span>Quay lại</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -182,19 +197,15 @@ export default function EventDetailPage() {
 
     if (!event) {
         return (
-            <div className="home-page">
-                <div className="home-overlay" />
-                <div className="myclub-container">
-                    <div className="glass-card event-detail-notfound-card">
-                        <div className="event-detail-notfound-icon">⚠️</div>
-                        <h3 className="event-detail-notfound-title"> 
-                            Không tìm thấy sự kiện
-                        </h3>
-                        <p className="event-detail-notfound-text">
-                            Sự kiện này không tồn tại hoặc đã bị xóa
-                        </p>
-                        <button className="card-button" onClick={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/events')}>
-                            ← Quay lại danh sách
+            <div className="event-detail-page-wrapper">
+                <div className="event-detail-container">
+                    <div className="glass-card-premium error-placeholder-premium">
+                        <AlertTriangle size={48} className="icon-warning-orange" />
+                        <h3 className="error-title-modern">Không tìm thấy sự kiện</h3>
+                        <p className="error-desc-modern">Sự kiện này không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
+                        <button className="btn-back-soft mt-4" onClick={() => navigate(-1)}>
+                            <ArrowLeft size={18} />
+                            <span>Quay lại</span>
                         </button>
                     </div>
                 </div>
@@ -203,131 +214,135 @@ export default function EventDetailPage() {
     }
 
     return (
-        <div className="home-page">
-            <div className="home-overlay" />
-            <div className="myclub-container">
-                <div className="event-detail-header-section">
-                    <EventHeader
-                        title={event.title}
-                        status={event.status}
-                        onBack={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/events')}
-                        onEdit={() => navigate(`/events/${eventId}/edit`)}
-                        canEdit={event.status !== 'canceled'}
-                    />
-                    
-                    <button
-                        className="timeline-trigger-button"
-                        onClick={() => navigate(`/events/${eventId}/timeline`)}
-                        title="Xem timeline sự kiện"
-                    >
-                        📅 Timeline Sự Kiện
-                    </button>
-                </div>
-
-                <EventInfoCard
-                    event={event}
-                    formatDateTime={formatDateTime}
+        <div className="event-detail-page-wrapper">
+            <div className="event-detail-container">
+                <EventHeader
+                    title={event.title}
+                    status={event.status}
+                    onBack={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/events')}
+                    onEdit={() => navigate(`/events/${eventId}/update`)}
+                    canEdit={event.status !== 'canceled'}
                 />
 
-               
-                <div className="event-detail-actions">
-                    {isRegistered ? (
-                        <button
-                            className="card-button"
-                            onClick={handleCancelEvent}
-                            disabled={registering}
-                            style={{ backgroundColor: '#ff4444', color: 'white' }}
-                        >
-                            {registering ? 'Đang xử lý...' : ' Hủy đăng ký'}
-                        </button>
-                    ) : (
-                        <button
-                            className="card-button"
-                            onClick={handleRegisterEvent}
-                            disabled={registering || event.status === 'canceled'}
-                            style={{ backgroundColor: '#44aa44', color: 'white' }}
-                        >
-                            {registering ? 'Đang xử lý...' : ' Đăng ký sự kiện'}
-                        </button>
-                    )}
+                <div className="event-detail-content-row">
+                    <EventInfoCard
+                        event={event}
+                        registrationsCount={event.registrations?.length || 0}
+                        formatDateTime={formatDateTime}
+                    />
+                </div>
 
-                    {isOrganizer && event.status !== 'canceled' && (
-                        <>
+                <div className="event-action-center-premium">
+                    <div className="action-center-inner">
+                        <div className="action-text-wrap">
+                            <Sparkles size={20} className="action-icon-pink" />
+                            <div className="action-labels">
+                                <p className="action-title-main">Trung tâm điều phối</p>
+                                <p className="action-subtitle-main">Đăng ký tham gia hoặc quản lý tiến độ sự kiện</p>
+                            </div>
+                        </div>
+
+                        <div className="action-buttons-group">
                             <button
-                                className="card-button"
-                                onClick={() => setShowCancelDialog(true)}
-                                style={{ backgroundColor: '#d9534f', color: 'white' }}
+                                className="btn-secondary-glass"
+                                onClick={() => navigate(`/events/${eventId}/timeline`)}
                             >
-                                Hủy sự kiện
+                                <Calendar size={18} />
+                                <span>Xem lịch trình</span>
                             </button>
-                        </>
-                    )}
+
+                            {isRegistered ? (
+                                <button
+                                    className="btn-danger-premium"
+                                    onClick={handleCancelEvent}
+                                    disabled={registering}
+                                >
+                                    {registering ? (
+                                        <div className="mini-spinner"></div>
+                                    ) : (
+                                        <>
+                                            <XCircle size={18} />
+                                            <span>Hủy đăng ký</span>
+                                        </>
+                                    )}
+                                </button>
+                            ) : (
+                                <button
+                                    className="btn-success-premium"
+                                    onClick={handleRegisterEvent}
+                                    disabled={registering || event.status === 'canceled'}
+                                >
+                                    {registering ? (
+                                        <div className="mini-spinner"></div>
+                                    ) : (
+                                        <>
+                                            <CheckCircle size={18} />
+                                            <span>Đăng ký tham gia</span>
+                                        </>
+                                    )}
+                                </button>
+                            )}
+
+                            {isOrganizer && event.status !== 'canceled' && (
+                                <button
+                                    className="btn-danger-solid-premium"
+                                    onClick={() => setShowCancelDialog(true)}
+                                >
+                                    <Trash2 size={18} />
+                                    <span>Hủy sự kiện</span>
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {showCancelDialog && (
-                    <div className="modal-overlay" onClick={() => setShowCancelDialog(false)}>
-                        <div className="modal-body" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
-                            <div className="modal-header">
-                                <h3 style={{ margin: 0, color: '#fff' }}>Hủy sự kiện</h3>
-                                <button
-                                    className="modal-close"
-                                    onClick={() => setShowCancelDialog(false)}
-                                >
-                                    ✕
+                    <div className="modal-overlay-premium" onClick={() => setShowCancelDialog(false)}>
+                        <div className="glass-card-premium modal-content-modern" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header-premium">
+                                <AlertTriangle size={24} className="icon-warning-orange" />
+                                <h3>Xác nhận hủy sự kiện</h3>
+                                <button className="btn-close-glass" onClick={() => setShowCancelDialog(false)}>
+                                    <XCircle size={20} />
                                 </button>
                             </div>
 
-                            <div className="modal-content" style={{ padding: '20px' }}>
-                                <p style={{ marginBottom: '15px', color: '#fff' }}>
-                                    Bạn có chắc chắn muốn hủy sự kiện <strong>"{event.title}"</strong>?
-                                </p>
-                                <p style={{ marginBottom: '15px', color: '#ffaa00' }}>
-                                    ⚠️ Hành động này không thể hoàn tác!
+                            <div className="modal-body-premium">
+                                <p className="modal-warning-text">
+                                    Bạn có chắc chắn muốn hủy sự kiện <strong>"{event.title}"</strong>? 
+                                    Hành động này sẽ gửi thông báo đến tất cả thành viên đã đăng ký và không thể hoàn tác.
                                 </p>
 
-                                <div style={{ marginBottom: '15px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', color: '#fff', fontWeight: 'bold' }}>
-                                        Lý do hủy sự kiện: <span style={{ color: '#ff4444' }}>*</span>
-                                    </label>
+                                <div className="form-group-modern mt-6">
+                                    <label className="label-modern">Lý do hủy sự kiện <span className="req">*</span></label>
                                     <textarea
                                         value={cancelReason}
                                         onChange={(e) => setCancelReason(e.target.value)}
-                                        placeholder="Nhập lý do hủy sự kiện..."
+                                        placeholder="Vui lòng nhập lý do cụ thể..."
                                         rows={4}
-                                        style={{
-                                            width: '100%',
-                                            padding: '10px',
-                                            borderRadius: '8px',
-                                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                            color: '#fff',
-                                            resize: 'vertical',
-                                            fontSize: '14px'
-                                        }}
+                                        className="textarea-modern"
                                     />
                                 </div>
+                            </div>
 
-                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                                    <button
-                                        className="card-button"
-                                        onClick={() => setShowCancelDialog(false)}
-                                        disabled={canceling}
-                                        style={{ backgroundColor: '#6c757d', color: 'white' }}
-                                    >
-                                        Đóng
-                                    </button>
-                                    <button
-                                        className="card-button"
-                                        onClick={handleCancelWholeEvent}
-                                        disabled={canceling || !cancelReason.trim()}
-                                        style={{
-                                            backgroundColor: canceling || !cancelReason.trim() ? '#999' : '#d9534f',
-                                            color: 'white'
-                                        }}
-                                    >
-                                        {canceling ? 'Đang hủy...' : '🚫 Xác nhận hủy'}
-                                    </button>
-                                </div>
+                            <div className="modal-footer-premium">
+                                <button className="btn-cancel-glass" onClick={() => setShowCancelDialog(false)}>
+                                    Hủy bỏ
+                                </button>
+                                <button
+                                    className="btn-danger-solid-premium"
+                                    onClick={handleCancelWholeEvent}
+                                    disabled={canceling || !cancelReason.trim()}
+                                >
+                                    {canceling ? (
+                                        <div className="mini-spinner"></div>
+                                    ) : (
+                                        <>
+                                            <Send size={18} />
+                                            <span>Xác nhận & Gửi thông báo</span>
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>

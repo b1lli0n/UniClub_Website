@@ -3,6 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/CreateEvent.css';
 import '../styles/Events.css';
 import { unmapEvent } from '../services/dataMappers';
+import { 
+  ArrowLeft, 
+  Plus, 
+  Calendar, 
+  MapPin, 
+  Users, 
+  AlignLeft, 
+  Type, 
+  FileText, 
+  Image as ImageIcon,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  Settings,
+  Tags
+} from 'lucide-react';
 
 export default function CreateEventPage() {
   useEffect(() => {
@@ -180,229 +196,269 @@ export default function CreateEventPage() {
   };
 
   return (
-    <div className="home-page">
-      <div className="home-overlay" />
-      <div className="myclub-container">
-        <header className="myclub-header">
-          <h1 className="myclub-title">createClubEvent</h1>
+    <div className="create-event-page-wrapper">
+      <div className="create-event-container">
+        <header className="create-event-header">
+          <div className="header-badge-premium">Dành cho Leader</div>
+          <h1 className="page-main-title">Tạo sự kiện mới</h1>
+          <p className="page-subtitle">Sắp xếp các hoạt động thú vị cho câu lạc bộ của bạn</p>
         </header>
 
         {/* Back button */}
-        <div className="create-event-back">
-          <button className="card-button create-event-back-button clubevent-primary-btn" onClick={() => navigate('/clubEvent')}>
-            ← Quay lại
+        <div className="create-event-nav">
+          <button className="btn-back-soft" onClick={() => navigate('/clubEvent')}>
+            <ArrowLeft size={18} />
+            <span>Quay lại</span>
           </button>
         </div>
 
-        {/* Form Card */}
-        <div className="glass-card create-event-card">
+        <div className="glass-card-premium create-event-main-card">
           <div className="create-event-card-inner">
-            <h2 className="create-event-title">
-              Tạo sự kiện mới
-            </h2>
+            <div className="form-section-header">
+              <Plus className="section-icon" />
+              <h3>Chi tiết sự kiện</h3>
+            </div>
 
             {success && (
-              <div className="create-event-success">
-                ✅ Tạo sự kiện thành công! Đang chuyển hướng...
+              <div className="toast-success-custom">
+                <CheckCircle size={20} />
+                <span>Bạn đã tạo sự kiện thành công! Đang quay lại...</span>
               </div>
             )}
 
             {error && (
-              <div className="create-event-error">
-                {error}
+              <div className="toast-error-custom">
+                <div className="error-icon">!</div>
+                <span>{error}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="create-event-form">
               {/* Title */}
-              <div>
-                <label className="create-event-label">
-                  Tên sự kiện <span className="create-event-required">*</span>
+              <div className="form-group-modern">
+                <label className="label-modern">
+                  Tên sự kiện <span className="req">*</span>
                 </label>
-                <input
-                  type="text"
-                  name="title"
-                  placeholder="Nhập tên sự kiện"
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="create-event-input"
-                  required
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="create-event-label">
-                  Mô tả <span className="create-event-required">*</span>
-                </label>
-                <textarea
-                  name="description"
-                  placeholder="Nhập mô tả chi tiết về sự kiện"
-                  rows={4}
-                  value={formData.description}
-                  onChange={handleChange}
-                  className="create-event-textarea"
-                  required
-                />
-              </div>
-
-              {/* Content */}
-              <div>
-                <label className="create-event-label">
-                  Nội dung chi tiết <span className="create-event-required">*</span>
-                </label>
-                <textarea
-                  name="content"
-                  placeholder="Nhập nội dung chi tiết về sự kiện"
-                  rows={5}
-                  value={formData.content}
-                  onChange={handleChange}
-                  className="create-event-textarea"
-                  required
-                />
-              </div>
-
-              {/* Category */}
-              <div>
-                <label className="create-event-label">
-                  Công loại <span className="create-event-required">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="category"
-                  placeholder="Ví dụ: Giải trí, Kỹ thuật, Thể thao, ..."
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="create-event-input"
-                  required
-                />
-              </div>
-
-              {/* Location */}
-              <div>
-                <label className="create-event-label">
-                  Địa điểm <span className="create-event-required">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  placeholder="Nhập địa điểm tổ chức"
-                  value={formData.location}
-                  onChange={handleChange}
-                  className="create-event-input"
-                  required
-                />
-              </div>
-
-              {/* Public */}
-              <div className="create-event-checkbox">
-                <label className="create-event-label">
-                  Công khai
-                </label>
-                <label className="create-event-toggle">
+                <div className="input-with-icon">
+                  <Type className="field-icon" size={18} />
                   <input
-                    type="checkbox"
-                    name="public"
-                    checked={formData.public}
+                    type="text"
+                    name="title"
+                    placeholder="Ví dụ: Workshop Kỹ năng Giao tiếp 2024"
+                    value={formData.title}
                     onChange={handleChange}
-                  />
-                  <span className="create-event-toggle-label">Cho phép mọi người xem</span>
-                </label>
-              </div>
-
-              {/* Start and End Time */}
-              <div className="create-event-grid">
-                <div>
-                  <label className="create-event-label">
-                    Thời gian bắt đầu <span className="create-event-required">*</span>
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="startAt"
-                    value={formData.startAt}
-                    onChange={handleChange}
-                    className="create-event-input"
+                    className="input-modern"
                     required
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="create-event-label">
-                    Thời gian kết thúc <span className="create-event-required">*</span>
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="endAt"
-                    value={formData.endAt}
+              {/* Description */}
+              <div className="form-group-modern">
+                <label className="label-modern">
+                  Mô tả ngắn <span className="req">*</span>
+                </label>
+                <div className="input-with-icon align-start">
+                  <FileText className="field-icon" size={18} />
+                  <textarea
+                    name="description"
+                    placeholder="Mô tả tóm tắt về sự kiện (hiển thị ở thẻ bên ngoài)"
+                    rows={3}
+                    value={formData.description}
                     onChange={handleChange}
-                    className="create-event-input"
+                    className="textarea-modern"
                     required
                   />
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="form-group-modern">
+                <label className="label-modern">
+                  Nội dung chi tiết <span className="req">*</span>
+                </label>
+                <div className="input-with-icon align-start">
+                  <AlignLeft className="field-icon" size={18} />
+                  <textarea
+                    name="content"
+                    placeholder="Nội dung chi tiết, lịch trình, và thông tin diễn giả..."
+                    rows={6}
+                    value={formData.content}
+                    onChange={handleChange}
+                    className="textarea-modern"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row-modern">
+                {/* Category */}
+                <div className="form-group-modern">
+                  <label className="label-modern">
+                    Lĩnh vực <span className="req">*</span>
+                  </label>
+                  <div className="input-with-icon">
+                    <Tags className="field-icon" size={18} />
+                    <input
+                      type="text"
+                      name="category"
+                      placeholder="Giải trí, Kỹ thuật..."
+                      value={formData.category}
+                      onChange={handleChange}
+                      className="input-modern"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="form-group-modern">
+                  <label className="label-modern">
+                    Địa điểm <span className="req">*</span>
+                  </label>
+                  <div className="input-with-icon">
+                    <MapPin className="field-icon" size={18} />
+                    <input
+                      type="text"
+                      name="location"
+                      placeholder="Phòng A101, Hội trường..."
+                      value={formData.location}
+                      onChange={handleChange}
+                      className="input-modern"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Public Toggle */}
+              <div className="form-group-modern">
+                <div className="toggle-container-modern">
+                  <div className="toggle-text">
+                    <span className="toggle-title">Chế độ hiển thị</span>
+                    <span className="toggle-desc">Cho phép thành viên CLB khác và khách vãng lai xem sự kiện</span>
+                  </div>
+                  <label className="premium-switch">
+                    <input
+                      type="checkbox"
+                      name="public"
+                      checked={formData.public}
+                      onChange={handleChange}
+                    />
+                    <span className="slider-round"></span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Start and End Time */}
+              <div className="form-row-modern">
+                <div className="form-group-modern">
+                  <label className="label-modern">
+                    Bắt đầu <span className="req">*</span>
+                  </label>
+                  <div className="input-with-icon">
+                    <Calendar className="field-icon" size={18} />
+                    <input
+                      type="datetime-local"
+                      name="startAt"
+                      value={formData.startAt}
+                      onChange={handleChange}
+                      className="input-modern"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group-modern">
+                  <label className="label-modern">
+                    Kết thúc <span className="req">*</span>
+                  </label>
+                  <div className="input-with-icon">
+                    <Calendar className="field-icon" size={18} />
+                    <input
+                      type="datetime-local"
+                      name="endAt"
+                      value={formData.endAt}
+                      onChange={handleChange}
+                      className="input-modern"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Capacity and Status */}
-              <div className="create-event-grid">
-                <div>
-                  <label className="create-event-label">
-                    Sức chứa
-                  </label>
-                  <input
-                    type="number"
-                    name="capacity"
-                    min={1}
-                    value={formData.capacity}
-                    onChange={handleChange}
-                    className="create-event-input"
-                  />
+              <div className="form-row-modern">
+                <div className="form-group-modern">
+                  <label className="label-modern">Sức chứa tối đa</label>
+                  <div className="input-with-icon">
+                    <Users className="field-icon" size={18} />
+                    <input
+                      type="number"
+                      name="capacity"
+                      min={1}
+                      value={formData.capacity}
+                      onChange={handleChange}
+                      className="input-modern"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="create-event-label">
-                    Tài liệu
-                  </label>
-                  <select
-                    name="progressStatus"
-                    value={formData.progressStatus}
-                    onChange={handleChange}
-                    className="create-event-select"
-                  >
-                    <option value={0}>Draft (Nháp)</option>
-                    <option value={1}>Completed (Hoàn tất)</option>
-                  </select>
+                <div className="form-group-modern">
+                  <label className="label-modern">Trạng thái công bố</label>
+                  <div className="input-with-icon">
+                    <Settings className="field-icon" size={18} />
+                    <select
+                      name="progressStatus"
+                      value={formData.progressStatus}
+                      onChange={handleChange}
+                      className="select-modern"
+                    >
+                      <option value={0}>Nháp (Chưa công bố)</option>
+                      <option value={1}>Chính thức (Công bố ngay)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
               {/* Media URLs */}
-              <div>
-                <label className="create-event-label">
-                  Media URLs
-                </label>
-                <input
-                  type="text"
-                  name="mediaUrls"
-                  placeholder="Nhập URL, cách nhau bằng dấu phẩy"
-                  value={formData.mediaUrls.join(', ')}
-                  onChange={handleChange}
-                  className="create-event-input"
-                />
+              <div className="form-group-modern">
+                <label className="label-modern">Hình ảnh tiêu đề (URL)</label>
+                <div className="input-with-icon">
+                  <ImageIcon className="field-icon" size={18} />
+                  <input
+                    type="text"
+                    name="mediaUrls"
+                    placeholder="Dán link ảnh tại đây..."
+                    value={formData.mediaUrls.join(', ')}
+                    onChange={handleChange}
+                    className="input-modern"
+                  />
+                </div>
               </div>
 
               {/* Action buttons */}
-              <div className="create-event-actions">
+              <div className="form-actions-premium">
                 <button
                   type="button"
                   onClick={() => navigate('/events')}
-                  className="create-event-cancel"
+                  className="btn-cancel-glass"
                 >
-                  Hủy
+                  Hủy bỏ
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="card-button create-event-submit"
+                  className="btn-submit-premium"
                 >
-                  {loading ? '⏳ Đang tạo...' : 'Tạo sự kiện'}
+                  {loading ? (
+                    <span className="loading-content">
+                      <div className="mini-spinner"></div>
+                      Đang xử lý...
+                    </span>
+                  ) : (
+                    <>Tạo sự kiện ngay</>
+                  )}
                 </button>
               </div>
             </form>

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { user, loading } = useAuth()
-  if (loading) return <div>Loading...</div>
+  if (loading) return <div>Đang tải...</div>
   if (!user) return <Navigate to="/login" />
   const roleMap = {
     'admin': 1,

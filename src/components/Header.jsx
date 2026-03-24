@@ -181,11 +181,11 @@ const Header = () => {
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case "EVENT":
+      case "Sự kiện":
         return "📅";
-      case "CLUB":
+      case "Câu lạc bộ":
         return "👥";
-      case "SYSTEM":
+      case "Hệ thống":
         return "🔔";
       default:
         return "📧";
@@ -285,9 +285,9 @@ const Header = () => {
           <div className="logo-text-wrapper">
             <span className="logo-text">UniClub</span>
             <span className="logo-subtext">
-              {location.pathname.startsWith('/events') ? 'Events' :
-                location.pathname.startsWith('/clubs') ? 'Clubs' :
-                  location.pathname.startsWith('/profile') ? 'Profile' : 'Community'}
+              {location.pathname.startsWith('/events') ? 'Sự kiện' :
+                location.pathname.startsWith('/clubs') ? 'Câu lạc bộ' :
+                  location.pathname.startsWith('/profile') ? 'Trang cá nhân' : 'Cộng đồng'}
             </span>
           </div>
         </div>
@@ -299,14 +299,14 @@ const Header = () => {
             className={`header-link ${/^\/clubs\/?$/.test(location.pathname) ? 'is-active' : ''}`}
             onClick={() => handleNavClick('/clubs')}
           >
-            Clubs
+            Câu lạc bộ
           </button>
           <button
             type="button"
             className={`header-link ${location.pathname.startsWith('/events') ? 'is-active' : ''}`}
             onClick={() => handleNavClick('/events')}
           >
-            Events
+            Sự kiện
           </button>
         </div>
 
@@ -402,7 +402,7 @@ const Header = () => {
                   className="header-admin-btn"
                   onClick={() => navigate('/admin')}
                 >
-                  Admin Dashboard
+                  Bảng quản trị
                 </button>
               )}
 
@@ -432,7 +432,7 @@ const Header = () => {
                     )}
                   </div>
                   <div className="header-user-text">
-                    <div className="header-user-name">{user?.fullName || 'User'}</div>
+                    <div className="header-user-name">{user?.fullName || 'Người dùng'}</div>
                   </div>
                   <span className={`header-dropdown-arrow ${isDropdownOpen ? 'is-open' : ''}`}>
                     ▼
@@ -447,42 +447,42 @@ const Header = () => {
                       onClick={() => handleMenuClick('/profile')}
                     >
                       <span className="dropdown-icon"></span>
-                      My Profile
+                      Trang cá nhân của tôi
                     </button>
                     <button
                       className="header-dropdown-item"
                       onClick={() => handleMenuClick('/my-clubs')}
                     >
                       <span className="dropdown-icon"></span>
-                      My Club
+                      Câu lạc bộ của tôi
                     </button>
                     <button
                       className="header-dropdown-item"
                       onClick={() => handleMenuClick('/my-events')}
                     >
                       <span className="dropdown-icon"></span>
-                      My Event
+                      Sự kiện của tôi
                     </button>
                     <button
                       className="header-dropdown-item"
                       onClick={() => handleMenuClick('/my-notifications')}
                     >
                       <span className="dropdown-icon">🔔</span>
-                      My Notifications
+                      Thông báo của tôi
                     </button>
                     <button
                       className="header-dropdown-item"
                       onClick={() => handleMenuClick('/my-requests')}
                     >
                       <span className="dropdown-icon"></span>
-                      My Requests
+                      Yêu cầu của tôi
                     </button>
                     <button
                       className="header-dropdown-item"
                       onClick={() => handleMenuClick('/my-membership-fees')}
                     >
                       <span className="dropdown-icon"></span>
-                      My Membership Fees
+                      Phí thành viên của tôi
                     </button>
                     <div className="header-dropdown-divider"></div>
                     <button
@@ -490,7 +490,7 @@ const Header = () => {
                       onClick={handleLogoutClick}
                     >
                       <span className="dropdown-icon"></span>
-                      Logout
+                      Đăng xuất
                     </button>
                   </div>
                 )}

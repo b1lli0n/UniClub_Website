@@ -44,7 +44,7 @@ const ClubSection = () => {
     return (
       <section className="club-section">
         <div className="section-header">
-          <h2 className="section-title">Club</h2>
+          <h2 className="section-title">Câu lạc bộ</h2>
         </div>
         <div className="club-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
           <p>Đang tải danh sách câu lạc bộ...</p>
@@ -57,7 +57,7 @@ const ClubSection = () => {
     return (
       <section className="club-section">
         <div className="section-header">
-          <h2 className="section-title">Club</h2>
+          <h2 className="section-title">Câu lạc bộ</h2>
         </div>
         <div className="club-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
           <p style={{ color: '#e74c3c' }}>Lỗi: {error}</p>
@@ -70,7 +70,7 @@ const ClubSection = () => {
     return (
       <section className="club-section">
         <div className="section-header">
-          <h2 className="section-title">Club</h2>
+          <h2 className="section-title">Câu lạc bộ</h2>
         </div>
         <div className="club-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
           <p>Không có câu lạc bộ nào</p>
@@ -82,7 +82,7 @@ const ClubSection = () => {
   return (
     <section className="club-section">
       <div className="section-header">
-        <h2 className="section-title">Club</h2>
+        <h2 className="section-title">Câu lạc bộ</h2>
         <Link to="/clubs" className="see-more-link">
           Xem thêm
           <svg

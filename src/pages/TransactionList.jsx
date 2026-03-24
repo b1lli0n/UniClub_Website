@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { getTransactions } from '../api/transactionApi';
 import TransactionForm from '../components/TransactionForm';
+import '../styles/admin.css';
+import '../styles/rewards.css';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const STATUS_MAP = {

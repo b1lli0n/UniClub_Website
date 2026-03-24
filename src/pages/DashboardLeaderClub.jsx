@@ -278,12 +278,12 @@ export default function Dashboard() {
             events={previewEvents}
             clubName={club?.name || 'Câu lạc bộ'}
             onCreate={() => navigate('/clubEvent/create')}
-            onView={(id) => navigate(`/events/${id}`)}
-            onEdit={(id) => navigate(`/events/${id}/update`)}
+            onView={(id) => navigate(`/clubEvent/${id}`)}
+            onEdit={(id) => navigate(`/clubEvent/${id}/update`)}
             onAttend={(id) => navigate(`/clubs/${clubId}/events/${id}/attendance`)}
             onSeeAll={() => {
               localStorage.setItem('clubId', clubId);
-              navigate('/events');
+              navigate('/clubEvent');
             }}
             loading={loading}
           />

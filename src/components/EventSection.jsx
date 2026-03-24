@@ -46,7 +46,7 @@ const EventSection = () => {
     return (
       <section className="event-section">
         <div className="section-header">
-          <h2 className="section-title">Event</h2>
+          <h2 className="section-title">Sự kiện</h2>
         </div>
         <div className="event-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
           <p>Đang tải danh sách sự kiện...</p>
@@ -59,7 +59,7 @@ const EventSection = () => {
     return (
       <section className="event-section">
         <div className="section-header">
-          <h2 className="section-title">Event</h2>
+          <h2 className="section-title">Sự kiện</h2>
         </div>
         <div className="event-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
           <p style={{ color: '#e74c3c' }}>Lỗi: {error}</p>
@@ -72,7 +72,7 @@ const EventSection = () => {
     return (
       <section className="event-section">
         <div className="section-header">
-          <h2 className="section-title">Event</h2>
+          <h2 className="section-title">Sự kiện</h2>
         </div>
         <div className="event-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
           <p>Không có sự kiện nào</p>
@@ -84,7 +84,7 @@ const EventSection = () => {
   return (
     <section className="event-section">
       <div className="section-header">
-        <h2 className="section-title">Event</h2>
+        <h2 className="section-title">Sự kiện</h2>
         <Link to="/events" className="see-more-link">
           Xem thêm
           <svg

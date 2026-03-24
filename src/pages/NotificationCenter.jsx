@@ -343,7 +343,7 @@ const NotificationCenter = () => {
                                     onClick={() => setIsComposeOpen(true)}
                                 >
                                     <span>+</span>
-                                    CREATE NOTIFICATION
+                                    Tạo thông báo
                                 </button>
                             </div>
 

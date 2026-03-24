@@ -6,6 +6,7 @@ import EventCard from '../components/events/EventCard';
 import EventsFilter from '../components/events/EventsFilter';
 import EmptyEventState from '../components/events/EmptyEventState';
 import '../styles/Events.css';
+import { Plus, Calendar, Settings, Sparkles, Filter } from 'lucide-react';
 
 export default function EventsPage() {
     useEffect(() => {
@@ -69,7 +70,10 @@ export default function EventsPage() {
     }, [events]);
 
     const formatDateTime = (dateString) => {
+        if (!dateString) return 'Thời gian: TBC';
         const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Thời gian: Đang cập nhật';
+        
         return date.toLocaleDateString('vi-VN', {
             day: '2-digit',
             month: '2-digit',
@@ -85,7 +89,7 @@ export default function EventsPage() {
                 <div className="home-overlay" />
                 <div className="myclub-container">
                     <div className="glass-card events-loading-card">
-                        Loading...
+                        Đang tải...
                     </div>
                 </div>
             </div>
@@ -106,44 +110,56 @@ export default function EventsPage() {
     }
 
     return (
-        <div className="home-page">
-            <div className="home-overlay" />
-            <div className="myclub-container">
+        <div className="events-page-wrapper">
+            <div className="events-container">
                 {/* Header with title and create button */}
-                <div className="myclub-hero glass-card events-hero">
-                    <div className="myclub-hero-content">
-                        <h2>Sự kiện</h2>
-                        <p>Quản lý tất cả sự kiện của câu lạc bộ</p>
+                <header className="events-header">
+                    <div className="events-header-content">
+                        <div className="header-badge-premium">
+                            <Sparkles size={14} />
+                            Quản lý cộng đồng
+                        </div>
+                        <h1 className="events-page-title">Sự kiện CLB</h1>
+                        <p className="events-page-subtitle">Sáng tạo và điều phối các hoạt động ngoại khóa hấp dẫn</p>
                     </div>
+                    
                     <button
-                        className="myclub-add clubevent-primary-btn"
+                        className="btn-create-premium"
                         onClick={() => navigate('/clubEvent/create')}
                     >
-                        + Tạo sự kiện
+                        <Plus size={20} />
+                        <span>Tạo sự kiện mới</span>
                     </button>
+                </header>
+
+                <div className="events-controls-row">
+                    <div className="filter-label-wrap">
+                        <Filter size={18} />
+                        <span>Bộ lọc trạng thái:</span>
+                    </div>
+                    <EventsFilter
+                        statusFilter={statusFilter}
+                        onFilterChange={setStatusFilter}
+                    />
                 </div>
 
-                {/* Filter section */}
-                <EventsFilter
-                    statusFilter={statusFilter}
-                    onFilterChange={setStatusFilter}
-                />
-
                 {/* Events grid */}
-                {filteredEvents.length > 0 ? (
-                    <div className="events-grid">
-                        {filteredEvents.map((event) => (
-                            <EventCard
-                                key={event._id}
-                                event={event}
-                                onViewDetails={(id) => navigate(`/clubEvent/${id}`)}
-                                formatDateTime={formatDateTime}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <EmptyEventState onCreateEvent={() => navigate('/clubEvent/create')} />
-                )}
+                <div className="events-content-area">
+                    {filteredEvents.length > 0 ? (
+                        <div className="events-grid-modern">
+                            {filteredEvents.map((event) => (
+                                <EventCard
+                                    key={event._id}
+                                    event={event}
+                                    onViewDetails={(id) => navigate(`/clubEvent/${id}`)}
+                                    formatDateTime={formatDateTime}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <EmptyEventState onCreateEvent={() => navigate('/clubEvent/create')} />
+                    )}
+                </div>
             </div>
         </div>
     );

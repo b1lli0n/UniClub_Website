@@ -24,18 +24,25 @@ const Home = () => {
       <EventSection />
 
       {/* Call to Action Section */}
-      <div className="cta-section">
-        <div className="cta-content">
-          <h2 className="cta-title">Nên tăng quản lý câu lạc bộ</h2>
-          <p className="cta-description">Tạo câu lạc bộ của bạn và quản lý các thành viên, sự kiện dễ dàng.</p>
-          <button 
-            className="cta-button"
+      <section className="cta-section">
+        <div className="cta-decoration">
+          <div className="cta-blob cta-blob-1"></div>
+          <div className="cta-blob cta-blob-2"></div>
+        </div>
+        <div className="cta-content glass-card">
+          <h2 className="cta-title">Nâng tầm quản lý câu lạc bộ</h2>
+          <p className="cta-description">
+            Tạo câu lạc bộ của riêng bạn và bắt đầu hành trình xây dựng cộng đồng sinh viên vững mạnh ngay hôm nay.
+          </p>
+          <button
+            className="cta-button-premium"
             onClick={() => navigate('/clubs/create')}
           >
-            Tạo CLB của riêng bạn
+            <span>Tạo CLB của riêng bạn</span>
+            <i className="fa-solid fa-arrow-right"></i>
           </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

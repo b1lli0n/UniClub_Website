@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../styles/UpdateEvent.css';
+import '../styles/CreateEvent.css';
+import { ArrowLeft, AlertCircle, CheckCircle, Settings } from 'lucide-react';
 import { unmapEvent } from '../services/dataMappers';
 import StatusBadge from '../components/events/StatusBadge';
 import { EventUpdateForm } from '../components/events/EventUpdateForm';
@@ -202,7 +204,7 @@ function UpdateEventPage() {
                 <div className="home-overlay" />
                 <div className="myclub-container">
                     <div className="glass-card update-event-loading-card">
-                        Loading...
+                        Đang tải...
                     </div>
                 </div>
             </div>
@@ -245,34 +247,41 @@ function UpdateEventPage() {
     }
 
     return (
-        <div className="home-page">
-            <div className="home-overlay" />
-            <div className="myclub-container">
-                <header className="myclub-header">
-                    <h1 className="myclub-title">Chỉnh sửa sự kiện</h1>
+        <div className="create-event-page-wrapper">
+            <div className="create-event-container">
+                <header className="create-event-header">
+                    <div className="header-badge-premium">Quản lý sự kiện</div>
+                    <h1 className="page-main-title">Chỉnh sửa sự kiện</h1>
+                    <p className="page-subtitle">Cập nhật thông tin để thu hút nhiều thành viên hơn</p>
                 </header>
 
-                <div className="update-event-back">
-                    <button className="card-button" onClick={() => navigate(`/events/${eventId}`)}>
-                        ← Quay lại
+                <div className="create-event-nav">
+                    <button className="btn-back-soft" onClick={() => navigate(`/events/${eventId}`)}>
+                        <ArrowLeft size={18} />
+                        <span>Quay lại</span>
                     </button>
                 </div>
 
                 {message && (
-                    <div className="glass-card update-event-message-card">
-                        <p className="update-event-message-text">✓ {message}</p>
+                    <div className="toast-success-custom">
+                        <CheckCircle size={20} />
+                        <span>{message}</span>
                     </div>
                 )}
                 {error && event && (
-                    <div className="glass-card update-event-error-alert">
-                        <p className="update-event-error-text">⚠ {error}</p>
+                    <div className="toast-error-custom">
+                        <AlertCircle size={20} />
+                        <span>{error}</span>
                     </div>
                 )}
 
-                <div className="glass-card update-event-status-card">
-                    <span className="update-event-status-label">
-                        Trạng thái hiện tại:
-                    </span>
+                <div className="glass-card-premium update-event-status-card-modern">
+                    <div className="status-label-wrap">
+                        <Settings size={18} className="status-icon" />
+                        <span className="update-event-status-label">
+                            Trạng thái hiện tại:
+                        </span>
+                    </div>
                     <StatusBadge status={event.status} />
                 </div>
 
