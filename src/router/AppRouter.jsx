@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-=======
 import { Routes, Route } from 'react-router-dom'
->>>>>>> Thao
 import ProtectedRoute from './ProtectedRoute'
 
 import AdminLayout from '../layouts/AdminLayout'
@@ -18,12 +13,9 @@ import ListOfClubs from '../pages/ClubPages/ListOfClubs'
 import ClubDetail from '../pages/ClubPages/ClubDetail'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
-<<<<<<< HEAD
 import EventAttendanceList from '../pages/leader/EventAttendanceList'
-=======
 import CreateClub from '../pages/ClubPages/CreateClub'
 import TransactionList from '../pages/TransactionList'
->>>>>>> Quynh
 
 import Event from '../pages/EventPages/EventInClub'
 import EventPublic from '../pages/EventPages/EventPublic'
@@ -49,6 +41,14 @@ import RewardDetail from '../pages/admin/RewardDetail'
 import RedemptionHistory from '../pages/admin/RedemptionHistory'
 import Badges from '../pages/admin/Badges'
 import BadgeDetail from '../pages/admin/BadgeDetail'
+import RewardsAdmin from '../pages/admin/Rewards'
+import RewardDetailAdmin from '../pages/admin/RewardDetail'
+import RedemptionHistoryAdmin from '../pages/admin/RedemptionHistory'
+import BadgesAdmin from '../pages/admin/Badges'
+import BadgeDetailAdmin from '../pages/admin/BadgeDetail'
+import RewardPointLogs from '../pages/admin/RewardPointLogs'
+import AdminNotifications from '../pages/admin/Notifications'
+import FinancialDashboard from '../pages/FinancialDashboard'
 import MembershipsPage from '../pages/Memberships';
 import EventsPage from '../pages/Events';
 import EventDetailPage from '../pages/EventDetail';
@@ -56,6 +56,11 @@ import CreateEventPage from '../pages/CreateEvent';
 import UpdateEventPage from '../pages/UpdateEvent';
 import NotificationsPage from '../pages/Notifications';
 import Home from '../pages/Home';
+import ViewRewards from '../pages/RewardPages/ViewRewards';
+import ViewRewardDetail from '../pages/RewardPages/ViewRewardDetail';
+import ViewRedemptionHistory from '../pages/RewardPages/ViewRedemptionHistory';
+import RedeemReward from '../pages/RewardPages/RedeemReward';
+import RewardRequestsLeader from '../pages/RewardPages/RewardRequestsLeader';
 
 const AppRouter = () => {
   return (
@@ -75,6 +80,24 @@ const AppRouter = () => {
         <Route path="/club/:clubId/events" element={<Event />} />
         <Route path="/club/:clubId/events/:eventId" element={<EventDetail />} />
         <Route path="/my-notifications" element={<NotificationCenter />} />
+        <Route path="/club/:clubId/rewards" element={<ViewRewards />} />
+        <Route path="/club/:clubId/rewards/:rewardId" element={<ViewRewardDetail />} />
+        <Route
+          path="/club/:clubId/rewards/history"
+          element={
+            <ProtectedRoute>
+              <ViewRedemptionHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/club/:clubId/rewards/:rewardId/redeem"
+          element={
+            <ProtectedRoute>
+              <RedeemReward />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/my-events" element={<MyEvent />} />
         {/* <Route path="/my-requests" element={<ViewJoinRequests />} /> */}
@@ -93,9 +116,25 @@ const AppRouter = () => {
         <Route path="/events/create" element={<CreateEventPage />} />
         <Route path="/events/:eventId" element={<EventDetailPage />} />
         <Route path="/events/:eventId/update" element={<UpdateEventPage />} />
+
+        <Route path="/clubs/:clubId/rewards/requests" element={<RewardRequestsLeader />} />
+
+        <Route path="/clubEvent" element={<EventsPage />} />s
+        <Route path="/clubEvent/create" element={<CreateEventPage />} />
+        <Route path="/clubEvent/:eventId" element={<EventDetailPage />} />
+        <Route path="/clubEvent/:eventId/update" element={<UpdateEventPage />} />
+
+        <Route path="/events" element={<Navigate to="/clubEvent" replace />} />
+
         <Route path="/memberships" element={<MembershipsPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-      </Route>
+        <Route path="/notifications" element={<NotificationsPage />} />        <Route
+          path="/clubs/:clubId/finance"
+          element={
+            <ProtectedRoute>
+              <FinancialDashboard />
+            </ProtectedRoute>
+          }
+        />      </Route>
 
       {/* Admin Routes with ProtectedRoute */}
       <Route
@@ -112,7 +151,13 @@ const AppRouter = () => {
         <Route path="list-clubs" element={<ClubList />} />
         <Route path="club-detail/:id" element={<ClubDetailAdmin />} />
         <Route path="club-members/:id" element={<ClubMembers />} />
-        <Route path="announcements" element={<PlaceholderPage title="Quản lý thông báo" />} />
+        <Route path="rewards" element={<RewardsAdmin />} />
+        <Route path="rewards/:rewardId" element={<RewardDetailAdmin />} />
+        <Route path="reward-history" element={<RedemptionHistoryAdmin />} />
+        <Route path="reward-point-logs" element={<RewardPointLogs />} />
+        <Route path="badges" element={<BadgesAdmin />} />
+        <Route path="badges/:badgeId" element={<BadgeDetailAdmin />} />
+        <Route path="announcements" element={<AdminNotifications />} />
         <Route path="users" element={<PlaceholderPage title="Quản lý người dùng" />} />
         {/* Reward & Badge Routes */}
         <Route path="rewards" element={<Rewards />} />

@@ -13,10 +13,18 @@ const axiosInstance = axios.create({
   }
 })
 
+const clearAuthStorage = () => {
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('adminToken')
+  localStorage.removeItem('user')
+}
+
 // Interceptor để thêm token (nếu có authentication)
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('adminToken')
+    // Prefer unified token key, keep legacy fallback for old sessions.
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('adminToken')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -30,7 +38,45 @@ axiosInstance.interceptors.request.use(
 // Interceptor để xử lý response errors
 axiosInstance.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config
+
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      originalRequest._retry = true
+
+      try {
+        const refreshToken = localStorage.getItem('refreshToken')
+
+        if (!refreshToken) {
+          clearAuthStorage()
+          window.location.href = '/login'
+          return Promise.reject(error)
+        }
+
+        const refreshResponse = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/refresh-token`, {
+          refreshToken,
+        })
+
+        if (refreshResponse.data?.success) {
+          const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data.data
+
+          localStorage.setItem('accessToken', accessToken)
+          localStorage.setItem('adminToken', accessToken)
+
+          if (newRefreshToken) {
+            localStorage.setItem('refreshToken', newRefreshToken)
+          }
+
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`
+          return axiosInstance(originalRequest)
+        }
+      } catch (refreshError) {
+        clearAuthStorage()
+        window.location.href = '/login'
+        return Promise.reject(refreshError)
+      }
+    }
+
     if (error.response) {
       // Server trả về error response
       console.error('API Error:', error.response.data)
@@ -98,8 +144,22 @@ export const getClubMembers = async (clubId, params = {}) => {
  * Cập nhật trạng thái CLB (Approve/Reject/Activate/Deactivate)
  */
 export const updateClubStatus = async (clubId, status) => {
-  console.log('API Calls - updateClubStatus:', { clubId, status, type: typeof status })
-  return axiosInstance.put(`/clubs/${clubId}/status`, { status })
+  const statusMap = {
+    pending: 0,
+    active: 1,
+    paused: 2,
+    rejected: 3
+  }
+
+  const normalizedStatus = Number.isInteger(status)
+    ? status
+    : statusMap[String(status).toLowerCase()]
+
+  if (![0, 1, 2, 3].includes(normalizedStatus)) {
+    throw new Error('Trạng thái CLB không hợp lệ. Cho phép: 0 (pending), 1 (active), 2 (paused), 3 (rejected)')
+  }
+
+  return axiosInstance.put(`/clubs/${clubId}/status`, { status: normalizedStatus })
 }
 
 /**

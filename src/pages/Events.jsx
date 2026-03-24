@@ -112,7 +112,7 @@ export default function EventsPage() {
                         <p>Quản lý tất cả sự kiện của câu lạc bộ</p>
                     </div>
                     <button
-                        className="myclub-add"
+                        className="myclub-add clubevent-primary-btn"
                         onClick={() => navigate('/clubEvent/create')}
                     >
                         + Tạo sự kiện

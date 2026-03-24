@@ -8,8 +8,12 @@ const AdminLayout = () => {
         { key: 'dashboard', label: 'Dashboard', icon: 'fa-chart-pie', path: '/admin', end: true },
         { key: 'registrations', label: 'Danh sách đăng ký', icon: 'fa-list-check', path: '/admin/clubs-request' },
         { key: 'clubs', label: 'Quản lý câu lạc bộ', icon: 'fa-sitemap', path: '/admin/list-clubs' },
+<<<<<<< HEAD
         { key: 'rewards', label: 'Phần thưởng', icon: 'fa-gift', path: '/admin/rewards' },
         { key: 'badges', label: 'Huy hiệu', icon: 'fa-medal', path: '/admin/badges' },
+=======
+        { key: 'rewardLogs', label: 'Reward Logs', icon: 'fa-clock-rotate-left', path: '/admin/reward-point-logs' },
+>>>>>>> Tien
         { key: 'announcements', label: 'Quản lý thông báo', icon: 'fa-bullhorn', path: '/admin/announcements' },
         { key: 'users', label: 'Quản lý người dùng', icon: 'fa-users', path: '/admin/users' },
     ]
@@ -40,8 +44,16 @@ const AdminLayout = () => {
                                 const active = isActive ||
                                     (m.key === 'clubs' && location.pathname.startsWith('/admin/club-detail')) ||
                                     (m.key === 'registrations' && location.pathname.startsWith('/admin/club-request-detail')) ||
+<<<<<<< HEAD
                                     (m.key === 'rewards' && (location.pathname.startsWith('/admin/rewards/') || location.pathname === '/admin/reward-history')) ||
                                     (m.key === 'badges' && location.pathname.startsWith('/admin/badges/'))
+=======
+                                    (m.key === 'rewardLogs' && (
+                                        location.pathname.startsWith('/admin/reward-point-logs') ||
+                                        location.pathname.startsWith('/admin/reward-history') ||
+                                        location.pathname.startsWith('/admin/rewards')
+                                    ))
+>>>>>>> Tien
                                 return `admin-menu-item ${m.key === 'registrations' ? 'admin-menu-item--primary' : ''} ${active ? 'is-active' : ''}`
                             }}
                         >

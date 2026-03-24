@@ -22,6 +22,14 @@ const ClubDetailCard = ({ club }) => {
     const clubId = club.id || club._id;
     const roleNum = club.membershipRole ?? club.role;
 
+    // Persist selected club context so sidebar can render role-based items.
+    if (clubId) {
+      localStorage.setItem('clubId', String(clubId));
+    }
+    if (roleNum !== undefined && roleNum !== null) {
+      localStorage.setItem('clubRole', String(roleNum));
+    }
+
     // Management roles (Leader, Sub Leader, Secretary, Treasurer) can access dashboard
     // Role: 1=leader, 2=sub_leader, 3=secretary, 4=treasurer
     if (roleNum > 0) {

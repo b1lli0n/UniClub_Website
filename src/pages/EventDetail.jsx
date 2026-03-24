@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { getEventsByClub } from '../api/clubApi';
 import EventHeader from '../components/eventDetail/EventHeader';
 import EventInfoCard from '../components/eventDetail/EventInfoCard';
 import CancelledEventAlert from '../components/eventDetail/CancelledEventAlert';
+import api from '../api/api';
 import '../styles/EventDetail.css';
 
 export default function EventDetailPage() {
@@ -128,33 +130,25 @@ export default function EventDetailPage() {
 
     const handleCancelWholeEvent = async () => {
         if (!cancelReason.trim()) {
-            alert('Vui lòng nhập lý do hủy sự kiện');
+            toast.warning('Vui lòng nhập lý do hủy sự kiện');
             return;
         }
 
         try {
             setCanceling(true);
-            const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/events/${eventId}/cancel`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ reason: cancelReason })
-            });
+            const response = await api.patch(
+                `/clubs/${clubId}/events/${eventId}/cancel`,
+                { reason: cancelReason }
+            );
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Hủy sự kiện thất bại');
-            }
-
-            alert('Hủy sự kiện thành công!');
+            toast.success('Hủy sự kiện thành công!');
             setShowCancelDialog(false);
             // Reload event data
             window.location.reload();
         } catch (err) {
             console.error('❌ Cancel event error:', err);
-            alert(err.message || 'Không thể hủy sự kiện');
+            const errorMessage = err.response?.data?.message || err.message || 'Không thể hủy sự kiện';
+            toast.error(errorMessage);
         } finally {
             setCanceling(false);
         }

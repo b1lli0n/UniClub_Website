@@ -72,7 +72,8 @@ body.clubdetail-body #root {
 }
 
 .clubdetail-logo-wrapper {
-  width: 200px;   /* khung vuông lớn hơn theo yêu cầu */
+  width: 200px;
+  /* khung vuông lớn hơn theo yêu cầu */
   height: 200px;
   border-radius: 20px;
   overflow: hidden;
@@ -222,6 +223,70 @@ body.clubdetail-body #root {
   transform: translateX(0);
 }
 
+/* Rewards Table */
+.clubdetail-reward-table-wrap {
+  padding: 14px;
+}
+
+.clubdetail-reward-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.clubdetail-reward-table th,
+.clubdetail-reward-table td {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  color: var(--clubdetail-ink);
+}
+
+.clubdetail-reward-table th {
+  text-align: left;
+  font-weight: 800;
+}
+
+.clubdetail-reward-empty {
+  margin: 0;
+  padding: 8px;
+  color: var(--clubdetail-muted);
+  font-weight: 600;
+}
+
+.clubdetail-reward-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.clubdetail-reward-status--active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.clubdetail-reward-status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.clubdetail-reward-status--inactive {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.clubdetail-reward-link {
+  border: 1px solid rgba(31, 42, 68, 0.25);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--clubdetail-ink);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 /* Organized Events */
 .clubdetail-events-grid {
   display: grid;
@@ -231,7 +296,8 @@ body.clubdetail-body #root {
 
 .clubdetail-event-card {
   display: grid;
-  grid-template-columns: 200px 1fr; /* cột ảnh cố định, vuông to hơn */
+  grid-template-columns: 200px 1fr;
+  /* cột ảnh cố định, vuông to hơn */
   gap: 16px;
   padding: 16px;
   align-items: stretch;
@@ -239,7 +305,8 @@ body.clubdetail-body #root {
 
 .clubdetail-event-image {
   width: 200px;
-  height: 200px;      /* khung ảnh vuông, cố định */
+  height: 200px;
+  /* khung ảnh vuông, cố định */
   border-radius: 16px;
   overflow: hidden;
 }
@@ -310,7 +377,8 @@ body.clubdetail-body #root {
 /* Admin Board */
 .clubdetail-admin-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr)); /* luôn 5 cột trên 1 hàng (màn lớn) */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* luôn 5 cột trên 1 hàng (màn lớn) */
   gap: 24px;
   justify-items: center;
 }
@@ -322,7 +390,8 @@ body.clubdetail-body #root {
   gap: 16px;
   padding: 28px;
   width: 100%;
-  max-width: 260px; /* mọi card rộng như nhau */
+  max-width: 260px;
+  /* mọi card rộng như nhau */
   min-height: 400px;
   box-sizing: border-box;
 }
@@ -330,7 +399,8 @@ body.clubdetail-body #root {
 .clubdetail-admin-avatar {
   width: 180px;
   height: 220px;
-  border-radius: 18px; /* hình chữ nhật bo góc */
+  border-radius: 18px;
+  /* hình chữ nhật bo góc */
   overflow: hidden;
 }
 
@@ -360,7 +430,8 @@ body.clubdetail-body #root {
 
 .clubdetail-admin-info {
   text-align: center;
-  max-width: 220px; /* giới hạn bề ngang text để dễ ellipsis */
+  max-width: 220px;
+  /* giới hạn bề ngang text để dễ ellipsis */
   width: 100%;
   overflow: hidden;
 }
@@ -392,7 +463,8 @@ body.clubdetail-body #root {
 
 .clubdetail-library-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2x2 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* 2x2 */
   gap: 16px;
 }
 
@@ -404,7 +476,8 @@ body.clubdetail-body #root {
 .clubdetail-library-frame {
   position: relative;
   width: 100%;
-  padding-top: 65%; /* ~tỉ lệ 3:2, tất cả khung như nhau */
+  padding-top: 65%;
+  /* ~tỉ lệ 3:2, tất cả khung như nhau */
   border-radius: 18px;
   overflow: hidden;
 }
@@ -414,7 +487,8 @@ body.clubdetail-body #root {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* crop nhưng không méo */
+  object-fit: cover;
+  /* crop nhưng không méo */
   display: block;
 }
 
@@ -500,7 +574,8 @@ body.clubdetail-body footer a:hover {
   }
 
   .clubdetail-library-grid {
-    grid-template-columns: 1fr; /* 4 khung xếp dọc trên mobile */
+    grid-template-columns: 1fr;
+    /* 4 khung xếp dọc trên mobile */
   }
 
   .clubdetail-admin-grid {

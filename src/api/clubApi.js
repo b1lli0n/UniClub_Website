@@ -94,7 +94,29 @@ export const deleteClub = async (clubId) => {
   }
 };
 
-// Thêm thành viên vào club
+// Cập nhật trạng thái club (1: active, 2: paused)
+export const updateClubStatus = async (clubId, status) => {
+  try {
+    const response = await clubAPI.patch(`/${clubId}/status`, { status });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// ===== MEMBER MANAGEMENT (Active Members) =====
+
+// Xem danh sách thành viên active của club
+export const getClubMembers = async (clubId) => {
+  try {
+    const response = await clubAPI.get(`/${clubId}/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Thêm thành viên vào club (BE chưa có route)
 export const addMemberToClub = async (clubId, memberId) => {
   try {
     const response = await clubAPI.post(`/${clubId}/members`, { memberId });
@@ -157,16 +179,6 @@ export const cancelJoinRequest = async (clubId, requestId) => {
 };
 
 // ===== MEMBER MANAGEMENT APIS =====
-
-// Xem danh sách thành viên của club
-export const getClubMembers = async (clubId) => {
-  try {
-    const response = await clubAPI.get(`/${clubId}/members`);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
 
 // Lấy danh sách CLB mà user hiện tại tham gia
 export const getMyClubs = async () => {
