@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import ClubDetailCard from '../../components/ClubDetailCard';
 import { getUserClubs } from '../../api/userApi';
 import { useAuth } from '../../context/AuthContext';
+import '../../styles/Profile.css';
 import '../../styles/ListOfClubs.css';
 
 // Icon Components
@@ -110,16 +111,16 @@ const ListOfClubs = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [clubs, setClubs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const dropdownRef = useRef(null);
-
     // Add body class for styling
     useEffect(() => {
-        document.body.classList.add('clubs-body');
+        document.body.classList.add('profile-body');
         return () => {
-            document.body.classList.remove('clubs-body');
+            document.body.classList.remove('profile-body');
         };
     }, []);
+
+    const [loading, setLoading] = useState(true);
+    const dropdownRef = useRef(null);
 
     // Close dropdown when clicking outside
     useEffect(() => {

@@ -22,8 +22,8 @@
   border-radius: 22px;
   z-index: 1000;
   /* Cao hơn overlay để không bị mờ */
-  max-width: 1200px;
-  width: calc(100% - 2rem);
+  max-width: var(--site-content-max-width);
+  width: calc(100% - 2 * var(--site-content-gutter));
 }
 
 .header-nav {

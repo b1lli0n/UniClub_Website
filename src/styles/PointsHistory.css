@@ -1,79 +1,64 @@
 :root {
-  --points-primary: #6366f1;
-  --points-accent-pink: #fab1a0;
-  --points-reward-gold: #f59e0b;
-  --points-glass: rgba(255, 255, 255, 0.65);
-  --points-text-dark: #1e293b;
-  --points-muted: #64748b;
-  --points-success: #10b981;
-}
-
-body.points-history-body {
-  margin: 0;
-  min-height: 100vh;
-  color: var(--points-text-dark);
-  background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
-}
-
-body.points-history-body #root {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  text-align: left;
+  --ph-accent: #ff8baa;
+  --ph-accent-soft: rgba(255, 139, 170, 0.14);
+  --ph-text: #111827;
+  --ph-muted: #6b7280;
+  --ph-card: #ffffff;
+  --ph-border: #eef0f4;
+  --ph-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --ph-reward: #f59e0b;
+  --ph-success: #059669;
+  --ph-page-bg: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
 }
 
 .points-history-page {
-  min-height: 100vh;
-  padding: 24px 0 3rem;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: calc(100vh - 4rem);
+  padding: 0 var(--site-content-gutter) 96px;
+  margin-top: -1.5rem;
+  padding-top: 1.5rem;
+  background: var(--ph-page-bg);
 }
 
 .points-history-container {
-  max-width: 1150px;
+  max-width: var(--site-content-max-width);
   margin: 0 auto;
-  padding: 0 15px;
+  width: 100%;
 }
 
-.points-history-hero {
-  margin-bottom: 35px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  gap: 1rem;
+.points-history-shell {
+  background: transparent;
 }
 
-.points-history-hero-title {
-  font-size: clamp(1.8rem, 4vw, 3.2rem);
+.points-history-top {
+  margin-bottom: clamp(18px, 2.5vw, 24px);
+}
+
+.points-history-top-title {
+  margin: 0 0 4px;
+  font-size: clamp(1.6rem, 2.6vw, 2rem);
   font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  line-height: 1.15;
+}
+
+.points-history-top-desc {
   margin: 0;
-  letter-spacing: -1px;
-  line-height: 1.1;
-  color: var(--points-text-dark);
-}
-
-.points-history-hero-accent {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  color: var(--points-primary);
-  font-size: 1.1em;
-}
-
-.points-history-stat-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--points-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #475569;
 }
 
 .points-history-dashboard {
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 25px;
+  grid-template-columns: minmax(260px, 300px) 1fr;
+  gap: clamp(16px, 2vw, 22px);
+  align-items: start;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .points-history-dashboard {
     grid-template-columns: 1fr;
   }
@@ -82,120 +67,84 @@ body.points-history-body #root {
 .points-history-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.points-history-glass {
-  background: var(--points-glass);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-radius: 32px;
-  padding: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.03);
+  gap: 16px;
 }
 
 .points-history-card {
-  margin-bottom: 0;
+  background: var(--ph-card);
+  border-radius: 18px;
+  border: 1px solid var(--ph-border);
+  box-shadow: var(--ph-shadow);
+  padding: clamp(18px, 2vw, 22px);
 }
 
-.points-history-club-card {
-  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 50%, #a855f7 100%);
-  color: white;
-  border: none;
+.points-history-stat-card--club {
+  background: linear-gradient(145deg, #ffffff 0%, #fff5f7 50%, #fef2f4 100%);
+  border: 1px solid color-mix(in srgb, var(--ph-accent) 18%, var(--ph-border));
   position: relative;
   overflow: hidden;
-  padding: 32px 28px;
-  box-shadow: 0 20px 50px rgba(99, 102, 241, 0.35);
-}
-
-.points-history-club-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -30%;
-  width: 80%;
-  height: 160%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.points-history-club-card .points-history-stat-label,
-.points-history-club-card .points-history-club-label,
-.points-history-club-card .points-history-join-date {
-  color: rgba(255, 255, 255, 0.95);
 }
 
 .points-history-role-badge {
   position: absolute;
-  top: 24px;
-  right: 24px;
-  background: rgba(255, 255, 255, 0.25);
-  padding: 8px 14px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  top: 16px;
+  right: 16px;
+  background: var(--ph-accent-soft);
+  color: #9f1239;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  backdrop-filter: blur(8px);
+  letter-spacing: 0.06em;
 }
 
-.points-history-club-label {
-  font-size: 0.8rem;
+.points-history-stat-label {
+  font-size: 0.65rem;
+  font-weight: 700;
   text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  color: var(--ph-muted);
   display: block;
-  margin-bottom: 10px;
-  opacity: 0.95;
+  margin-bottom: 8px;
 }
 
 .points-history-club-name-wrap {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin: 4px 0 0;
-  flex-wrap: wrap;
+  gap: 12px;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
-.points-history-club-icon {
-  width: 44px;
-  height: 44px;
+.points-history-stat-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--ph-accent);
   flex-shrink: 0;
-  opacity: 0.95;
 }
 
 .points-history-club-name {
   margin: 0;
-  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
   font-weight: 800;
+  color: var(--ph-text);
   line-height: 1.2;
-  letter-spacing: -0.02em;
   flex: 1;
   min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .points-history-join-date {
   font-size: 0.85rem;
-  opacity: 0.95;
-  margin-top: 18px;
+  color: var(--ph-muted);
+  margin-top: 14px;
   display: block;
 }
 
-.points-history-stat-huge {
-  font-size: 2.5rem;
-  font-weight: 800;
-  letter-spacing: -2px;
-  line-height: 1;
-  margin: 8px 0;
-  color: var(--points-text-dark);
-}
-
-
 .points-history-contrib-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   text-align: center;
 }
 
@@ -204,60 +153,51 @@ body.points-history-body #root {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin: 8px 0 12px;
-  flex-wrap: wrap;
+  margin: 6px 0 12px;
 }
 
 .points-history-contrib-icon {
-  width: 32px;
-  height: 32px;
-  color: var(--points-primary);
+  width: 28px;
+  height: 28px;
+  color: var(--ph-accent);
   flex-shrink: 0;
 }
 
 .points-history-contrib-value {
-  font-size: 2rem;
+  font-size: clamp(1.75rem, 3vw, 2.1rem);
   font-weight: 800;
-  letter-spacing: -1px;
+  letter-spacing: -0.02em;
+  color: var(--ph-text);
   line-height: 1;
-  color: var(--points-text-dark);
 }
 
 .points-history-contrib-unit {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--points-muted);
-  margin-left: 2px;
+  color: var(--ph-muted);
 }
 
 .points-history-progress-track {
   width: 100%;
   height: 8px;
-  background: #e2e8f0;
+  background: #f1f5f9;
   border-radius: 999px;
   overflow: hidden;
-  margin-top: 0;
 }
 
 .points-history-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--points-primary), #a855f7);
+  background: linear-gradient(90deg, var(--ph-accent), #fda4c0);
   border-radius: 999px;
-  transition: width 0.4s ease;
 }
 
-/* Reward card */
 .points-history-reward-card {
-  background: #ffffff;
-  border: 2px solid var(--points-reward-gold);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  border: 1px solid color-mix(in srgb, var(--ph-reward) 35%, var(--ph-border));
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
 }
 
 .points-history-reward-label {
-  color: var(--points-reward-gold) !important;
+  color: var(--ph-reward) !important;
 }
 
 .points-history-reward-row {
@@ -265,74 +205,56 @@ body.points-history-body #root {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin: 8px 0 16px;
-  flex-wrap: wrap;
+  margin: 6px 0 14px;
 }
 
 .points-history-reward-icon {
-  width: 32px;
-  height: 32px;
-  color: var(--points-reward-gold);
-  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  color: var(--ph-reward);
 }
 
 .points-history-reward-value {
-  font-size: 2rem;
+  font-size: clamp(1.75rem, 3vw, 2.1rem);
   font-weight: 800;
-  letter-spacing: -1px;
-  color: var(--points-reward-gold);
-  line-height: 1;
+  color: var(--ph-reward);
 }
 
 .points-history-reward-unit {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   opacity: 0.9;
-  margin-left: 2px;
 }
 
 .points-history-btn-redeem {
-  background: var(--points-reward-gold);
-  color: white;
-  border: none;
   width: 100%;
-  padding: 12px;
-  border-radius: 15px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--ph-reward);
+  color: #fff;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: transform 0.2s;
 }
 
-.points-history-btn-redeem:hover {
-  transform: scale(1.02);
-}
-
-/* Badges card */
-.points-history-badges-card {
-  padding: 20px;
-}
-
-.points-history-badges-label {
-  color: var(--points-muted) !important;
+.points-history-badges-icon {
+  width: 26px;
+  height: 26px;
+  color: var(--ph-reward);
+  flex-shrink: 0;
 }
 
 .points-history-badges-value {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  margin-top: 5px;
-  color: var(--points-text-dark);
-}
-
-.points-history-badges-icon {
-  width: 28px;
-  height: 28px;
-  color: var(--points-reward-gold);
-  flex-shrink: 0;
+  color: var(--ph-text);
+  margin-top: 0;
 }
 
 .points-history-main {
@@ -340,64 +262,147 @@ body.points-history-body #root {
 }
 
 .points-history-history-card {
-  padding: 35px;
+  padding: clamp(20px, 2.5vw, 28px);
 }
 
 .points-history-history-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  padding-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 1rem;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ph-border);
 }
 
 .points-history-history-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 2rem;
   margin: 0;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: var(--points-text-dark);
+  color: var(--ph-text);
 }
 
 .points-history-filter {
-  display: flex;
-  gap: 10px;
+  display: inline-flex;
   align-items: center;
+  gap: 8px;
+  color: var(--ph-muted);
 }
 
 .points-history-month-select {
-  background: white;
-  border: 1px solid #e2e8f0;
-  padding: 8px 15px;
+  padding: 10px 14px;
   border-radius: 12px;
-  font-family: inherit;
+  border: 1px solid var(--ph-border);
+  background: #f9fafb;
+  font-size: 0.875rem;
   font-weight: 600;
-  font-size: 0.85rem;
-  outline: none;
-  color: var(--points-text-dark);
+  color: var(--ph-text);
   cursor: pointer;
-  min-width: 120px;
-}
-
-.points-history-month-select:focus {
-  border-color: var(--points-primary);
+  outline: none;
+  min-width: 140px;
 }
 
 .points-history-list {
-  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .points-history-row {
   display: grid;
-  grid-template-columns: 80px 1fr 110px;
-  gap: 12px;
+  grid-template-columns: 76px 1fr minmax(96px, 120px);
+  gap: 14px;
   align-items: center;
-  padding: 18px 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-  transition: 0.3s;
+  padding: 14px 12px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.points-history-row:hover {
+  background: #f9fafb;
+  border-color: var(--ph-border);
+  box-shadow: var(--ph-shadow);
+  transform: translateY(-2px);
+}
+
+.points-history-date-box {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ph-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+}
+
+.points-history-row-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.points-history-thumb {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f9fafb;
+  border: 1px solid var(--ph-border);
+  flex-shrink: 0;
+}
+
+.points-history-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.points-history-row-text {
+  min-width: 0;
+}
+
+.points-history-row-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ph-text);
+  line-height: 1.35;
+}
+
+.points-history-row-sub {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--ph-muted);
+  font-weight: 500;
+}
+
+.points-history-points-box {
+  text-align: right;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.points-history-loading-card {
+  text-align: center;
+  padding: 2rem;
+}
+
+.points-history-loading,
+.points-history-empty {
+  margin: 0;
+  color: var(--ph-muted);
+  padding: 1rem 0;
+}
+
+.points-history-empty {
+  text-align: center;
 }
 
 @media (max-width: 600px) {
@@ -409,62 +414,4 @@ body.points-history-body #root {
   .points-history-points-box {
     text-align: left;
   }
-}
-
-.points-history-row:hover {
-  background: white;
-  transform: translateX(10px);
-  border-radius: 18px;
-}
-
-.points-history-date-box {
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: #94a3b8;
-}
-
-.points-history-row-content {
-  min-width: 0;
-}
-
-.points-history-row-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--points-text-dark);
-}
-
-.points-history-row-sub {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
-  color: var(--points-muted);
-}
-
-.points-history-points-box {
-  text-align: right;
-  font-weight: 800;
-  color: var(--points-success);
-  font-size: 0.9rem;
-}
-
-.points-history-loading-card {
-  text-align: center;
-  padding: 2rem;
-}
-
-.points-history-loading,
-.points-history-empty {
-  margin: 0;
-  color: var(--points-muted);
-  padding: 1rem 0;
-}
-
-.points-history-empty {
-  text-align: center;
-}
-
-.points-history-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }

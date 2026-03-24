@@ -1,0 +1,12 @@
+.club-area-loading-main {
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.club-area-loading-inner {
+  color: #64748b;
+  font-size: 1rem;
+}

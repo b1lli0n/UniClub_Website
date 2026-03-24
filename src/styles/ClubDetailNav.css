@@ -1,0 +1,74 @@
+/* ClubDetailNav - thanh điều hướng cố định, hiện trên tất cả trang club */
+.clubdetail-nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(31, 42, 68, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.clubdetail-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--clubdetail-ink, #1f2a44);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+.clubdetail-nav-btn:hover {
+  background: rgba(255, 175, 204, 0.2);
+}
+
+.clubdetail-nav-btn.is-active {
+  background: rgba(255, 175, 204, 0.35);
+  color: #b83b6e;
+}
+
+.clubdetail-nav-btn.is-active:hover {
+  background: rgba(255, 175, 204, 0.45);
+}
+
+.clubdetail-nav-btn:active {
+  transform: scale(0.98);
+}
+
+.clubdetail-nav-btn svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .clubdetail-nav {
+    left: 8px;
+    right: 8px;
+    transform: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .clubdetail-nav-btn {
+    flex: 1;
+    min-width: calc(33.33% - 6px);
+    max-width: calc(50% - 4px);
+    justify-content: center;
+    padding: 8px 6px;
+    font-size: 0.75rem;
+  }
+}

@@ -259,12 +259,19 @@ const Register = () => {
       const response = await registerService(finalFormData);
 
       if (response.success) {
-        // Cập nhật auth context
-        login(response.data.user);
-
+        const data = response.data || {};
+        if (data.needVerify) {
+          toast.success(response.message || 'Đăng ký thành công! Vui lòng xác thực email.');
+          navigate('/verify-otp', {
+            state: {
+              email: data.email || finalFormData.email,
+              resendCooldownSeconds: data.resendCooldownSeconds ?? 60,
+            },
+          });
+          return;
+        }
+        if (data.user) login(data.user);
         toast.success(response.message || 'Đăng ký thành công!');
-
-        // Chuyển hướng về trang chủ
         navigate('/');
       }
     } catch (error) {

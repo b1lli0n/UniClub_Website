@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { FileBadge, ScrollText, CircleStar, BookMarked, X } from 'lucide-react';
+import { Users, Calendar, Tag, ImageIcon, ArrowRight, Crown, UserCircle2, ShieldCheck, FileBadge2, Wallet } from 'lucide-react';
+import ClubDetailNav from '../../components/ClubDetailNav';
 import { getClubById, getEventsByClub } from '../../api/clubApi';
+import { getUserClubs } from '../../api/userApi';
+import { useAuth } from '../../context/AuthContext';
 import '../../styles/ClubDetail.css';
+import { ASSET_BASE } from '../../api/api';
 
-// Backend base URL để build full URL cho logo_url / imageUrl nếu BE trả về đường dẫn tương đối
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const ASSET_BASE = API_BASE.replace(/\/api\/?$/, '');
-
-// Helper: build full image URL từ đường dẫn trong DB (/assets/..., /uploads/..., hoặc absolute URL)
 const buildImageSrc = (raw) => {
   const cleaned = (raw || '').trim().replace(/"/g, '');
   if (!cleaned) return null;
@@ -18,16 +17,70 @@ const buildImageSrc = (raw) => {
   return `${ASSET_BASE}${cleaned}`;
 };
 
+const pickEventShowcaseImage = (event) => {
+  if (!event) return null;
+  const order = [
+    event.banner_url,
+    event.image_url,
+    event.image,
+    event.thumbnail_url,
+    Array.isArray(event.media_urls) ? event.media_urls[0] : null,
+  ];
+  for (const raw of order) {
+    const src = buildImageSrc(raw);
+    if (src) return src;
+  }
+  return null;
+};
+
+const formatRoleLabel = (role) => {
+  const value = typeof role === 'string' ? role.trim() : role;
+  const map = {
+    0: 'Thành viên',
+    1: 'Leader',
+    2: 'Sub Leader',
+    3: 'Secretary',
+    4: 'Treasurer',
+  };
+
+  if (typeof value === 'number' && map[value]) return map[value];
+  if (typeof value === 'string') {
+    if (value !== '' && !Number.isNaN(Number(value)) && map[Number(value)]) return map[Number(value)];
+    return value;
+  }
+  return '';
+};
+
+const getRoleIcon = (role) => {
+  const value = typeof role === 'string' ? role.trim() : role;
+  const map = {
+    0: UserCircle2,
+    1: Crown,
+    2: ShieldCheck,
+    3: FileBadge2,
+    4: Wallet,
+  };
+
+  if (typeof value === 'number' && map[value]) return map[value];
+  if (typeof value === 'string' && value !== '' && !Number.isNaN(Number(value)) && map[Number(value)]) {
+    return map[Number(value)];
+  }
+  return UserCircle2;
+};
+
 const ClubDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showFloatingNav } = useOutletContext() || {};
+  const { user } = useAuth();
   const [isJoined, setIsJoined] = useState(false);
+  const [isMember, setIsMember] = useState(false);
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
-  const [showFabMenu, setShowFabMenu] = useState(false);
+  const [heroImgError, setHeroImgError] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
-  // Add body class for styling
   useEffect(() => {
     document.body.classList.add('clubdetail-body');
     return () => {
@@ -35,27 +88,68 @@ const ClubDetail = () => {
     };
   }, []);
 
-  // Fetch club detail + events from API
+  useEffect(() => {
+    setHeroImgError(false);
+  }, [id, club?.logo_url]);
+
   useEffect(() => {
     const fetchClubDetail = async () => {
       if (!id) return;
       setLoading(true);
       try {
-        // 1. Lấy thông tin club
         const clubRes = await getClubById(id);
         if (clubRes.success) {
-          setClub(clubRes.data);
+          const clubData = clubRes.data;
+          setClub(clubData);
+          setUserRole(clubData?.membershipRole ?? clubData?.my_role ?? clubData?.role ?? null);
+          const fromApi = clubData?.isMember ?? clubData?.is_member;
+          if (typeof fromApi === 'boolean') {
+            setIsMember(fromApi);
+            setIsJoined(fromApi);
+          }
         } else {
           toast.error(clubRes.message || 'Không thể tải thông tin câu lạc bộ');
           setClub(null);
         }
 
-        // 2. Lấy danh sách sự kiện của club
         const eventRes = await getEventsByClub(id, { sortBy: 'nearest' });
         if (eventRes.success) {
           setEvents(eventRes.data || []);
         } else {
           setEvents([]);
+        }
+
+        const clubData = clubRes?.success ? clubRes.data : null;
+        const fromApi = clubData?.isMember ?? clubData?.is_member;
+        if (typeof fromApi !== 'boolean' && user) {
+          const userId = user._id || user.id;
+          if (userId) {
+            try {
+              const userClubsRes = await getUserClubs(userId);
+              const memberships =
+                userClubsRes?.data?.clubs ||
+                userClubsRes?.data ||
+                userClubsRes?.clubs ||
+                userClubsRes ||
+                [];
+              const arr = Array.isArray(memberships) ? memberships : [];
+              const joined = arr.some((m) => {
+                const cid = m?.club_id?._id || m?.club_id?.id || m?.club?._id || m?.club?.id;
+                return String(cid) === String(id);
+              });
+              const membership = arr.find((m) => {
+                const cid = m?.club_id?._id || m?.club_id?.id || m?.club?._id || m?.club?.id;
+                return String(cid) === String(id);
+              });
+              setIsMember(joined);
+              setIsJoined(joined);
+              if (membership) {
+                setUserRole(membership.role ?? membership.membershipRole ?? membership.membership_role ?? null);
+              }
+            } catch {
+
+            }
+          }
         }
       } catch (error) {
         console.error('Error fetching club detail:', error);
@@ -72,14 +166,8 @@ const ClubDetail = () => {
     };
 
     fetchClubDetail();
-  }, [id]);
+  }, [id, user]);
 
-  const handleJoin = () => {
-    setIsJoined(!isJoined);
-  };
-
-  // Derived data từ club
-  // Map events từ BE sang shape FE đang dùng
   const organizedEvents = (events || []).map((ev) => {
     const image = buildImageSrc(ev.media_urls && ev.media_urls[0]);
     return {
@@ -94,16 +182,7 @@ const ClubDetail = () => {
   });
   const adminBoard = club?.adminBoard || [];
 
-  // Chuẩn hoá dữ liệu thư viện ảnh từ BE
-  // Hỗ trợ cả:
-  // - club.libraryImages: [{ imageUrl, isLarge }, ...]
-  // - club.libraryImages: ['/assets/a.jpg', '/assets/b.jpg']
-  // - club.libraryImage: '/assets/a.jpg' hoặc ['...']
   const rawLibraryImages = club?.libraryImages || club?.libraryImage || [];
-
-  // Debug: Log raw data từ BE
-  // console.log('[FE DEBUG] Raw libraryImages from API:', rawLibraryImages);
-  // console.log('[FE DEBUG] Type:', typeof rawLibraryImages, 'isArray:', Array.isArray(rawLibraryImages));
 
   const normalizedLibraryImages = (Array.isArray(rawLibraryImages)
     ? rawLibraryImages
@@ -112,7 +191,6 @@ const ClubDetail = () => {
     .map((img) => {
       if (!img) return null;
       if (typeof img === 'string') {
-        // Loại bỏ dấu ngoặc kép và khoảng trắng thừa, trailing slash
         const cleaned = img.trim().replace(/^["']|["']$/g, '').replace(/\/$/, '');
         return cleaned ? { imageUrl: cleaned, isLarge: false } : null;
       }
@@ -127,26 +205,23 @@ const ClubDetail = () => {
     })
     .filter((img) => img && img.imageUrl);
 
-  // Debug: Log sau khi normalize
-  // console.log('[FE DEBUG] Normalized libraryImages:', normalizedLibraryImages);
-  // console.log('[FE DEBUG] Normalized count:', normalizedLibraryImages.length);
-  
-  // Đảm bảo normalizedLibraryImages luôn là array
   const safeLibraryImages = Array.isArray(normalizedLibraryImages) ? normalizedLibraryImages : [];
 
-  // Build logo URL giống với ListOfClubs (ưu tiên logo_url, chỉ xử lý 1 chỗ)
   const logoSrc = buildImageSrc(club?.logo_url);
+  const heroIllustrationSrc = logoSrc || (safeLibraryImages[0] ? buildImageSrc(safeLibraryImages[0].imageUrl) : null);
+  const userRoleLabel = formatRoleLabel(userRole ?? club?.membershipRole ?? club?.my_role ?? club?.role);
+  const RoleIcon = getRoleIcon(userRole ?? club?.membershipRole ?? club?.my_role ?? club?.role);
 
-  // 4 slot thư viện ảnh đều nhau (2x2)
   const librarySlots = [0, 1, 2, 3];
+
+  const showcaseEvents = organizedEvents.slice(0, 5);
 
   return (
     <div className="clubdetail-container">
-      <Container className="py-4">
-        {/* Loading / Error state */}
+      <Container className="clubdetail-page-inner">
         {loading && (
-          <section className="clubdetail-section">
-            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+          <section className="clubdetail-dash-section">
+            <div className="clubdetail-card clubdetail-card--loading">
               <span className="clubdetail-label">Đang tải</span>
               <p className="clubdetail-desc-text">Đang tải thông tin câu lạc bộ...</p>
             </div>
@@ -154,8 +229,8 @@ const ClubDetail = () => {
         )}
 
         {!loading && !club && (
-          <section className="clubdetail-section">
-            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+          <section className="clubdetail-dash-section">
+            <div className="clubdetail-card clubdetail-card--empty">
               <span className="clubdetail-label">Không tìm thấy</span>
               <p className="clubdetail-desc-text">
                 Không tìm thấy thông tin câu lạc bộ. Vui lòng quay lại danh sách câu lạc bộ.
@@ -166,309 +241,297 @@ const ClubDetail = () => {
 
         {!loading && club && (
           <>
-        {/* Club Information Section */}
-        <section className="clubdetail-info glass-panel">
-          <div className="clubdetail-info-grid">
-            {/* Logo */}
-            <div className="clubdetail-logo">
-              {logoSrc ? (
-                <div className="clubdetail-logo-wrapper">
-                  <img
-                    src={logoSrc}
-                    alt={club.name}
-                    className="clubdetail-logo-img"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = '/images/clubs/default.png';
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="clubdetail-logo-placeholder">
-                  <span>Logo</span>
-                </div>
-              )}
-            </div>
-
-            {/* Main Info */}
-            <div className="clubdetail-main">
-              <div className="clubdetail-name-section">
-                <span className="clubdetail-label">Tên câu lạc bộ</span>
-                <h1 className="clubdetail-name">{club.name}</h1>
-              </div>
-
-              <div className="clubdetail-stats">
-                <div className="clubdetail-stat">
-                  <span className="clubdetail-label">Số lượng thành viên</span>
-                  <span className="clubdetail-stat-value">
-                    {club.member_total ?? club.members ?? 0}
-                  </span>
-                </div>
-                <div className="clubdetail-stat">
-                  <span className="clubdetail-label">Sự kiện</span>
-                  <span className="clubdetail-stat-value">
-                    {club.event_total ?? club.events ?? 0}
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className={`clubdetail-join-btn ${isJoined ? 'is-joined' : ''}`}
-                onClick={handleJoin}
-              >
-                {isJoined ? 'Đã tham gia ✓' : 'Tham gia ngay'}
-              </button>
-            </div>
-
-            {/* Description */}
-            <div className="clubdetail-desc">
-              <span className="clubdetail-label">Mô tả</span>
-              <p className="clubdetail-desc-text">{club.description}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Organized Events Section */}
-        <section className="clubdetail-section">
-          <div className="clubdetail-section-header">
-            <h2 className="clubdetail-section-title">Sự kiện</h2>
-            <button
-              type="button"
-              className="clubdetail-view-all-btn"
-              onClick={() => navigate(`/club/${id}/events`)}
-            >
-              Xem tất cả →
-            </button>
-          </div>
-          <div className="clubdetail-events-grid">
-            {organizedEvents.length > 0 ? (
-              organizedEvents.map((event) => (
-                <div
-                  key={event._id || event.id}
-                  className="clubdetail-event-card glass-panel"
-                >
-                  <div className="clubdetail-event-image">
-                    {event.image ? (
+            <div className="clubdetail-dashboard-grid">
+              <div className="clubdetail-cell clubdetail-cell-hero-full">
+                <div className="clubdetail-hero-landing">
+                  <section className="clubdetail-hero-banner">
+                    {heroIllustrationSrc && !heroImgError && (
                       <img
-                        src={event.image}
-                        alt={event.name}
-                        className="clubdetail-event-img"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = '/images/events/default.png';
-                        }}
+                        src={heroIllustrationSrc}
+                        alt=""
+                        className="clubdetail-hero-banner-bg"
+                        onError={() => setHeroImgError(true)}
                       />
+                    )}
+                    <div
+                      className={`clubdetail-hero-banner-fallback${!heroIllustrationSrc || heroImgError ? ' is-visible' : ''}`}
+                      aria-hidden
+                    >
+                      <ImageIcon className="clubdetail-hero-banner-fallback-icon" strokeWidth={1.25} />
+                    </div>
+                    <div className="clubdetail-hero-overlay" aria-hidden />
+                    {(club.category || userRoleLabel) && (
+                      <div className="clubdetail-hero-ribbon-corner">
+                        {club.category && (
+                          <span className="clubdetail-hero-category clubdetail-hero-category--corner">{club.category}</span>
+                        )}
+                        {userRoleLabel && (
+                          <span
+                            className="clubdetail-hero-user-role"
+                            title={userRoleLabel}
+                            aria-label={userRoleLabel}
+                          >
+                            <span className="clubdetail-hero-user-role-icon-wrap" aria-hidden>
+                              <RoleIcon size={22} strokeWidth={2.25} />
+                            </span>
+                            <span className="clubdetail-hero-user-role-text">{userRoleLabel}</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="clubdetail-hero-banner-inner">
+                      <div className="clubdetail-hero-intro">
+                        <h1 className="clubdetail-hero-title">
+                          {/* <span className="clubdetail-hero-title-kicker">Câu lạc bộ</span>{' '} */}
+                          <span className="clubdetail-hero-title-name">{club.name}</span>
+                        </h1>
+                        <p className="clubdetail-hero-lead">{club.description}</p>
+                      </div>
+                      {!isMember && (
+                        <button type="button" className="clubdetail-join-btn clubdetail-join-btn--primary">
+                          <span>Tham gia ngay</span>
+                          <ArrowRight size={16} strokeWidth={2.6} aria-hidden />
+                        </button>
+                      )}
+                    </div>
+                  </section>
+                  <div className="clubdetail-hero-float-wrap">
+                    <div className="clubdetail-float-card">
+                      <div className="clubdetail-float-stats">
+                        <div className="clubdetail-float-stat">
+                          <span className="clubdetail-float-stat-icon" aria-hidden>
+                            <Users size={22} strokeWidth={2} />
+                          </span>
+                          <span className="clubdetail-float-stat-label">Thành viên</span>
+                          <span className="clubdetail-float-stat-value">
+                            {club.member_total ?? club.members ?? 0}
+                          </span>
+                        </div>
+                        <div className="clubdetail-float-stat">
+                          <span className="clubdetail-float-stat-icon" aria-hidden>
+                            <Calendar size={22} strokeWidth={2} />
+                          </span>
+                          <span className="clubdetail-float-stat-label">Sự kiện</span>
+                          <span className="clubdetail-float-stat-value">
+                            {club.event_total ?? club.events ?? 0}
+                          </span>
+                        </div>
+                        <div className="clubdetail-float-stat">
+                          <span className="clubdetail-float-stat-icon" aria-hidden>
+                            <Tag size={22} strokeWidth={2} />
+                          </span>
+                          <span className="clubdetail-float-stat-label">Thể loại</span>
+                          <span className="clubdetail-float-stat-value clubdetail-float-stat-value--muted">
+                            {club.category || '—'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="clubdetail-cell clubdetail-cell-events">
+                <section className="clubdetail-events-showcase">
+                  <div className="clubdetail-events-showcase-decor" aria-hidden />
+                  <div className="clubdetail-events-showcase-inner">
+                    <header className="clubdetail-events-showcase-head">
+                      <div className="clubdetail-events-showcase-head-text">
+                        <h2 className="clubdetail-events-showcase-title">Sự kiện</h2>
+                        <p className="clubdetail-events-showcase-sub">Các hoạt động tại câu lạc bộ</p>
+                      </div>
+                      <button
+                        type="button"
+                        className="clubdetail-events-showcase-all"
+                        onClick={() => navigate(`/club/${id}/events`)}
+                      >
+                        Xem tất cả →
+                      </button>
+                    </header>
+                    {showcaseEvents.length > 0 ? (
+                      <div
+                        className="clubdetail-events-showcase-row"
+                        data-count={showcaseEvents.length}
+                      >
+                        {showcaseEvents.map((event) => {
+                          const showcaseImg = pickEventShowcaseImage(event);
+                          return (
+                            <article
+                              key={event._id || event.id}
+                              className="clubdetail-event-showcase-card"
+                              tabIndex={0}
+                              role="link"
+                              onClick={() => navigate(`/club/${id}/events/${event._id || event.id}`)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  navigate(`/club/${id}/events/${event._id || event.id}`);
+                                }
+                              }}
+                            >
+                              <div className="clubdetail-event-showcase-card-visual">
+                                {showcaseImg ? (
+                                  <img
+                                    src={showcaseImg}
+                                    alt={event.name}
+                                    className="clubdetail-event-showcase-card-img"
+                                    loading="lazy"
+                                    decoding="async"
+                                    sizes="(max-width: 600px) 86vw, 280px"
+                                    onError={(e) => {
+                                      e.currentTarget.onerror = null;
+                                      e.currentTarget.src = '/images/events/default.png';
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="clubdetail-event-showcase-card-placeholder" aria-hidden />
+                                )}
+                                <span className="clubdetail-event-showcase-tag">
+                                  {(event.category || 'Sự kiện').toUpperCase()}
+                                </span>
+                              </div>
+                              <div className="clubdetail-event-showcase-card-body clubdetail-event-showcase-card-body--slant">
+                                <h3 className="clubdetail-event-showcase-card-name">{event.name}</h3>
+                                {event.description ? (
+                                  <p className="clubdetail-event-showcase-card-desc clubdetail-event-showcase-card-desc--slant">
+                                    {event.description}
+                                  </p>
+                                ) : null}
+                                <div className="clubdetail-event-showcase-card-footer clubdetail-event-showcase-card-footer--slant">
+                                  <div className="clubdetail-event-showcase-card-meta clubdetail-event-showcase-card-meta--slant">
+                                    <Users className="clubdetail-event-showcase-meta-icon" size={14} strokeWidth={3} aria-hidden />
+                                    <span>{event.participants || 0} người tham gia</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="clubdetail-event-showcase-arrow clubdetail-event-showcase-arrow--lime"
+                                    aria-label="Xem chi tiết sự kiện"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/club/${id}/events/${event._id || event.id}`);
+                                    }}
+                                  >
+                                    <ArrowRight size={18} strokeWidth={2.5} aria-hidden />
+                                  </button>
+                                </div>
+                              </div>
+                            </article>
+                          );
+                        })}
+                      </div>
                     ) : (
-                      <div className="clubdetail-image-placeholder">
-                        <span>Image</span>
+                      <div className="clubdetail-events-showcase-empty">
+                        <p className="clubdetail-events-showcase-empty-text">
+                          Câu lạc bộ chưa có sự kiện nào được tổ chức.
+                        </p>
                       </div>
                     )}
                   </div>
-                  <div className="clubdetail-event-body">
-                    <div className="clubdetail-event-row">
-                      <span className="clubdetail-label">Thể loại</span>
-                      <span className="clubdetail-event-category">{event.category}</span>
+                </section>
+              </div>
+
+              <div className="clubdetail-cell clubdetail-cell-admin">
+                <div className="clubdetail-card clubdetail-card--members clubdetail-card--dash">
+                  <h2 className="clubdetail-section-title clubdetail-section-title--in-card">Thành viên</h2>
+                  {adminBoard.length > 0 ? (
+                    <div
+                      className={`clubdetail-member-grid${adminBoard.length < 3 ? ' clubdetail-member-grid--few' : ''}`}
+                    >
+                      {adminBoard.map((admin) => {
+                        const rawAvatar = (admin.avatar || '').trim().replace(/"/g, '');
+                        const avatarSrc = rawAvatar
+                          ? rawAvatar.startsWith('http')
+                            ? rawAvatar
+                            : `${ASSET_BASE}${rawAvatar}`
+                          : null;
+
+                        return (
+                          <article
+                            key={admin._id || admin.id}
+                            className="clubdetail-member-card"
+                          >
+                            <div className="clubdetail-member-card-media">
+                              {avatarSrc ? (
+                                <img
+                                  src={avatarSrc}
+                                  alt={admin.name}
+                                  className="clubdetail-member-card-img"
+                                  onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = '/images/users/default.png';
+                                  }}
+                                />
+                              ) : (
+                                <div className="clubdetail-member-card-placeholder" aria-hidden />
+                              )}
+                              <div className="clubdetail-member-card-scrim" aria-hidden />
+                              <div className="clubdetail-member-card-overlay">
+                                <span className="clubdetail-member-card-name">{admin.name}</span>
+                                <span className="clubdetail-member-card-role">{admin.role}</span>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
                     </div>
-                    <div className="clubdetail-event-row">
-                      <span className="clubdetail-label">Tên sự kiện</span>
-                      <h3 className="clubdetail-event-name">{event.name}</h3>
+                  ) : (
+                    <div className="clubdetail-member-empty">
+                      <p className="clubdetail-member-empty-text">
+                        Chưa cập nhật thông tin người dẫn dắt cho câu lạc bộ này.
+                      </p>
                     </div>
-                    <div className="clubdetail-event-row">
-                      <span className="clubdetail-label">Mô tả</span>
-                      <p className="clubdetail-event-desc">{event.description}</p>
-                    </div>
-                    <div className="clubdetail-event-row">
-                      <span className="clubdetail-label">Số lượng tham gia</span>
-                      <span className="clubdetail-event-participants">
-                        {event.participants || 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="clubdetail-event-card glass-panel">
-                <div className="clubdetail-event-body">
-                  <p className="clubdetail-event-desc">
-                    Câu lạc bộ chưa có sự kiện nào được tổ chức.
-                  </p>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        </section>
 
-        {/* Admin Board Section */}
-        <section className="clubdetail-section">
-          <h2 className="clubdetail-section-title">Ban quản trị</h2>
-          <div className="clubdetail-admin-grid">
-            {adminBoard.length > 0 ? (
-              adminBoard.map((admin) => {
-                const rawAvatar = (admin.avatar || '').trim().replace(/"/g, '');
-                const avatarSrc = rawAvatar
-                  ? rawAvatar.startsWith('http')
-                    ? rawAvatar
-                    : `${ASSET_BASE}${rawAvatar}`
-                  : null;
-
-                return (
-                  <div
-                    key={admin._id || admin.id}
-                    className="clubdetail-admin-card glass-panel"
-                  >
-                    <div className="clubdetail-admin-avatar">
-                      {avatarSrc ? (
-                        <img
-                          src={avatarSrc}
-                          alt={admin.name}
-                          className="clubdetail-admin-avatar-img"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = '/images/users/default.png';
-                          }}
-                        />
-                      ) : (
-                        <div className="clubdetail-avatar-placeholder">
-                          <span>Image</span>
+              <div className="clubdetail-cell clubdetail-cell-gallery">
+                <div className="clubdetail-card clubdetail-card--section clubdetail-card--dash">
+                  <h2 className="clubdetail-section-title clubdetail-section-title--in-card">Hình ảnh</h2>
+                  <div className="clubdetail-library-masonry">
+                    {librarySlots.map((slotIndex) => {
+                      const imgObj = safeLibraryImages[slotIndex] || null;
+                      const src = imgObj && imgObj.imageUrl ? buildImageSrc(imgObj.imageUrl) : null;
+                      const large = !!(imgObj && imgObj.isLarge);
+                      return (
+                        <div
+                          key={slotIndex}
+                          className={`clubdetail-library-cell${large ? ' clubdetail-library-cell--large' : ''}`}
+                        >
+                          <div className="clubdetail-library-frame">
+                            {src ? (
+                              <img
+                                src={src}
+                                alt={club.name}
+                                className="clubdetail-library-img"
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src = '/images/clubs/default-library.png';
+                                }}
+                              />
+                            ) : (
+                              <div className="clubdetail-image-placeholder">
+                                <span>Chưa có hình ảnh thư viện</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    <div className="clubdetail-admin-info">
-                      <span className="clubdetail-admin-name">{admin.name}</span>
-                      <span className="clubdetail-admin-role">{admin.role}</span>
-                    </div>
+                      );
+                    })}
                   </div>
-                );
-              })
-            ) : (
-              <div className="clubdetail-admin-card glass-panel">
-                <div className="clubdetail-admin-info">
-                  <span className="clubdetail-admin-name">
-                    Chưa cập nhật ban quản trị cho câu lạc bộ này.
-                  </span>
                 </div>
               </div>
-            )}
-          </div>
-        </section>
 
-        {/* Club Library Section */}
-        <section className="clubdetail-section">
-          <h2 className="clubdetail-section-title">Thư viện CLB</h2>
-          {/* Nền kính chung cho cả 4 khung ảnh */}
-          <div className="clubdetail-library-wrapper glass-panel">
-            <div className="clubdetail-library-grid">
-              {librarySlots.map((slotIndex) => {
-                const imgObj = safeLibraryImages[slotIndex] || null;
-                const src = imgObj && imgObj.imageUrl ? buildImageSrc(imgObj.imageUrl) : null;
-                return (
-                  <div
-                    key={slotIndex}
-                    className="clubdetail-library-item"
-                  >
-                    <div className="clubdetail-library-frame">
-                      {src ? (
-                        <img
-                          src={src}
-                          alt={club.name}
-                          className="clubdetail-library-img"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = '/images/clubs/default-library.png';
-                          }}
-                        />
-                      ) : (
-                        <div className="clubdetail-image-placeholder">
-                          <span>Chưa có hình ảnh thư viện</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              <div className="clubdetail-cell clubdetail-cell-about">
+                <div className="clubdetail-card clubdetail-card--sidebar clubdetail-card--dash">
+                  <h2 className="clubdetail-about-title">Mô tả chi tiết</h2>
+                  <p className="clubdetail-about-text">{club.description}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
 
-        <div className="clubdetail-fab-wrapper">
-          <button
-            type="button"
-            className="clubdetail-fab-achievement"
-            title="Mở menu điểm & thành tích"
-            aria-label="Mở menu điểm & thành tích"
-            onClick={() => setShowFabMenu((prev) => !prev)}
-          >
-            <span className="clubdetail-fab-badge">
-              {club.event_total ?? club.events ?? 0}
-            </span>
-            <span className="clubdetail-fab-icon" aria-hidden="true">
-              {showFabMenu ? <X size={26} strokeWidth={3} /> : <FileBadge size={26} />}
-            </span>
-          </button>
-
-          <div
-            className={
-              showFabMenu
-                ? 'clubdetail-fab-menu clubdetail-fab-menu-open'
-                : 'clubdetail-fab-menu'
-            }
-          >
-            <button
-              type="button"
-              className="clubdetail-fab-mini"
-              title="Lịch sử điểm thành tích"
-              aria-label="Lịch sử điểm thành tích"
-              onClick={() => navigate(`/clubs/${id}/points-history`)}
-            >
-              <ScrollText size={22} strokeWidth={3} />
-            </button>
-
-            <button
-              type="button"
-              className="clubdetail-fab-mini"
-              title="Bảng xếp hạng tháng"
-              aria-label="Bảng xếp hạng tháng"
-              onClick={() => navigate(`/clubs/${id}/leaderboard`, { state: { clubName: club?.name } })}
-            >
-              <span className="clubdetail-fab-icon" aria-hidden="true">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="20"
-                  height="20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.166 2.621v.858c-1.035.148-2.059.33-3.071.543a.75.75 0 0 0-.584.859 6.753 6.753 0 0 0 6.138 5.6 6.73 6.73 0 0 0 2.743 1.346A6.707 6.707 0 0 1 9.279 15H8.54c-1.036 0-1.875.84-1.875 1.875V19.5h-.75a2.25 2.25 0 0 0-2.25 2.25c0 .414.336.75.75.75h15a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-2.25-2.25h-.75v-2.625c0-1.036-.84-1.875-1.875-1.875h-.739a6.706 6.706 0 0 1-1.112-3.173 6.73 6.73 0 0 0 2.743-1.347 6.753 6.753 0 0 0 6.139-5.6.75.75 0 0 0-.585-.858 47.077 47.077 0 0 0-3.07-.543V2.62a.75.75 0 0 0-.658-.744 49.22 49.22 0 0 0-6.093-.377c-2.063 0-4.096.128-6.093.377a.75.75 0 0 0-.657.744Zm0 2.629c0 1.196.312 2.32.857 3.294A5.266 5.266 0 0 1 3.16 5.337a45.6 45.6 0 0 1 2.006-.343v.256Zm13.5 0v-.256c.674.1 1.343.214 2.006.343a5.265 5.265 0 0 1-2.863 3.207 6.72 6.72 0 0 0 .857-3.294Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </span>
-            </button>
-
-            <button
-              type="button"
-              className="clubdetail-fab-mini"
-              title="Huy hiệu của bạn"
-              aria-label="Huy hiệu của bạn"
-              onClick={() => navigate(`/clubs/${id}/badges`)}
-            >
-              <CircleStar size={22} strokeWidth={3} />
-            </button>
-
-            <button
-              type="button"
-              className="clubdetail-fab-mini"
-              title="Quy tắc tính điểm"
-              aria-label="Quy tắc tính điểm"
-              onClick={() => navigate(`/clubs/${id}/point-rules`)}
-            >
-              <BookMarked size={22} strokeWidth={3} />
-            </button>
-          </div>
-        </div>
+            {showFloatingNav !== false && (
+              <ClubDetailNav clubName={club?.name} isMember={isMember} />
+            )}
           </>
         )}
       </Container>

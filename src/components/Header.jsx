@@ -2,10 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Header.css';
-
-// Backend base URL để build full URL cho avatar nếu dùng đường dẫn từ BE
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const ASSET_BASE = API_BASE.replace(/\/api\/?$/, '');
+import { ASSET_BASE } from '../api/api';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -103,7 +100,7 @@ const Header = () => {
         <div className="header-links">
           <button
             type="button"
-            className={`header-link ${location.pathname.startsWith('/clubs') ? 'is-active' : ''}`}
+            className={`header-link ${/^\/clubs\/?$/.test(location.pathname) ? 'is-active' : ''}`}
             onClick={() => handleNavClick('/clubs')}
           >
             Clubs
@@ -133,7 +130,7 @@ const Header = () => {
                         src={
                           user.avatar.startsWith('http')
                             ? user.avatar
-                            : `${ASSET_BASE}${user.avatar}`
+                            : `${ASSET_BASE}${user.avatar.startsWith('/') ? user.avatar : `/${user.avatar}`}`
                         }
                         alt={user?.fullName || 'Avatar'}
                         className="profile-avatar-image"
