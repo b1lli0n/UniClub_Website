@@ -4,9 +4,21 @@ import api from './api';
 const eventAPI = api;
 
 const eventApi = {
-  // ===== MY CLUB - Lấy sự kiện theo câu lạc bộ cụ thể =====
-  // GET /api/events/club/:clubId
-  getEventsByClub: (clubId, params) => eventAPI.get(`/events/club/${clubId}`, { params }),
+  // Lấy danh sách sự kiện của câu lạc bộ
+  getEvents: (clubId) => eventAPI.get(`/events/${clubId}/event`),
+
+  // Lấy sự kiện đã tham gia
+  getPastEvents: () => eventAPI.get('/events/past'),
+
+  // Lấy sự kiện theo club
+  getEventsByClub: async (clubId, params = {}) => {
+    // params: { q, category, sort, page, limit }
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString
+      ? `/events/club/${clubId}?${queryString}`
+      : `/events/club/${clubId}`;
+    return await api.get(url);
+  },
 
   // ===== MY EVENTS - Lấy sự kiện user đã đăng ký (bắt buộc token) =====
   // GET /api/events/my-events
@@ -33,8 +45,13 @@ const eventApi = {
   // Gửi feedback
   submitFeedback: (id, payload) => eventAPI.post(`/events/${id}/feedback`, payload),
 
-  // ===== EVENT DETAIL =====
-  // Xem chi tiết sự kiện (dùng endpoint club-specific)
+  // Cập nhật feedback (PUT /api/events/feedback/:feedbackId body: { rating, comments })
+  updateFeedback: (feedbackId, payload) => eventAPI.put(`/events/feedback/${feedbackId}`, payload),
+
+  // Xóa feedback (DELETE /api/events/feedback/:feedbackId)
+  deleteFeedback: (feedbackId) => eventAPI.delete(`/events/feedback/${feedbackId}`),
+
+  // Xem chi tiết sự kiện
   getEventById: (clubId, eventId) => eventAPI.get(`/events/club/${clubId}/event/${eventId}`),
 };
 

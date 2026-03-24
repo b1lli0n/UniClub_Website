@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+=======
+import { Routes, Route } from 'react-router-dom'
+>>>>>>> Thao
 import ProtectedRoute from './ProtectedRoute'
 
 import AdminLayout from '../layouts/AdminLayout'
@@ -14,16 +18,16 @@ import ListOfClubs from '../pages/ClubPages/ListOfClubs'
 import ClubDetail from '../pages/ClubPages/ClubDetail'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
+import EventAttendanceList from '../pages/leader/EventAttendanceList'
 
 import Event from '../pages/EventPages/EventInClub'
 import EventPublic from '../pages/EventPages/EventPublic'
 import MyEvent from '../pages/EventPages/MyEvent';
 import EventDetail from '../pages/EventPages/EventDetail'
+import NotificationCenter from "../pages/NotificationCenter";
 
 import Profile from '../pages/Profile'
 
-import About from '../pages/About'
-import Contacts from '../pages/Contacts'
 // import ViewJoinRequests from '../pages/ViewJoinRequests'
 import NotFound from '../pages/NotFound'
 
@@ -59,6 +63,7 @@ const AppRouter = () => {
         <Route path="/my-clubs" element={<ListOfMyClubs />} />
         <Route path="/club/:clubId/events" element={<Event />} />
         <Route path="/club/:clubId/events/:eventId" element={<EventDetail />} />
+        <Route path="/my-notifications" element={<NotificationCenter />} />
 
         <Route path="/my-events" element={<MyEvent />} />
         {/* <Route path="/my-requests" element={<ViewJoinRequests />} /> */}
@@ -70,14 +75,11 @@ const AppRouter = () => {
       <Route element={<MainLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
-
-        <Route path="/clubEvent" element={<EventsPage />} />
-        <Route path="/clubEvent/create" element={<CreateEventPage />} />
-        <Route path="/clubEvent/:eventId" element={<EventDetailPage />} />
-        <Route path="/clubEvent/:eventId/update" element={<UpdateEventPage />} />
-
-        <Route path="/events" element={<Navigate to="/clubEvent" replace />} />
-
+        <Route path="/clubs/:id/events/:eventId/attendance" element={<EventAttendanceList />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/events/create" element={<CreateEventPage />} />
+        <Route path="/events/:eventId" element={<EventDetailPage />} />
+        <Route path="/events/:eventId/update" element={<UpdateEventPage />} />
         <Route path="/memberships" element={<MembershipsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
       </Route>

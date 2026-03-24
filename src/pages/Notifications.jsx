@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { getNotifications } from '../services/api';
+import { getNotifications } from '../api/notificationApi';
 import '../styles/Notifications.css';
 
 const NotificationTypeBadge = ({ type }) => {
