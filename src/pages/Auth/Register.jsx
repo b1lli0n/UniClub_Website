@@ -45,7 +45,8 @@ const Register = () => {
     }
 
     // Regex: chỉ chữ cái tiếng Việt có dấu và khoảng trắng
-    const vietnameseNameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/;
+    // const vietnameseNameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/;
+    const vietnameseNameRegex = /^[\p{L}\s]+$/u;
 
     if (!vietnameseNameRegex.test(trimmedValue)) {
       return 'Họ và tên chỉ được chứa chữ cái tiếng Việt và khoảng trắng';
@@ -258,12 +259,19 @@ const Register = () => {
       const response = await registerService(finalFormData);
 
       if (response.success) {
-        // Cập nhật auth context
-        login(response.data.user);
-
+        const data = response.data || {};
+        if (data.needVerify) {
+          toast.success(response.message || 'Đăng ký thành công! Vui lòng xác thực email.');
+          navigate('/verify-otp', {
+            state: {
+              email: data.email || finalFormData.email,
+              resendCooldownSeconds: data.resendCooldownSeconds ?? 60,
+            },
+          });
+          return;
+        }
+        if (data.user) login(data.user);
         toast.success(response.message || 'Đăng ký thành công!');
-
-        // Chuyển hướng về trang chủ
         navigate('/');
       }
     } catch (error) {

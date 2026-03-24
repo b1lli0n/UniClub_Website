@@ -33,6 +33,17 @@
     padding: 0 12px;
 }
 
+.sidebar-nav-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 8px 4px;
+    flex-shrink: 0;
+}
+
+.sidebar-item--club .sidebar-label {
+    font-size: 13px;
+}
+
 .sidebar-item {
     display: flex;
     align-items: center;

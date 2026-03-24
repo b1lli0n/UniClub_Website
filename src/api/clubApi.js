@@ -238,5 +238,34 @@ export const getMemberContributions = async (clubId, memberId) => {
   }
 };
 
+export const getClubTransactions = async (clubId, params = {}) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/transactions`, { params });
+    return response.data;
+  } catch (error) {
+    console.error('Get club transactions error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể lấy danh sách giao dịch' };
+  }
+};
+
+export const getClubTransactionDetail = async (clubId, transactionId) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/transactions/${transactionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get club transaction detail error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể lấy chi tiết giao dịch' };
+  }
+};
+
+export const reviewClubTransaction = async (clubId, transactionId, payload) => {
+  try {
+    const response = await clubAPI.patch(`/clubs/${clubId}/transactions/${transactionId}/review`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Review club transaction error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể cập nhật trạng thái giao dịch' };
+  }
+};
+
 export default clubAPI;
- 

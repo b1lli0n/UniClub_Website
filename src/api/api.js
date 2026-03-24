@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
+export const ASSET_BASE = API_URL.replace(/\/api\/?$/, '');
 // Create axios instance
 const api = axios.create({
   baseURL: API_URL,
@@ -17,6 +17,9 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     return config;
   },
   (error) => {
@@ -31,9 +34,9 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Không refresh token cho các endpoint auth (login, register, refresh-token)
-    const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') || 
-                          originalRequest?.url?.includes('/auth/register') ||
-                          originalRequest?.url?.includes('/auth/refresh-token');
+    const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') ||
+      originalRequest?.url?.includes('/auth/register') ||
+      originalRequest?.url?.includes('/auth/refresh-token');
 
     // If error is 401 and we haven't tried to refresh yet, và không phải auth endpoint
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
@@ -41,7 +44,7 @@ api.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        
+
         if (!refreshToken) {
           // No refresh token, logout user
           localStorage.removeItem('accessToken');
@@ -58,7 +61,7 @@ api.interceptors.response.use(
 
         if (response.data.success) {
           const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-          
+
           localStorage.setItem('accessToken', accessToken);
           localStorage.setItem('refreshToken', newRefreshToken);
 

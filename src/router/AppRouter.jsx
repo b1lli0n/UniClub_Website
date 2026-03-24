@@ -4,18 +4,30 @@ import ProtectedRoute from './ProtectedRoute'
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
 import MainLayout from '../layouts/MainLayout'
+import ClubAreaLayout from '../layouts/ClubAreaLayout'
 
 import Register from '../pages/Auth/Register'
+import VerifyOtp from '../pages/Auth/VerifyOtp'
 import Login from '../pages/Auth/Login'
+import ForgotPassword from '../pages/Auth/ForgotPassword'
+import ResetPassword from '../pages/Auth/ResetPassword'
 
 
 import ListOfClubs from '../pages/ClubPages/ListOfClubs'
 import ClubDetail from '../pages/ClubPages/ClubDetail'
+import PointsHistory from '../pages/ClubPages/PointsHistory'
+import ClubLeaderboard from '../pages/ClubPages/ClubLeaderboard'
+import ClubBadges from '../pages/ClubPages/ClubBadges'
+import PointRules from '../pages/ClubPages/PointRules'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
 import EventAttendanceList from '../pages/leader/EventAttendanceList'
 import CreateClub from '../pages/ClubPages/CreateClub'
+<<<<<<< HEAD
 import TransactionList from '../pages/TransactionList'
+=======
+import ClubTransactions from '../pages/ClubPages/ClubTransactions'
+>>>>>>> Trinh
 
 import Event from '../pages/EventPages/EventInClub'
 import EventPublic from '../pages/EventPages/EventPublic'
@@ -24,6 +36,7 @@ import EventDetail from '../pages/EventPages/EventDetail'
 import NotificationCenter from "../pages/NotificationCenter";
 
 import Profile from '../pages/Profile'
+import ChangePassword from '../pages/Auth/ChangePassword'
 
 // import ViewJoinRequests from '../pages/ViewJoinRequests'
 import NotFound from '../pages/NotFound'
@@ -67,14 +80,16 @@ const AppRouter = () => {
     <Routes>
       {/* Auth Routes (no layout) */}
       <Route path="/register" element={<Register />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* User Routes with Layout */}
       <Route element={<UserLayout />}>
         <Route index element={<Home />} />
         <Route path="/clubs" element={<ListOfClubs />} />
         <Route path="/clubs/create" element={<CreateClub />} />
-        <Route path="/clubs/:id" element={<ClubDetail />} />
         <Route path="/events" element={<EventPublic />} />
         <Route path="/my-clubs" element={<ListOfMyClubs />} />
         <Route path="/club/:clubId/events" element={<Event />} />
@@ -103,11 +118,22 @@ const AppRouter = () => {
         {/* <Route path="/my-requests" element={<ViewJoinRequests />} /> */}
 
         <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/change-password" element={<ChangePassword />} />
+      </Route>
+
+      {/* Trang CLB: leader có sidebar + ẩn nav nổi; thành viên chỉ nav nổi */}
+      <Route element={<ClubAreaLayout />}>
+        <Route path="/clubs/:id" element={<ClubDetail />} />
+        <Route path="/clubs/:id/points-history" element={<PointsHistory />} />
+        <Route path="/clubs/:id/leaderboard" element={<ClubLeaderboard />} />
+        <Route path="/clubs/:id/badges" element={<ClubBadges />} />
+        <Route path="/clubs/:id/point-rules" element={<PointRules />} />
       </Route>
 
       {/* Dashboard/Club Routes with MainLayout (includes Sidebar) */}
       <Route element={<MainLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
+        <Route path="/clubs/:id/transactions" element={<ClubTransactions />} />
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/events/:eventId/attendance" element={<EventAttendanceList />} />
         {/* Treasurer: Quản lý tài chính CLB */}

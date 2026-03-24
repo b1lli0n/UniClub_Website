@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import ClubDetailCard from '../../components/ClubDetailCard';
 import { getAllClubs } from '../../api/clubApi';
 import '../../styles/ListOfClubs.css';
 
-// Icon Components
 const IconBase = ({ children, viewBox = '0 0 24 24' }) => (
   <svg
     className="club-catIcon"
@@ -100,6 +100,7 @@ const SORT_OPTIONS = [
   { value: 'members', label: 'Nhiều thành viên' },
   { value: 'members-asc', label: 'Ít thành viên' },
 ];
+const CLUBS_PER_PAGE = 12;
 
 const ListOfClubs = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -107,17 +108,18 @@ const ListOfClubs = () => {
   const [sortBy, setSortBy] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [clubs, setClubs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const dropdownRef = useRef(null);
-
-  // Add body class for styling
+  // Add body class for styling (nền + header giống Profile, footer giống Home)
   useEffect(() => {
-    document.body.classList.add('clubs-body');
+    document.body.classList.add('clubs-list-body');
     return () => {
-      document.body.classList.remove('clubs-body');
+      document.body.classList.remove('clubs-list-body');
     };
   }, []);
+
+  const [loading, setLoading] = useState(true);
+  const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -143,9 +145,9 @@ const ListOfClubs = () => {
         });
 
         if (response.success) {
-          const clubsWithId = response.data.map((club) => ({
+          const clubsWithId = response.data.map((club, index) => ({
             ...club,
-            id: club._id,
+            id: club?._id || `club-${index}`,
           }));
           setClubs(clubsWithId);
         }
@@ -165,15 +167,38 @@ const ListOfClubs = () => {
     return () => clearTimeout(timeoutId);
   }, [selectedCategory, sortBy, searchQuery]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, sortBy, searchQuery]);
+
   const currentSortLabel =
     SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label || 'Mặc định';
+  const totalPages = Math.max(1, Math.ceil(clubs.length / CLUBS_PER_PAGE));
+  const paginatedClubs = clubs.slice(
+    (currentPage - 1) * CLUBS_PER_PAGE,
+    currentPage * CLUBS_PER_PAGE
+  );
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const getVisiblePages = () => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (currentPage <= 3) return [1, 2, 3, 4, 'dots', totalPages];
+    if (currentPage >= totalPages - 2) {
+      return [1, 'dots', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, 'dots', currentPage - 1, currentPage, currentPage + 1, 'dots-2', totalPages];
+  };
 
   return (
     <div className="list-of-clubs-page">
-      {/* Hero Section with Categories */}
-      <div className="club-hero">
-        <Container className="py-4">
-          <div className="club-catGrid" role="list">
+      <Container className="loc-container py-4 pb-5">
+        <section className="loc-cat-section" aria-label="Lọc theo danh mục">
+          <div className="loc-cat-tabs" role="list">
             {CLUB_CATEGORIES.map(({ id, labelTop, labelBottom, mapsTo, Icon }) => {
               const isActive =
                 selectedCategory === mapsTo ||
@@ -182,153 +207,189 @@ const ListOfClubs = () => {
                 <button
                   key={id}
                   type="button"
-                  className={`club-catItem ${isActive ? 'is-active' : ''}`}
+                  className={`loc-cat-pill ${isActive ? 'is-active' : ''}`}
                   role="listitem"
                   onClick={() => setSelectedCategory(mapsTo)}
                   aria-label={`${labelTop} ${labelBottom}`}
                 >
-                  <div className="club-catCircle">
+                  <span className="loc-cat-pill-icon" aria-hidden="true">
                     <Icon />
-                  </div>
-                  <div className="club-catLabel">
-                    <div>{labelTop}</div>
-                    {labelBottom && <div>{labelBottom}</div>}
-                  </div>
+                  </span>
+                  <span className="loc-cat-pill-label">{labelTop}</span>
                 </button>
               );
             })}
           </div>
-        </Container>
-      </div>
+        </section>
 
-      {/* Clubs List */}
-      <Container className="pb-5">
-        <div className="club-sectionHead">
-          <div className="club-sectionTitleBlock">
-            <h3 className="club-sectionTitle">
-              {selectedCategory === 'all'
-                ? 'Câu lạc bộ'
-                : `Câu lạc bộ • ${selectedCategory}`}
-            </h3>
-            <p className="club-sectionSub">
-              {loading ? 'Đang tải...' : `${clubs.length} câu lạc bộ.`}
-            </p>
+        <section className="loc-clubs-shell">
+          <section className="loc-toolbar">
+            <div className="loc-toolbar-row loc-toolbar-row--head">
+              <div className="club-sectionTitleBlock">
+                <h3 className="club-sectionTitle">
+                  {selectedCategory === 'all'
+                    ? 'Câu lạc bộ'
+                    : `Câu lạc bộ • ${selectedCategory}`}
+                </h3>
+                <p className="club-sectionSub">
+                  {loading ? 'Đang tải...' : `${clubs.length} câu lạc bộ.`}
+                </p>
+              </div>
+            </div>
+            <div className="loc-toolbar-row loc-toolbar-row--search">
+              <div className="club-search-wrapper">
+                <Search className="club-search-icon-svg" size={18} strokeWidth={2} aria-hidden />
+                <input
+                  type="text"
+                  className="club-search-input"
+                  placeholder="Tìm kiếm theo tên, mô tả..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="club-sort" ref={dropdownRef}>
+                <label className="club-sortLabel" htmlFor="club-sort-trigger">Sắp xếp</label>
+                <div className="club-dropdown">
+                  <button
+                    id="club-sort-trigger"
+                    type="button"
+                    className={`club-dropdown-trigger ${isDropdownOpen ? 'is-open' : ''
+                      }`}
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    disabled={loading}
+                  >
+                    <span>{currentSortLabel}</span>
+                    <svg
+                      className={`club-dropdown-arrow ${isDropdownOpen ? 'is-open' : ''
+                        }`}
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                    >
+                      <path
+                        d="M4 6L8 10L12 6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  {isDropdownOpen && (
+                    <div className="club-dropdown-menu">
+                      {SORT_OPTIONS.map((option) => {
+                        const isSelected = sortBy === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            className={`club-dropdown-item ${isSelected ? 'is-selected' : ''}`}
+                            onClick={() => {
+                              if (isSelected) {
+                                setSortBy('');
+                              } else {
+                                setSortBy(option.value);
+                              }
+                              setIsDropdownOpen(false);
+                            }}
+                          >
+                            <span>{option.label}</span>
+                            {isSelected && (
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                              >
+                                <path
+                                  d="M3 8L6.5 11.5L13 4.5"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className={`clubs-list ${!loading && paginatedClubs.length === 1 ? 'is-single-item' : ''}`}>
+            {loading ? (
+              <div className="club-empty glass-panel">
+                <div className="club-emptyTitle">Đang tải dữ liệu...</div>
+              </div>
+            ) : clubs.length > 0 ? (
+              paginatedClubs.map((club, index) => (
+                <ClubDetailCard key={club.id || club._id || `club-card-${index}`} club={club} />
+              ))
+            ) : (
+              <div className="club-empty glass-panel">
+                <div className="club-emptyTitle">
+                  Không tìm thấy câu lạc bộ phù hợp
+                </div>
+                <div className="club-emptySub">Thử đổi danh mục khác nhé.</div>
+                <button
+                  className="club-secondaryBtn"
+                  type="button"
+                  onClick={() => setSelectedCategory('all')}
+                >
+                  Xoá bộ lọc
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="club-sectionControls">
-            {/* Search beside title */}
-            <div className="club-search-wrapper">
+          {!loading && clubs.length > 0 && totalPages > 1 && (
+            <nav className="loc-pagination" aria-label="Phân trang câu lạc bộ">
+              <button
+                type="button"
+                className="loc-page-btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                aria-label="Trang trước"
+              >
+                <ChevronLeft size={16} />
+              </button>
 
-              <input
-                type="text"
-                className="club-search-input"
-                placeholder="Tìm kiếm theo tên, mô tả..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            {/* Sort Dropdown */}
-            <div className="club-sort" ref={dropdownRef}>
-              <label className="club-sortLabel">Sắp xếp:</label>
-              <div className="club-dropdown">
-                <button
-                  type="button"
-                  className={`club-dropdown-trigger ${isDropdownOpen ? 'is-open' : ''
-                    }`}
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  disabled={loading}
-                >
-                  <span>{currentSortLabel}</span>
-                  <svg
-                    className={`club-dropdown-arrow ${isDropdownOpen ? 'is-open' : ''
-                      }`}
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                  >
-                    <path
-                      d="M4 6L8 10L12 6"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-                {isDropdownOpen && (
-                  <div className="club-dropdown-menu">
-                    {SORT_OPTIONS.map((option) => {
-                      const isSelected = sortBy === option.value;
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          className={`club-dropdown-item ${isSelected ? 'is-selected' : ''}`}
-                          onClick={() => {
-                            // Nếu bấm lại vào option đang chọn -> bỏ chọn (sortBy = '')
-                            if (isSelected) {
-                              setSortBy('');
-                            } else {
-                              setSortBy(option.value);
-                            }
-                            setIsDropdownOpen(false);
-                          }}
-                        >
-                          <span>{option.label}</span>
-                          {isSelected && (
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <path
-                                d="M3 8L6.5 11.5L13 4.5"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+              <div className="loc-page-numbers">
+                {getVisiblePages().map((item) =>
+                  typeof item === 'number' ? (
+                    <button
+                      key={item}
+                      type="button"
+                      className={`loc-page-btn ${currentPage === item ? 'is-active' : ''}`}
+                      onClick={() => setCurrentPage(item)}
+                    >
+                      {item}
+                    </button>
+                  ) : (
+                    <span key={item} className="loc-page-dots" aria-hidden>
+                      ...
+                    </span>
+                  )
                 )}
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Clubs List */}
-        <div className="clubs-list">
-          {loading ? (
-            <div className="club-empty glass-panel">
-              <div className="club-emptyTitle">Đang tải dữ liệu...</div>
-            </div>
-          ) : clubs.length > 0 ? (
-            clubs.map((club) => (
-              <ClubDetailCard key={club.id || club._id} club={club} />
-            ))
-          ) : (
-            <div className="club-empty glass-panel">
-              <div className="club-emptyTitle">
-                Không tìm thấy câu lạc bộ phù hợp
-              </div>
-              <div className="club-emptySub">Thử đổi danh mục khác nhé.</div>
               <button
-                className="club-secondaryBtn"
                 type="button"
-                onClick={() => setSelectedCategory('all')}
+                className="loc-page-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                aria-label="Trang sau"
               >
-                Xoá bộ lọc
+                <ChevronRight size={16} />
               </button>
-            </div>
+            </nav>
           )}
-        </div>
+        </section>
       </Container>
     </div>
   );

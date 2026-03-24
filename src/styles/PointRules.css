@@ -1,0 +1,326 @@
+:root {
+  --pr-primary: #6c5ce7;
+  --pr-primary-2: #7c8cff;
+  --pr-accent: #f472b6;
+  --pr-text: #111827;
+  --pr-muted: #6b7280;
+  --pr-border: #eef0f4;
+  --pr-card-bg: #ffffff;
+  --pr-card-soft: #f9fafb;
+  --pr-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.point-rules-page {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: calc(100vh - 4rem);
+  padding: 0 var(--site-content-gutter) 96px;
+  margin-top: -1.5rem;
+  padding-top: 1.5rem;
+  background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
+}
+
+.point-rules-shell {
+  width: 100%;
+  max-width: var(--site-content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  background: #f5f7fb;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06);
+  padding: clamp(20px, 2.2vw, 26px);
+  box-sizing: border-box;
+}
+
+.point-rules-shell-header {
+  margin-bottom: 20px;
+}
+
+.point-rules-shell-title {
+  margin: 0 0 8px;
+  font-size: clamp(1.35rem, 2.2vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--pr-text);
+  line-height: 1.2;
+}
+
+.point-rules-shell-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--pr-muted);
+  line-height: 1.5;
+}
+
+.point-rules-state {
+  text-align: center;
+  margin: 0;
+  padding: 2.5rem 1rem;
+  font-size: 0.95rem;
+  color: var(--pr-muted);
+  font-weight: 500;
+}
+
+.point-rules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.point-rules-card {
+  background: var(--pr-card-bg);
+  border: 1px solid var(--pr-border);
+  border-radius: 16px;
+  box-shadow: var(--pr-shadow);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.point-rules-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.14);
+}
+
+.point-rules-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.point-rules-action-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f2f3f7;
+  color: var(--pr-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.point-rules-action-icon-svg {
+  width: 20px;
+  height: 20px;
+}
+
+.point-rules-card-head-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.point-rules-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.point-rules-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--pr-text);
+  line-height: 1.3;
+}
+
+.point-rules-code-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pr-muted);
+  background: #f3f4f6;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.point-rules-badge-active {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.point-rules-desc {
+  margin: 0 0 16px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--pr-muted);
+  min-height: 2.6em;
+}
+
+.point-rules-points-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.point-rules-point-item {
+  background: var(--pr-card-soft);
+  border-radius: 12px;
+  border: 1px solid #edf0f5;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.point-rules-point-kicker {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--pr-muted);
+}
+
+.point-rules-point-value {
+  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.point-rules-point-item--achievement .point-rules-point-value {
+  color: var(--pr-primary);
+}
+
+.point-rules-point-item--reward .point-rules-point-value {
+  color: var(--pr-accent);
+}
+
+.point-rules-limit-info {
+  border-top: 1px solid #edf0f5;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.point-rules-limit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--pr-muted);
+}
+
+.point-rules-limit-item-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.point-rules-limit-item-label svg {
+  color: var(--pr-primary);
+  flex-shrink: 0;
+}
+
+.point-rules-limit-item b {
+  color: var(--pr-text);
+  font-weight: 700;
+  font-size: 0.83rem;
+}
+
+.point-rules-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--pr-border);
+}
+
+.point-rules-page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.point-rules-page-btn {
+  min-width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--pr-border);
+  background: var(--pr-card-bg);
+  color: var(--pr-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.point-rules-page-btn:hover:not(:disabled) {
+  border-color: #d1d5db;
+  background: var(--pr-card-soft);
+}
+
+.point-rules-page-btn.is-active {
+  background: var(--pr-text);
+  border-color: var(--pr-text);
+  color: #fff;
+}
+
+.point-rules-page-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.point-rules-page-dots {
+  color: var(--pr-muted);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 1100px) {
+  .point-rules-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .point-rules-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .point-rules-card {
+    padding: 20px;
+  }
+
+  .point-rules-points-row {
+    grid-template-columns: 1fr;
+  }
+
+  .point-rules-pagination {
+    gap: 8px;
+  }
+
+  .point-rules-page-numbers {
+    gap: 6px;
+  }
+
+  .point-rules-page-btn {
+    min-width: 34px;
+    height: 34px;
+  }
+}

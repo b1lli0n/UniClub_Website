@@ -12,6 +12,8 @@ main {
 }
 
 :root {
+    --site-content-max-width: 1200px;
+    --site-content-gutter: 1rem;
     --candy-purple: #cdb4db;
     --candy-lightpink: #ffc8dd;
     --candy-hotpink: #ffafcc;

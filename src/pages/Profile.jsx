@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Container } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
-import { getProfile } from '../api/userApi';
 import { getMyContributions, getMyClubs, getClubs } from '../api/clubApi';
 import PointHistoryTable, { PointStatsRow } from '../components/PointHistoryTable';
 import '../styles/Profile.css';
@@ -12,6 +12,9 @@ import '../styles/PointHistory.css';
 // Backend base URL để build full URL cho avatar nếu BE trả về đường dẫn tương đối
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const ASSET_BASE = API_BASE.replace(/\/api\/?$/, '');
+import { getProfile, updateProfile, uploadProfileAvatar } from '../api/userApi';
+import '../styles/Profile.css';
+import { ASSET_BASE } from '../api/api';
 
 const genderOptions = [
   { value: 'female', label: 'Nữ' },
@@ -49,11 +52,71 @@ const TABS = [
 const Profile = () => {
   const { user, isLoggedIn } = useAuth();
   const [activeTab, setActiveTab] = useState('info');
+const FULLNAME_REGEX = /^[\p{L}\s]+$/u;
+
+const formatDateForInput = (date) => {
+  if (!date) return '';
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}/.test(date)) {
+    return date.slice(0, 10);
+  }
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const validateDob = (dobStr) => {
+  if (!dobStr || !String(dobStr).trim()) return { ok: true };
+  const parts = String(dobStr).slice(0, 10).split('-');
+  if (parts.length !== 3) return { ok: false, message: 'Ngày sinh không hợp lệ' };
+  const y = Number(parts[0]);
+  const m = Number(parts[1]) - 1;
+  const day = Number(parts[2]);
+  const dob = new Date(y, m, day);
+  if (
+    dob.getFullYear() !== y ||
+    dob.getMonth() !== m ||
+    dob.getDate() !== day
+  ) {
+    return { ok: false, message: 'Ngày sinh không hợp lệ' };
+  }
+  const today = new Date();
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const d = new Date(dob.getFullYear(), dob.getMonth(), dob.getDate());
+  if (d > t) {
+    return { ok: false, message: 'Ngày sinh phải là ngày trong quá khứ' };
+  }
+  const oldest = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+  if (d < oldest) {
+    return { ok: false, message: 'Ngày sinh không hợp lệ' };
+  }
+  const twelfth = new Date(d.getFullYear() + 12, d.getMonth(), d.getDate());
+  if (twelfth > t) {
+    return { ok: false, message: 'Bạn phải đủ ít nhất 12 tuổi' };
+  }
+  return { ok: true };
+};
+
+const normalizeAssetPath = (raw) => {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  if (value.startsWith('http')) return value;
+  return value.startsWith('/') ? value : `/${value}`;
+};
+
+const Profile = () => {
+  const { user, updateUser } = useAuth();
+  const navigate = useNavigate();
 
   const [profile, setProfile] = useState({
     fullName: '', email: '', phone: '', gender: 'other', dob: '', avatar: '',
   });
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef(null);
 
   // ── Point history state ──────────────────────────────────────────────────
   const [clubs, setClubs] = useState([]);
@@ -71,6 +134,17 @@ const Profile = () => {
     if (isNaN(d.getTime())) return '';
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
+  const maxDobStr = useMemo(() => {
+    const t = new Date();
+    t.setFullYear(t.getFullYear() - 12);
+    return formatDateForInput(t);
+  }, []);
+
+  const minDobStr = useMemo(() => {
+    const t = new Date();
+    t.setFullYear(t.getFullYear() - 120);
+    return formatDateForInput(t);
+  }, []);
 
   useEffect(() => {
     document.body.classList.add('profile-body');
@@ -92,6 +166,12 @@ const Profile = () => {
             gender: ud.gender || 'other',
             dob: formatDateForInput(ud.dob),
             avatar: ud.avatar_url || '',
+            fullName: userData.fullName || '',
+            email: userData.email || '',
+            phone: userData.phone_number ?? userData.phone ?? '',
+            gender: userData.gender || 'other',
+            dob: formatDateForInput(userData.date_of_birth ?? userData.dob),
+            avatar: normalizeAssetPath(userData.avatar_url || userData.avatar || ''),
           });
         } else {
           toast.error(response.message || 'Không thể tải thông tin profile');
@@ -160,6 +240,132 @@ const Profile = () => {
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSave = async () => {
+    const nameTrim = (profile.fullName || '').trim();
+    if (nameTrim.length < 2 || nameTrim.length > 70) {
+      toast.error('Họ và tên phải từ 2 đến 70 ký tự');
+      return;
+    }
+    if (!FULLNAME_REGEX.test(nameTrim)) {
+      toast.error('Họ và tên chỉ được chứa chữ cái và khoảng trắng');
+      return;
+    }
+
+    const phoneTrim = (profile.phone || '').trim();
+    if (phoneTrim && !/^0\d{9}$/.test(phoneTrim)) {
+      toast.error('Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)');
+      return;
+    }
+
+    const dobCheck = validateDob(profile.dob);
+    if (!dobCheck.ok) {
+      toast.error(dobCheck.message);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        fullName: nameTrim,
+        phone_number: phoneTrim,
+        gender: profile.gender || 'other',
+      };
+
+      if (profile.dob) {
+        payload.date_of_birth = profile.dob;
+      }
+
+      const avatarVal = (profile.avatar || '').trim();
+      if (avatarVal) {
+        payload.avatar_url = normalizeAssetPath(avatarVal);
+      }
+
+      const res = await updateProfile(payload);
+      if (!res || !res.success) {
+        toast.error(res?.message || 'Không thể cập nhật profile');
+        return;
+      }
+      if (!res.data) {
+        toast.error('Phản hồi từ server không hợp lệ');
+        return;
+      }
+      toast.success(res.message || 'Cập nhật profile thành công');
+      const u = res.data;
+      setProfile({
+        fullName: u.fullName || '',
+        email: u.email || '',
+        phone: u.phone_number ?? u.phone ?? '',
+        gender: u.gender || 'other',
+        dob: formatDateForInput(u.date_of_birth ?? u.dob),
+        avatar: normalizeAssetPath(u.avatar_url || u.avatar || ''),
+      });
+      if (user && typeof updateUser === 'function') {
+        const av = normalizeAssetPath(u.avatar_url ?? u.avatar ?? '');
+        updateUser({
+          ...user,
+          fullName: u.fullName,
+          email: u.email,
+          avatar: av,
+          avatar_url: av,
+          ...(u.phone_number !== undefined && { phone_number: u.phone_number }),
+        });
+      }
+    } catch (err) {
+      const msg =
+        (err && typeof err === 'object' && err.message) ||
+        'Không thể cập nhật thông tin profile';
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAvatarButtonClick = () => {
+    avatarInputRef.current?.click();
+  };
+
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Ảnh tối đa 2MB');
+      return;
+    }
+    if (!/^image\/(jpeg|png|webp|gif)$/i.test(file.type)) {
+      toast.error('Chỉ chấp nhận JPG, PNG, WebP hoặc GIF');
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const res = await uploadProfileAvatar(file);
+      if (!res?.success || !res.data) {
+        toast.error(res?.message || 'Cập nhật ảnh thất bại');
+        return;
+      }
+      toast.success(res.message || 'Đã cập nhật ảnh đại diện');
+      const u = res.data;
+      const av = normalizeAssetPath(u.avatar_url || u.avatar || '');
+      setProfile((prev) => ({ ...prev, avatar: av }));
+      if (user && typeof updateUser === 'function') {
+        updateUser({
+          ...user,
+          fullName: u.fullName ?? user.fullName,
+          email: u.email ?? user.email,
+          avatar: av,
+          avatar_url: av,
+        });
+      }
+    } catch (err) {
+      const msg =
+        (err && typeof err === 'object' && err.message) ||
+        'Không thể tải ảnh lên';
+      toast.error(msg);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const initials = (profile.fullName || '')
     .split(' ')
     .filter(Boolean)
@@ -210,8 +416,20 @@ const Profile = () => {
               ) : (
                 <div className="profile-avatar">{initials || 'UC'}</div>
               )}
-              <button type="button" className="profile-avatar-edit">
-                Đổi ảnh
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="profile-avatar-file-input"
+                onChange={handleAvatarFileChange}
+              />
+              <button
+                type="button"
+                className="profile-avatar-edit"
+                onClick={handleAvatarButtonClick}
+                disabled={uploadingAvatar || saving}
+              >
+                {uploadingAvatar ? 'Đang tải...' : 'Đổi ảnh'}
               </button>
             </div>
             <div className="profile-head-text">
@@ -249,22 +467,45 @@ const Profile = () => {
                     className="profile-input"
                     value={profile.phone}
                     onChange={handleChange}
-                    placeholder="09xx xxx xxx"
+                    placeholder="Nhập số điện thoại"
                   />
                 </div>
-                <div className="profile-field">
-                  <label className="profile-label" htmlFor="email">
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    className="profile-input profile-input--readonly"
-                    value={profile.email}
-                    readOnly
-                  />
-                  <p className="profile-hint">Email dùng để đăng nhập hệ thống.</p>
+                <div className="profile-field-group profile-field-group--left">
+                  <div className="profile-field">
+                    <label className="profile-label" htmlFor="email">
+                      Email
+                    </label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      className="profile-input profile-input--readonly"
+                      value={profile.email}
+                      readOnly
+                    />
+                  </div>
+                  <div className="profile-field profile-field--password">
+                    <label className="profile-label" htmlFor="password">
+                      Mật khẩu
+                    </label>
+                    <div className="profile-password-row">
+                      <input
+                        id="password"
+                        type="text"
+                        className="profile-input profile-input--readonly"
+                        value="••••••••"
+                        readOnly
+                        aria-readonly="true"
+                      />
+                      <button
+                        type="button"
+                        className="profile-change-pass-btn"
+                        onClick={() => navigate('/profile/change-password')}
+                      >
+                        Đổi mật khẩu
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <div className="profile-field profile-field-inline">
                   <div className="profile-field-half">
@@ -293,6 +534,8 @@ const Profile = () => {
                         className="profile-input profile-date-input"
                         value={profile.dob}
                         onChange={handleChange}
+                        min={minDobStr}
+                        max={maxDobStr}
                       />
                       <span className="profile-date-icon" aria-hidden="true">
 
@@ -304,8 +547,13 @@ const Profile = () => {
             </div>
 
             <div className="profile-section profile-section--actions">
-              <button type="button" className="profile-save-btn">
-                Lưu thay đổi
+              <button
+                type="button"
+                className="profile-save-btn"
+                onClick={handleSave}
+                disabled={saving || uploadingAvatar}
+              >
+                {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>
             </div>
           </Container>

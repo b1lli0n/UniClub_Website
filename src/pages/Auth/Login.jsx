@@ -255,9 +255,9 @@ const Login = () => {
           <div className="form-group">
             <div className="password-header">
               <label htmlFor="password" className="form-label">Mật khẩu</label>
-              <a href="#forgot-password" className="forgot-password-link">
+              <Link to="/forgot-password" className="forgot-password-link">
                 Quên mật khẩu?
-              </a>
+              </Link>
             </div>
             <div className="password-input-wrapper">
               <input

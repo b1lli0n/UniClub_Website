@@ -40,6 +40,20 @@ export const updateProfile = async (profileData) => {
   }
 };
 
+export const uploadProfileAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+  try {
+    const response = await userAPI.post('/users/profile/avatar', formData);
+    return response.data;
+  } catch (error) {
+    console.error('Upload avatar error:', error);
+    throw error.response?.data || {
+      message: error?.message || 'Không thể tải ảnh đại diện lên',
+    };
+  }
+};
+
 
 // Lấy danh sách tất cả users
 export const getAllUsers = async () => {
