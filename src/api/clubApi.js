@@ -1,31 +1,60 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API_BASE_URL = "http://localhost:5000/api/clubs";
-const API_ROOT = "http://localhost:5000/api";
+const API_BASE_URL = 'http://localhost:5000/api/clubs';
 
 // Tạo instance axios
 const clubAPI = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
-  },
+    'Content-Type': 'application/json'
+  }
 });
 
-// Thêm token vào mỗi request (FIX: đọc từ 'accessToken' thay vì 'token')
+// Thêm token vào mỗi request
 clubAPI.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// ===== CLUB CRUD =====
+export const getAllClubs = async (params = {}) => {
+  try {
+    const response = await clubAPI.get('/clubs', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Get all clubs error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể lấy danh sách câu lạc bộ' };
+  }
+};
+
+// Lấy thông tin chi tiết một club
+export const getClubById = async (id) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get club by id error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể lấy thông tin câu lạc bộ' };
+  }
+};
+
+// Lấy danh sách sự kiện của một club
+export const getEventsByClub = async (clubId, params = {}) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/events`, { params });
+    return response.data;
+  } catch (error) {
+    console.error('Get events by club error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể lấy danh sách sự kiện của câu lạc bộ' };
+  }
+};
 
 // Tạo club mới
 export const createClub = async (clubData) => {
   try {
-    const response = await clubAPI.post("/", clubData);
+    const response = await clubAPI.post('/create', clubData);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -35,7 +64,7 @@ export const createClub = async (clubData) => {
 // Lấy danh sách clubs
 export const getClubs = async () => {
   try {
-    const response = await clubAPI.get("/");
+    const response = await clubAPI.get('/');
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -52,7 +81,7 @@ export const getClubDetail = async (clubId) => {
   }
 };
 
-// Cập nhật club (BE chưa có route)
+// Cập nhật club
 export const updateClub = async (clubId, clubData) => {
   try {
     const response = await clubAPI.put(`/${clubId}`, clubData);
@@ -62,7 +91,7 @@ export const updateClub = async (clubId, clubData) => {
   }
 };
 
-// Xóa club (BE chưa có route)
+// Xóa club
 export const deleteClub = async (clubId) => {
   try {
     const response = await clubAPI.delete(`/${clubId}`);
@@ -72,19 +101,7 @@ export const deleteClub = async (clubId) => {
   }
 };
 
-// ===== MEMBER MANAGEMENT (Active Members) =====
-
-// Xem danh sách thành viên active của club
-export const getClubMembers = async (clubId) => {
-  try {
-    const response = await clubAPI.get(`/${clubId}/members`);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
-
-// Thêm thành viên vào club (BE chưa có route)
+// Thêm thành viên vào club
 export const addMemberToClub = async (clubId, memberId) => {
   try {
     const response = await clubAPI.post(`/${clubId}/members`, { memberId });
@@ -94,9 +111,9 @@ export const addMemberToClub = async (clubId, memberId) => {
   }
 };
 
-// ===== JOIN REQUEST (User) =====
+// ===== MEMBER REQUEST APIS =====
 
-// Gửi yêu cầu tham gia club (BE chưa có route)
+// Gửi yêu cầu tham gia club
 export const requestToJoinClub = async (clubId) => {
   try {
     const response = await clubAPI.post(`/${clubId}/join-requests`);
@@ -106,22 +123,20 @@ export const requestToJoinClub = async (clubId) => {
   }
 };
 
-// Xem danh sách yêu cầu của user hiện tại (BE chưa có route)
-export const getMyJoinRequests = async () => {
+// Xem danh sách yêu cầu tham gia (của club hiện tại - dành cho leader/admin)
+export const getJoinRequests = async (clubId) => {
   try {
-    const response = await clubAPI.get("/join-requests/my-requests");
+    const response = await clubAPI.get(`/${clubId}/join-requests`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
   }
 };
 
-// ===== MEMBERSHIP REQUEST (Leader/Sub-leader) =====
-
-// Xem danh sách yêu cầu tham gia (pending requests)
-export const getJoinRequests = async (clubId) => {
+// Xem danh sách yêu cầu của user hiện tại
+export const getMyJoinRequests = async () => {
   try {
-    const response = await clubAPI.get(`/${clubId}/members/requests`);
+    const response = await clubAPI.get('/join-requests/my-requests');
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -131,52 +146,36 @@ export const getJoinRequests = async (clubId) => {
 // Xem chi tiết yêu cầu tham gia
 export const getJoinRequestDetail = async (clubId, requestId) => {
   try {
-    const response = await clubAPI.get(`/${clubId}/memberships/${requestId}`);
+    const response = await clubAPI.get(`/${clubId}/join-requests/${requestId}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
   }
 };
 
-// Duyệt yêu cầu tham gia (approve)
-export const approveJoinRequest = async (clubId, requestId) => {
-  try {
-    const response = await clubAPI.post(
-      `/${clubId}/memberships/${requestId}/approve`
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
-
-// Từ chối yêu cầu tham gia (reject)
-export const rejectJoinRequest = async (clubId, requestId) => {
-  try {
-    const response = await clubAPI.post(
-      `/${clubId}/memberships/${requestId}/reject`
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
-
-// Hủy yêu cầu tham gia (BE chưa có route)
+// Hủy yêu cầu tham gia club
 export const cancelJoinRequest = async (clubId, requestId) => {
   try {
-    const response = await clubAPI.delete(
-      `/${clubId}/join-requests/${requestId}`
-    );
+    const response = await clubAPI.delete(`/${clubId}/join-requests/${requestId}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
   }
 };
 
-// ===== LEAVE CLUB =====
+// ===== MEMBER MANAGEMENT APIS =====
 
-// Rời khỏi club (BE chưa có route)
+// Xem danh sách thành viên của club
+export const getClubMembers = async (clubId) => {
+  try {
+    const response = await clubAPI.get(`/${clubId}/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Rời khỏi club
 export const leaveClub = async (clubId) => {
   try {
     const response = await clubAPI.post(`/${clubId}/leave`);
@@ -185,43 +184,5 @@ export const leaveClub = async (clubId) => {
     throw error.response?.data || error.message;
   }
 };
-
-// ===== EVENTS =====
-
-// Lấy sự kiện theo club (dùng cho MyClub page)
-export const getEventsByClub = async (clubId, params) => {
-  try {
-    const token = localStorage.getItem("accessToken");
-    const response = await axios.get(`${API_ROOT}/events/club/${clubId}`, {
-      params,
-      headers: {
-        Authorization: token ? `Bearer ${token}` : undefined,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
-
-// Lấy sự kiện user đã đăng ký (dùng cho My Events page)
-export const getMyEvents = async (params) => {
-  try {
-    const token = localStorage.getItem("accessToken");
-    const response = await axios.get(`${API_ROOT}/events/my-events`, {
-      params,
-      headers: {
-        Authorization: token ? `Bearer ${token}` : undefined,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
-
-// ===== Aliases để tương thích import cũ =====
-export const getAllClubs = getClubs;
-export const getClubById = getClubDetail;
 
 export default clubAPI;
