@@ -3,9 +3,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* Apply signature pastel gradient globally */
-    background: linear-gradient(135deg, #A2D2FF 0%, #FFC8DD 50%, #CDB4DB 100%);
-    background-attachment: fixed;
+    background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
 }
 
 .main-layout-body {

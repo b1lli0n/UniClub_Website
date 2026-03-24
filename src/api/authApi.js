@@ -32,6 +32,7 @@ export const login = async (credentials) => {
 
       // Lưu tokens và user vào localStorage
       localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('adminToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       console.log('User logged in:', accessToken, user);

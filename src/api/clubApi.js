@@ -1,14 +1,7 @@
+import api from './api';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api/clubs';
-
-// Tạo instance axios
-const clubAPI = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+const clubAPI = api;
 
 // Thêm token vào mỗi request
 clubAPI.interceptors.request.use((config) => {
@@ -16,8 +9,8 @@ clubAPI.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  return config;
-});
+}
+)
 
 export const getAllClubs = async (params = {}) => {
   try {
@@ -205,20 +198,6 @@ export const leaveClub = async (clubId) => {
   }
 };
 
-// Lấy danh sách sự kiện của một club
-export const getEventsByClub = async (clubId, params = {}) => {
-  try {
-    const response = await axios.get(`http://localhost:5000/api/events/club/${clubId}`, { params });
-    return response.data;
-  } catch (error) {
-    console.error('Get events by club error:', error);
-    throw error.response?.data || { message: error.message || 'Không thể lấy danh sách sự kiện của câu lạc bộ' };
-  }
-};
-
-export const getAllClubs = getClubs;
-export const getClubById = getClubDetail;
-
 // ===== CONTRIBUTION / POINT HISTORY APIS =====
 
 // Lấy lịch sử điểm của chính mình (Member)
@@ -248,3 +227,4 @@ export const getMemberContributions = async (clubId, memberId) => {
 };
 
 export default clubAPI;
+ 
