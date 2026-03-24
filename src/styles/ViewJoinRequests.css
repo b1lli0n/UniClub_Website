@@ -1,0 +1,321 @@
+/* src/styles/ViewJoinRequests.css */
+:root {
+  --joinreq-hot-pink: #ffafcc;
+  --joinreq-powder-blue: #bde0fe;
+  --joinreq-lavender: #cdb4db;
+  --joinreq-ink: #1f2a44;
+  --joinreq-muted: rgba(31, 42, 68, 0.72);
+  --joinreq-success: #4caf50;
+  --joinreq-warning: #ff9800;
+  --joinreq-danger: #f44336;
+}
+
+/* Body class for join requests page */
+body.joinrequests-body {
+  margin: 0;
+  min-height: 100vh;
+  display: block;
+  place-items: unset;
+  color: var(--joinreq-ink);
+}
+
+body.joinrequests-body #root {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.joinrequests-container {
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+/* Glass Panel */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 16px 50px rgba(31, 42, 68, 0.10);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 22px;
+}
+
+/* Header Section */
+.joinrequests-header {
+  margin-bottom: 2.5rem;
+  padding: 2rem 0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.joinrequests-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--joinreq-ink);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.joinrequests-subtitle {
+  font-size: 1.125rem;
+  color: var(--joinreq-muted);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Section */
+.joinrequests-section {
+  margin-bottom: 2rem;
+}
+
+/* Empty State */
+.joinrequests-empty {
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--joinreq-ink);
+  margin-bottom: 0.75rem;
+}
+
+.empty-message {
+  color: var(--joinreq-muted);
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Label */
+.joinrequests-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--joinreq-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+/* List */
+.joinrequests-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card */
+.joinrequests-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.joinrequests-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(31, 42, 68, 0.15);
+}
+
+/* Card Header */
+.joinrequests-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.joinrequests-club-info {
+  flex: 1;
+}
+
+.joinrequests-club-name {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--joinreq-ink);
+  margin: 0 0 0.5rem;
+  line-height: 1.3;
+}
+
+.joinrequests-club-category {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--joinreq-muted);
+  background: rgba(255, 255, 255, 0.5);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+/* Status Badge */
+.joinrequests-status {
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-align: center;
+  min-width: 120px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.status-pending {
+  background: rgba(255, 152, 0, 0.2);
+  color: #e65100;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.status-approved {
+  background: rgba(76, 175, 80, 0.2);
+  color: #2e7d32;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-rejected {
+  background: rgba(244, 67, 54, 0.2);
+  color: #c62828;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.status-unknown {
+  background: rgba(158, 158, 158, 0.2);
+  color: var(--joinreq-muted);
+  border: 1px solid rgba(158, 158, 158, 0.3);
+}
+
+/* Card Body */
+.joinrequests-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.joinrequests-detail-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.joinrequests-value {
+  font-size: 0.95rem;
+  color: var(--joinreq-ink);
+  font-weight: 600;
+}
+
+.joinrequests-rejection-reason {
+  font-size: 0.95rem;
+  color: var(--joinreq-ink);
+  background: rgba(244, 67, 54, 0.08);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid rgba(244, 67, 54, 0.5);
+  margin: 0;
+  font-style: italic;
+}
+
+/* Status Indicator */
+.joinrequests-status-indicator {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.status-pending-icon {
+  background: rgba(255, 152, 0, 0.2);
+}
+
+.status-approved-icon {
+  background: rgba(76, 175, 80, 0.2);
+}
+
+.status-rejected-icon {
+  background: rgba(244, 67, 54, 0.2);
+}
+
+/* Card Footer with Action Buttons */
+.joinrequests-card-footer {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Cancel Request Button */
+.btn-cancel-request {
+  padding: 0.5rem 1.5rem;
+  background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+}
+
+.btn-cancel-request:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+  background: linear-gradient(135deg, #e53935 0%, #d32f2f 100%);
+}
+
+.btn-cancel-request:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-cancel-request:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .joinrequests-title {
+    font-size: 1.75rem;
+  }
+
+  .joinrequests-card-header {
+    flex-direction: column;
+  }
+
+  .joinrequests-status {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .joinrequests-list {
+    grid-template-columns: 1fr;
+  }
+
+  .joinrequests-status-indicator {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-top: 0.5rem;
+  }
+}

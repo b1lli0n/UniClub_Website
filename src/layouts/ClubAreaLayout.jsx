@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Outlet, useParams, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { SidebarNav } from '../components/layout/SidebarNav';
+import { SidebarNav } from '../components/navbar/SidebarNav';
 import { getClubById } from '../api/clubApi';
 import { getUserClubs } from '../api/userApi';
 import { useAuth } from '../context/AuthContext';
-import '../styles/MainLayout.css';
 import '../styles/ClubAreaLayout.css';
 
 /** Ban quản lý: Leader (1), Sub Leader (2), Secretary (3), Treasurer (4) — giống ClubDetailCard */

@@ -16,7 +16,6 @@ body.profile-body {
   display: block;
   place-items: unset;
   color: var(--club-ink);
-  background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
 }
 
 body.profile-body #root {
@@ -490,29 +489,7 @@ body.profile-body #root {
   pointer-events: none;
 }
 
-/* Footer only when on Profile page */
-body.profile-body footer {
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
-  color: rgba(31, 42, 68, 0.75) !important;
-  padding: 40px 0 !important;
-  margin-top: 80px;
-  text-align: center;
-  font-size: 14px;
-}
 
-body.profile-body footer a,
-body.profile-body footer strong {
-  color: var(--candy-hotpink) !important;
-  text-decoration: none;
-  font-weight: 800;
-}
-
-body.profile-body footer a:hover {
-  color: var(--candy-purple) !important;
-}
 
 /* Responsive */
 @media (max-width: 768px) {

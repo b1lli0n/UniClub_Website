@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { register as registerService } from '../../api/authApi';
@@ -7,6 +7,10 @@ import logoImage from '../../image/logo.png';
 import '../../styles/Register.css';
 
 const Register = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',

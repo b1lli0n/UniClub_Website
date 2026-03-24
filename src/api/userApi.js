@@ -85,3 +85,34 @@ export const getUserClubs = async (userId) => {
   }
 };
 
+// Xem danh sách yêu cầu tham gia của user hiện tại
+export const getUserJoinRequests = async () => {
+  try {
+    const response = await userAPI.get(`/users/my-join-requests`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Hủy yêu cầu tham gia câu lạc bộ
+export const cancelJoinRequest = async (requestId) => {
+  try {
+    const response = await userAPI.delete(`/users/join-requests/${requestId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Xem danh sach phi membership cua user hien tai
+export const listMyMembershipFees = async (params = {}) => {
+  try {
+    const response = await userAPI.get('/users/my-membership-fees', { params });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || {
+      message: error?.message || 'Khong the tai danh sach phi thanh vien'
+    };
+  }
+};

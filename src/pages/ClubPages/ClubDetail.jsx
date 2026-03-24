@@ -4,13 +4,10 @@ import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { Users, Calendar, Tag, ImageIcon, ArrowRight, Crown, UserCircle2, ShieldCheck, FileBadge2, Wallet } from 'lucide-react';
 import ClubDetailNav from '../../components/ClubDetailNav';
-import { getClubById, getEventsByClub } from '../../api/clubApi';
-<<<<<<< HEAD
+import { getClubById, getEventsByClub, requestToJoinClub } from '../../api/clubApi';
 import { getRewards } from '../../api/rewardApi';
-=======
 import { getUserClubs } from '../../api/userApi';
 import { useAuth } from '../../context/AuthContext';
->>>>>>> Trinh
 import '../../styles/ClubDetail.css';
 import { ASSET_BASE } from '../../api/api';
 
@@ -79,6 +76,7 @@ const ClubDetail = () => {
   const { user } = useAuth();
   const [isJoined, setIsJoined] = useState(false);
   const [isMember, setIsMember] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
@@ -86,6 +84,14 @@ const ClubDetail = () => {
   const [rewardsLoading, setRewardsLoading] = useState(true);
   const [heroImgError, setHeroImgError] = useState(false);
   const [userRole, setUserRole] = useState(null);
+
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Add body class for styling
 
   useEffect(() => {
     document.body.classList.add('clubdetail-body');
@@ -174,8 +180,33 @@ const ClubDetail = () => {
     fetchClubDetail();
   }, [id, user]);
 
-  const handleJoin = () => {
-    setIsJoined(!isJoined);
+  const handleJoin = async () => {
+    if (!id) return;
+    
+    setJoinLoading(true);
+    try {
+      const response = await requestToJoinClub(id);
+      console.log('✅ Join response:', response);
+      
+      // Success response
+      setIsJoined(true);
+      const successMessage = 'Gửi yêu cầu tham gia thành công! Hãy chờ phê duyệt từ ban quản trị.';
+      toast.success(successMessage);
+    } catch (error) {
+      console.error('❌ Join club error:', error);
+      
+      // Check if error message indicates success
+      const errorMsg = error?.message || error?.data?.message || error || '';
+      if (errorMsg.toLowerCase().includes('success') || errorMsg.toLowerCase().includes('thành công')) {
+        setIsJoined(true);
+        toast.success(errorMsg);
+      } else {
+        const errorMessage = error?.message || error?.data?.message || 'Không thể gửi yêu cầu tham gia';
+        toast.error(errorMessage);
+      }
+    } finally {
+      setJoinLoading(false);
+    }
   };
 
   const normalizeRewardStatus = (status) => {

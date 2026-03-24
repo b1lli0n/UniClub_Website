@@ -14,11 +14,9 @@ import {
   offNotificationReceived,
   disconnectSocket,
 } from "../services/socket";
-
 // Backend base URL để build full URL cho avatar nếu dùng đường dẫn từ BE
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const ASSET_BASE = API_BASE.replace(/\/api\/?$/, '');
-import { ASSET_BASE } from '../api/api';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -270,6 +268,10 @@ const Header = () => {
     .map((p) => p[0]?.toUpperCase())
     .join('');
 
+  const roleValue = user?.role;
+  const normalizedRole = String(roleValue || '').trim().toLowerCase();
+  const isAdmin = roleValue === 1;
+
   return (
     <nav className="header-nav glass-header">
       <div className="header-container">
@@ -394,6 +396,15 @@ const Header = () => {
                   </div>
                 )}
               </div>
+              {isAdmin && (
+                <button
+                  type="button"
+                  className="header-admin-btn"
+                  onClick={() => navigate('/admin')}
+                >
+                  Admin Dashboard
+                </button>
+              )}
 
               {/* User chip với avatar + name + role */}
               <div className="header-user-wrapper" ref={dropdownRef}>
@@ -465,6 +476,13 @@ const Header = () => {
                     >
                       <span className="dropdown-icon"></span>
                       My Requests
+                    </button>
+                    <button
+                      className="header-dropdown-item"
+                      onClick={() => handleMenuClick('/my-membership-fees')}
+                    >
+                      <span className="dropdown-icon"></span>
+                      My Membership Fees
                     </button>
                     <div className="header-dropdown-divider"></div>
                     <button

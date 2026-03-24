@@ -11,7 +11,6 @@
 /* Register Page */
 .register-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
   display: flex;
   align-items: center;
   justify-content: center;

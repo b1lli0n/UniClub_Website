@@ -3,15 +3,6 @@ import axios from 'axios';
 
 const clubAPI = api;
 
-// Thêm token vào mỗi request
-clubAPI.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-}
-)
-
 export const getAllClubs = async (params = {}) => {
   try {
     const response = await clubAPI.get('/clubs', { params });
@@ -47,7 +38,7 @@ export const getEventsByClub = async (clubId, params = {}) => {
 // Tạo club mới
 export const createClub = async (clubData) => {
   try {
-    const response = await clubAPI.post('/create', clubData);
+    const response = await clubAPI.post('/clubs/create', clubData);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -131,7 +122,7 @@ export const addMemberToClub = async (clubId, memberId) => {
 // Gửi yêu cầu tham gia club
 export const requestToJoinClub = async (clubId) => {
   try {
-    const response = await clubAPI.post(`/${clubId}/join-requests`);
+    const response = await clubAPI.post(`/clubs/${clubId}/join-request`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -141,7 +132,7 @@ export const requestToJoinClub = async (clubId) => {
 // Xem danh sách yêu cầu tham gia (của club hiện tại - dành cho leader/admin)
 export const getJoinRequests = async (clubId) => {
   try {
-    const response = await clubAPI.get(`/${clubId}/join-requests`);
+    const response = await clubAPI.get(`/clubs/${clubId}/join-request`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

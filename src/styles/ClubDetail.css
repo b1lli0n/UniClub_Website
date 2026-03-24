@@ -634,6 +634,12 @@ body.clubdetail-body #root {
   box-shadow: 0 8px 20px rgba(17, 24, 39, 0.2);
 }
 
+.clubdetail-join-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .clubdetail-join-btn.is-joined {
   background: #10b981;
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);

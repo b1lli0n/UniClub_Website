@@ -1,9 +1,9 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
-import MainLayout from '../layouts/MainLayout'
+import LeaderLayout from '../layouts/LeaderLayout'
 import ClubAreaLayout from '../layouts/ClubAreaLayout'
 
 import Register from '../pages/Auth/Register'
@@ -23,11 +23,7 @@ import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
 import EventAttendanceList from '../pages/leader/EventAttendanceList'
 import CreateClub from '../pages/ClubPages/CreateClub'
-<<<<<<< HEAD
-import TransactionList from '../pages/TransactionList'
-=======
 import ClubTransactions from '../pages/ClubPages/ClubTransactions'
->>>>>>> Trinh
 
 import Event from '../pages/EventPages/EventInClub'
 import EventPublic from '../pages/EventPages/EventPublic'
@@ -49,11 +45,6 @@ import ClubDetailAdmin from '../pages/admin/ClubDetail'
 import ClubMembers from '../pages/admin/ClubMembers'
 import PlaceholderPage from '../pages/admin/PlaceholderPage'
 import AdminDashboard from '../pages/admin/Dashboard'
-import Rewards from '../pages/admin/Rewards'
-import RewardDetail from '../pages/admin/RewardDetail'
-import RedemptionHistory from '../pages/admin/RedemptionHistory'
-import Badges from '../pages/admin/Badges'
-import BadgeDetail from '../pages/admin/BadgeDetail'
 import RewardsAdmin from '../pages/admin/Rewards'
 import RewardDetailAdmin from '../pages/admin/RewardDetail'
 import RedemptionHistoryAdmin from '../pages/admin/RedemptionHistory'
@@ -131,13 +122,11 @@ const AppRouter = () => {
       </Route>
 
       {/* Dashboard/Club Routes with MainLayout (includes Sidebar) */}
-      <Route element={<MainLayout />}>
+      <Route element={<LeaderLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/transactions" element={<ClubTransactions />} />
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/events/:eventId/attendance" element={<EventAttendanceList />} />
-        {/* Treasurer: Quản lý tài chính CLB */}
-        <Route path="/clubs/:id/transactions" element={<TransactionList />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/create" element={<CreateEventPage />} />
         <Route path="/events/:eventId" element={<EventDetailPage />} />
@@ -145,7 +134,7 @@ const AppRouter = () => {
 
         <Route path="/clubs/:clubId/rewards/requests" element={<RewardRequestsLeader />} />
 
-        <Route path="/clubEvent" element={<EventsPage />} />s
+        <Route path="/clubEvent" element={<EventsPage />} />
         <Route path="/clubEvent/create" element={<CreateEventPage />} />
         <Route path="/clubEvent/:eventId" element={<EventDetailPage />} />
         <Route path="/clubEvent/:eventId/update" element={<UpdateEventPage />} />
@@ -153,14 +142,16 @@ const AppRouter = () => {
         <Route path="/events" element={<Navigate to="/clubEvent" replace />} />
 
         <Route path="/memberships" element={<MembershipsPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />        <Route
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route
           path="/clubs/:clubId/finance"
           element={
             <ProtectedRoute>
               <FinancialDashboard />
             </ProtectedRoute>
           }
-        />      </Route>
+        />
+      </Route>
 
       {/* Admin Routes with ProtectedRoute */}
       <Route
@@ -185,12 +176,6 @@ const AppRouter = () => {
         <Route path="badges/:badgeId" element={<BadgeDetailAdmin />} />
         <Route path="announcements" element={<AdminNotifications />} />
         <Route path="users" element={<PlaceholderPage title="Quản lý người dùng" />} />
-        {/* Reward & Badge Routes */}
-        <Route path="rewards" element={<Rewards />} />
-        <Route path="rewards/:rewardId" element={<RewardDetail />} />
-        <Route path="reward-history" element={<RedemptionHistory />} />
-        <Route path="badges" element={<Badges />} />
-        <Route path="badges/:badgeId" element={<BadgeDetail />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

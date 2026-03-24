@@ -56,6 +56,11 @@ const EventPublic = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Scroll to top khi navigate đến trang này
+    useEffect(() => {
+      window.scrollTo(0, 0);
+    }, []);
+
   useEffect(() => {
     document.body.classList.add('event-body');
     return () => document.body.classList.remove('event-body');

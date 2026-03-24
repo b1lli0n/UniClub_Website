@@ -1,231 +1,236 @@
-// import React, { useState, useEffect } from 'react';
-// import { Container, Card, Button, Badge, Modal, Spinner, Alert } from 'react-bootstrap';
-// import { toast } from 'react-toastify';
-// import { getMyJoinRequests, getJoinRequestDetail, cancelJoinRequest } from '../api/clubAPI';
+import React, { useState, useEffect } from 'react';
+import { Container } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import { getUserJoinRequests, cancelJoinRequest } from '../api/userApi';
+import '../styles/ViewJoinRequests.css';
 
-// const ViewJoinRequests = () => {
-//   const [requests, setRequests] = useState([]);
-//   const [loading, setLoading] = useState(false);
-//   const [selectedRequest, setSelectedRequest] = useState(null);
-//   const [showDetailModal, setShowDetailModal] = useState(false);
-//   const [detailLoading, setDetailLoading] = useState(false);
+const ViewJoinRequests = () => {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [canceling, setCanceling] = useState(null);
 
-//   useEffect(() => {
-//     fetchRequests();
-//   }, []);
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-//   const fetchRequests = async () => {
-//     setLoading(true);
-//     try {
-//       // Lấy tất cả requests của user hiện tại
-//       const response = await getMyJoinRequests();
-//       console.log('📋 My Requests response:', response);
-      
-//       let requestsList = [];
-//       if (Array.isArray(response)) {
-//         requestsList = response;
-//       } else if (response && response.data && Array.isArray(response.data)) {
-//         requestsList = response.data;
-//       } else if (response && response.requests && Array.isArray(response.requests)) {
-//         requestsList = response.requests;
-//       }
-      
-//       setRequests(requestsList);
-//       if (requestsList.length === 0) {
-//         toast.info('Bạn chưa gửi yêu cầu tham gia club nào');
-//       }
-//     } catch (error) {
-//       console.error('Error fetching requests:', error);
-//       toast.error('❌ Lỗi khi lấy danh sách yêu cầu');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+  // Add body class for styling
+  useEffect(() => {
+    document.body.classList.add('joinreques ts-body');
+    return () => {
+      document.body.classList.remove('joinrequests-body');
+    };
+  }, []);
 
-//   const handleViewDetail = async (request) => {
-//     setDetailLoading(true);
-//     try {
-//       // Lấy chi tiết request
-//       const response = await getJoinRequestDetail(request.clubId || request.club_id, request._id);
-//       console.log('📄 Request detail:', response);
-//       setSelectedRequest(response);
-//       setShowDetailModal(true);
-//     } catch (error) {
-//       console.error('Error fetching detail:', error);
-//       toast.error('❌ Lỗi khi lấy chi tiết yêu cầu');
-//     } finally {
-//       setDetailLoading(false);
-//     }
-//   };
+  // Fetch user's join requests
+  useEffect(() => {
+    const fetchRequests = async () => {
+      setLoading(true);
+      try {
+        const response = await getUserJoinRequests();
+        console.log('Raw response from API:', response);
+        console.log('Response type:', typeof response);
+        console.log('Is Array?:', Array.isArray(response));
+        
+        let allRequests = [];
+        
+        // Try different ways to extract the array from response
+        if (Array.isArray(response)) {
+          // Response is directly an array
+          allRequests = response;
+          console.log('Got array directly from response');
+        } else if (response?.data) {
+          if (Array.isArray(response.data)) {
+            // response.data is an array
+            allRequests = response.data;
+            console.log('Got array from response.data');
+          } else if (Array.isArray(response.data.data)) {
+            // response.data.data is an array
+            allRequests = response.data.data;
+            console.log('Got array from response.data.data');
+          } else if (Array.isArray(response.data.requests)) {
+            // response.data.requests is an array
+            allRequests = response.data.requests;
+            console.log('Got array from response.data.requests');
+          }
+        } else if (Array.isArray(response?.requests)) {
+          // response.requests is an array (from your attachment)
+          allRequests = response.requests;
+          console.log('Got array from response.requests');
+        }
+        
+        console.log('All requests extracted:', allRequests);
+        console.log('All requests is array?:', Array.isArray(allRequests));
+        
+        // Filter only pending requests (status = 0)
+        const pendingRequests = allRequests.filter(req => req.status === 0);
+        console.log('Pending requests after filter:', pendingRequests);
+        
+        setRequests(pendingRequests);
+        
+        if (pendingRequests.length === 0 && !loading) {
+          console.log('No pending requests found');
+          toast.info('Bạn không có yêu cầu tham gia nào đang chờ phê duyệt');
+        }
+      } catch (error) {
+        console.error('Error fetching join requests:', error);
+        toast.error(error?.message || 'Không thể tải danh sách yêu cầu');
+        setRequests([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-//   const handleCancelRequest = async (request) => {
-//     if (!window.confirm('Bạn chắc chắn muốn hủy yêu cầu này?')) {
-//       return;
-//     }
+    fetchRequests();
+  }, []);
 
-//     try {
-//       await cancelJoinRequest(request.clubId || request.club_id, request._id);
-//       toast.success('✅ Đã hủy yêu cầu');
-//       // Refresh danh sách
-//       setShowDetailModal(false);
-//       fetchRequests();
-//     } catch (error) {
-//       console.error('Error canceling request:', error);
-//       toast.error('❌ Lỗi khi hủy yêu cầu');
-//     }
-//   };
+  // Format status text
+  const getStatusText = (status) => {
+    switch (status) {
+      case 0:
+        return 'Chờ phê duyệt';
+      case 1:
+        return 'Đã phê duyệt';
+      case 2:
+        return 'Bị từ chối';
+      default:
+        return 'Không xác định';
+    }
+  };
 
-//   const getStatusBadge = (status) => {
-//     const statusMap = {
-//       pending: { variant: 'warning', text: '⏳ Chờ xử lý' },
-//       approved: { variant: 'success', text: '✅ Đã chấp thuận' },
-//       rejected: { variant: 'danger', text: '❌ Bị từ chối' }
-//     };
-//     const statusInfo = statusMap[status] || { variant: 'secondary', text: status };
-//     return <Badge bg={statusInfo.variant}>{statusInfo.text}</Badge>;
-//   };
+  // Format status badge color
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 0:
+        return 'status-pending';
+      case 1:
+        return 'status-approved';
+      case 2:
+        return 'status-rejected';
+      default:
+        return 'status-unknown';
+    }
+  };
 
-//   return (
-//     <Container className="py-4">
-//       <h2 className="mb-4">📬 Yêu Cầu Tham Gia Club</h2>
+  // Handle cancel request
+  const handleCancelRequest = async (requestId) => {
+    if (!window.confirm('Bạn chắc chắn muốn hủy yêu cầu này?')) {
+      return;
+    }
 
-//       {loading ? (
-//         <div className="text-center">
-//           <Spinner animation="border" role="status">
-//             <span className="visually-hidden">Đang tải...</span>
-//           </Spinner>
-//         </div>
-//       ) : requests.length === 0 ? (
-//         <Alert variant="info">
-//           <strong>Không có yêu cầu nào</strong> - Bạn chưa gửi yêu cầu tham gia club nào
-//         </Alert>
-//       ) : (
-//         <div className="row">
-//           {requests.map((request) => (
-//             <div key={request._id} className="col-md-6 col-lg-4 mb-4">
-//               <Card className="h-100 shadow-sm">
-//                 <Card.Body>
-//                   <Card.Title className="d-flex justify-content-between align-items-start">
-//                     <span>{request.clubName || request.club?.name || 'Club không rõ'}</span>
-//                   </Card.Title>
+    setCanceling(requestId);
+    try {
+      await cancelJoinRequest(requestId);
+      setRequests(requests.filter(req => req._id !== requestId));
+      toast.success('Đã hủy yêu cầu tham gia');
+    } catch (error) {
+      console.error('Error canceling request:', error);
+      toast.error(error?.message || 'Không thể hủy yêu cầu');
+    } finally {
+      setCanceling(null);
+    }
+  };
 
-//                   <div className="mb-3">
-//                     {getStatusBadge(request.status || 'pending')}
-//                   </div>
+  return (
+    <div className="joinrequests-container">
+      <Container className="py-4">
+        {/* Header */}
+        <section className="joinrequests-header">
+          <h1 className="joinrequests-title">Yêu cầu tham gia đang chờ</h1>
+          <p className="joinrequests-subtitle">
+            Danh sách các yêu cầu tham gia câu lạc bộ đang chờ phê duyệt
+          </p>
+        </section>
 
-//                   <Card.Text>
-//                     <small className="text-muted">
-//                       📅 Gửi lúc: {new Date(request.createdAt).toLocaleDateString('vi-VN')}
-//                     </small>
-//                   </Card.Text>
+        {/* Loading State */}
+        {loading && (
+          <section className="joinrequests-section">
+            <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
+              <p className="joinrequests-label">Đang tải...</p>
+            </div>
+          </section>
+        )}
 
-//                   {request.message && (
-//                     <Card.Text>
-//                       <strong>Tin nhắn:</strong> {request.message}
-//                     </Card.Text>
-//                   )}
+        {/* Empty State */}
+        {!loading && requests.length === 0 && (
+          <section className="joinrequests-section">
+            <div className="glass-panel joinrequests-empty">
+              <div className="empty-icon">📋</div>
+              <h3 className="empty-title">Không có yêu cầu nào</h3>
+              <p className="empty-message">
+                Bạn không có yêu cầu tham gia câu lạc bộ nào đang chờ phê duyệt.
+              </p>
+            </div>
+          </section>
+        )}
 
-//                   <div className="d-flex gap-2 mt-3">
-//                     <Button
-//                       variant="primary"
-//                       size="sm"
-//                       onClick={() => handleViewDetail(request)}
-//                     >
-//                       Xem Chi Tiết
-//                     </Button>
-//                     {request.status === 'pending' && (
-//                       <Button
-//                         variant="danger"
-//                         size="sm"
-//                         onClick={() => handleCancelRequest(request)}
-//                       >
-//                         Hủy Yêu Cầu
-//                       </Button>
-//                     )}
-//                   </div>
-//                 </Card.Body>
-//               </Card>
-//             </div>
-//           ))}
-//         </div>
-//       )}
+        {/* Requests List */}
+        {!loading && requests.length > 0 && (
+          <section className="joinrequests-section">
+            <div className="joinrequests-list">
+              {requests.map((request) => (
+                <div key={request._id} className="joinrequests-card glass-panel">
+                  {/* Club Info and Status */}
+                  <div className="joinrequests-card-header">
+                    <div className="joinrequests-club-info">
+                      <h3 className="joinrequests-club-name">
+                        {request.club_id?.name || 'Câu lạc bộ'}
+                      </h3>
+                      {request.club_id?.category && (
+                        <span className="joinrequests-club-category">
+                          {request.club_id?.category}
+                        </span>
+                      )}
+                    </div>
+                    <div className={`joinrequests-status ${getStatusBadgeClass(request.status)}`}>
+                      {getStatusText(request.status)}
+                    </div>
+                  </div>
 
-//       {/* Modal Chi Tiết */}
-//       <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} size="lg" centered>
-//         <Modal.Header closeButton>
-//           <Modal.Title>Chi Tiết Yêu Cầu Tham Gia</Modal.Title>
-//         </Modal.Header>
-//         <Modal.Body>
-//           {detailLoading ? (
-//             <div className="text-center">
-//               <Spinner animation="border" role="status">
-//                 <span className="visually-hidden">Đang tải...</span>
-//               </Spinner>
-//             </div>
-//           ) : selectedRequest ? (
-//             <div>
-//               <div className="mb-3">
-//                 <h5>Club: {selectedRequest.clubName || selectedRequest.club?.name || 'Club không rõ'}</h5>
-//               </div>
+                  {/* Request Details */}
+                  <div className="joinrequests-card-body">
+                    <div className="joinrequests-detail-row">
+                      <span className="joinrequests-label">Ngày gửi</span>
+                      <span className="joinrequests-value">
+                        {new Date(request.createdAt || request.created_at).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
 
-//               <div className="mb-3">
-//                 <strong>Trạng Thái:</strong> <br />
-//                 {getStatusBadge(selectedRequest.status || 'pending')}
-//               </div>
+                    {request.role && (
+                      <div className="joinrequests-detail-row">
+                        <span className="joinrequests-label">Vai trò</span>
+                        <span className="joinrequests-value">
+                          {request.role === 'member' ? 'Thành viên' : request.role}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-//               <div className="mb-3">
-//                 <strong>Ngày Gửi:</strong> <br />
-//                 {new Date(selectedRequest.createdAt).toLocaleString('vi-VN')}
-//               </div>
+                  {/* Action Buttons */}
+                  <div className="joinrequests-card-footer">
+                    <button
+                      className="btn-cancel-request"
+                      onClick={() => handleCancelRequest(request._id)}
+                      disabled={canceling === request._id}
+                    >
+                      {canceling === request._id ? 'Đang hủy...' : 'Hủy yêu cầu'}
+                    </button>
+                  </div>
 
-//               {selectedRequest.message && (
-//                 <div className="mb-3">
-//                   <strong>Tin Nhắn:</strong> <br />
-//                   <p>{selectedRequest.message}</p>
-//                 </div>
-//               )}
+                  {/* Status Indicator */}
+                  <div className="joinrequests-status-indicator">
+                    {request.status === 0 && (
+                      <div className="status-icon status-pending-icon">⏳</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+      </Container>
+    </div>
+  );
+};
 
-//               {selectedRequest.responseMessage && (
-//                 <div className="mb-3">
-//                   <strong>Phản Hồi:</strong> <br />
-//                   <Alert variant={selectedRequest.status === 'approved' ? 'success' : 'danger'}>
-//                     {selectedRequest.responseMessage}
-//                   </Alert>
-//                 </div>
-//               )}
-
-//               {selectedRequest.respondedAt && (
-//                 <div className="mb-3">
-//                   <strong>Ngày Phản Hồi:</strong> <br />
-//                   {new Date(selectedRequest.respondedAt).toLocaleString('vi-VN')}
-//                 </div>
-//               )}
-
-//               {selectedRequest.respondedBy && (
-//                 <div className="mb-3">
-//                   <strong>Phản Hồi Bởi:</strong> <br />
-//                   {selectedRequest.respondedBy.name || 'Admin'}
-//                 </div>
-//               )}
-//             </div>
-//           ) : null}
-//         </Modal.Body>
-//         <Modal.Footer>
-//           {selectedRequest && selectedRequest.status === 'pending' && (
-//             <Button
-//               variant="danger"
-//               onClick={() => handleCancelRequest(selectedRequest)}
-//             >
-//               Hủy Yêu Cầu
-//             </Button>
-//           )}
-//           <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
-//             Đóng
-//           </Button>
-//         </Modal.Footer>
-//       </Modal>
-//     </Container>
-//   );
-// };
-
-// export default ViewJoinRequests;
+export default ViewJoinRequests;

@@ -187,13 +187,13 @@ export default function EventDetailPage() {
                 <div className="myclub-container">
                     <div className="glass-card event-detail-notfound-card">
                         <div className="event-detail-notfound-icon">⚠️</div>
-                        <h3 className="event-detail-notfound-title">
+                        <h3 className="event-detail-notfound-title"> 
                             Không tìm thấy sự kiện
                         </h3>
                         <p className="event-detail-notfound-text">
                             Sự kiện này không tồn tại hoặc đã bị xóa
                         </p>
-                        <button className="card-button" onClick={() => navigate('/events')}>
+                        <button className="card-button" onClick={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/events')}>
                             ← Quay lại danh sách
                         </button>
                     </div>
@@ -206,20 +206,31 @@ export default function EventDetailPage() {
         <div className="home-page">
             <div className="home-overlay" />
             <div className="myclub-container">
-                <EventHeader
-                    title={event.title}
-                    status={event.status}
-                    onBack={() => navigate('/events')}
-                    onEdit={() => navigate(`/events/${eventId}/edit`)}
-                    canEdit={event.status !== 'canceled'}
-                />
+                <div className="event-detail-header-section">
+                    <EventHeader
+                        title={event.title}
+                        status={event.status}
+                        onBack={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/events')}
+                        onEdit={() => navigate(`/events/${eventId}/edit`)}
+                        canEdit={event.status !== 'canceled'}
+                    />
+                    
+                    <button
+                        className="timeline-trigger-button"
+                        onClick={() => navigate(`/events/${eventId}/timeline`)}
+                        title="Xem timeline sự kiện"
+                    >
+                        📅 Timeline Sự Kiện
+                    </button>
+                </div>
 
                 <EventInfoCard
                     event={event}
                     formatDateTime={formatDateTime}
                 />
 
-                <div className="event-detail-actions glass-card" style={{ marginTop: '20px', padding: '20px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+               
+                <div className="event-detail-actions">
                     {isRegistered ? (
                         <button
                             className="card-button"
@@ -241,13 +252,15 @@ export default function EventDetailPage() {
                     )}
 
                     {isOrganizer && event.status !== 'canceled' && (
-                        <button
-                            className="card-button"
-                            onClick={() => setShowCancelDialog(true)}
-                            style={{ backgroundColor: '#d9534f', color: 'white' }}
-                        >
-                            Hủy sự kiện
-                        </button>
+                        <>
+                            <button
+                                className="card-button"
+                                onClick={() => setShowCancelDialog(true)}
+                                style={{ backgroundColor: '#d9534f', color: 'white' }}
+                            >
+                                Hủy sự kiện
+                            </button>
+                        </>
                     )}
                 </div>
 

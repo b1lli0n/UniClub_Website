@@ -15,7 +15,6 @@ body.event-body {
   /* override Vite template centering */
   place-items: unset;
   color: var(--event-ink);
-  background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
 }
 
 body.event-body #root {
@@ -1601,29 +1600,7 @@ body.event-body #root {
   font-weight: 800;
 }
 
-/* Footer only when on Event page */
-body.event-body footer {
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
-  color: rgba(31, 42, 68, 0.75) !important;
-  padding: 40px 0 !important;
-  margin-top: 80px;
-  text-align: center;
-  font-size: 14px;
-}
 
-body.event-body footer a,
-body.event-body footer strong {
-  color: var(--event-hot-pink) !important;
-  text-decoration: none;
-  font-weight: 800;
-}
-
-body.event-body footer a:hover {
-  color: var(--event-lavender) !important;
-}
 
 @media (max-width: 768px) {
   .event-topbar {

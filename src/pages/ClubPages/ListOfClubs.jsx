@@ -6,6 +6,8 @@ import ClubDetailCard from '../../components/ClubDetailCard';
 import { getAllClubs } from '../../api/clubApi';
 import '../../styles/ListOfClubs.css';
 
+
+// Icon Components
 const IconBase = ({ children, viewBox = '0 0 24 24' }) => (
   <svg
     className="club-catIcon"
@@ -110,16 +112,21 @@ const ListOfClubs = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [clubs, setClubs] = useState([]);
-  // Add body class for styling (nền + header giống Profile, footer giống Home)
+  const [loading, setLoading] = useState(true);
+  const dropdownRef = useRef(null);
+
+// Scroll to top khi navigate đến trang này
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Add body class for styling
   useEffect(() => {
     document.body.classList.add('clubs-list-body');
     return () => {
       document.body.classList.remove('clubs-list-body');
     };
   }, []);
-
-  const [loading, setLoading] = useState(true);
-  const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {

@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/CreateEvent.css';
 import '../styles/Events.css';
 import { unmapEvent } from '../services/dataMappers';
 
 export default function CreateEventPage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',

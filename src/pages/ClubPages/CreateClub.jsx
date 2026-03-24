@@ -32,6 +32,11 @@ const CreateClub = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [validated, setValidated] = useState(false);
 
+  // Scroll to top khi navigate đến trang này
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Fetch danh sách users khi component mount
   useEffect(() => {
     fetchUsers();
@@ -109,7 +114,7 @@ const CreateClub = () => {
         members: [...formData.members, member]
       });
       setMemberEmail('');
-      toast.success(`✅ Thêm thành viên thành công! (${formData.members.length + 1}/5)`);
+      toast.success(`✅ Thêm thành viên thành công!`);
     } catch (error) {
       toast.error('Lỗi khi thêm thành viên');
     }
@@ -167,11 +172,7 @@ const CreateClub = () => {
     }
 
     setLoading(true);
-    try {
-      const firstMember = typeof formData.members[0] === 'string' 
-        ? JSON.parse(formData.members[0]) 
-        : formData.members[0];
-      
+    try {    
       const memberIds = formData.members.map(member => {
         const memberObj = typeof member === 'string' 
           ? JSON.parse(member) 
@@ -182,9 +183,8 @@ const CreateClub = () => {
       const dataToSubmit = {
         ...formData,
         members: memberIds,
-        leader_id: firstMember.userId
       };
-      
+      // console.log('Dữ liệu gửi đi:', dataToSubmit);
       await createClub(dataToSubmit);
       toast.success('✅ Club được tạo thành công!');
       
@@ -204,7 +204,7 @@ const CreateClub = () => {
   };
 
   return (
-    <Container className="create-club-page">
+    <div className="create-club-page">
       <div className="create-club-container">
         <div className="create-club-header">
           <h1>Tạo Club Mới</h1>
@@ -367,7 +367,7 @@ const CreateClub = () => {
           </div>
         </Form>
       </div>
-    </Container>
+    </div>
   );
 };
 

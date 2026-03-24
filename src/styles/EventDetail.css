@@ -1,3 +1,72 @@
+/* Event Detail Actions */
+.event-detail-actions {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  transition: all 0.3s ease;
+}
+
+.event-detail-actions:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 768px) {
+  .event-detail-actions {
+    flex-direction: column;
+  }
+
+  .event-detail-actions button {
+    width: 100%;
+  }
+}
+
+/* Event Detail Header Section */
+.event-detail-header-section {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.event-timeline-button-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .event-detail-header-section {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .event-timeline-button-wrapper {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .event-detail-header-section {
+    grid-template-columns: 1fr;
+  }
+
+  .event-timeline-button-wrapper {
+    width: 100%;
+  }
+
+  .event-timeline-button-wrapper .timeline-trigger-button {
+    width: 100%;
+  }
+}
+
 .event-detail-page {
   min-height: calc(100vh - 200px);
   padding: 2rem 0;
