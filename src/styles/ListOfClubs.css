@@ -7,30 +7,6 @@
   --club-muted: rgba(31, 42, 68, 0.72);
 }
 
-/* Body class for clubs page */
-body.clubs-body {
-  margin: 0;
-  min-height: 100vh;
-  display: block;
-  place-items: unset;
-  color: var(--club-ink);
-  background: linear-gradient(180deg, #a2d2ff 0%, #ffc8dd 50%, #cdb4db 100%);
-  overflow-x: hidden;
-}
-
-body.clubs-body #root {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.list-of-clubs-page {
-  min-height: 100vh;
-  overflow-x: hidden;
-  width: 100%;
-}
-
 /* Glass Panel */
 .glass-panel {
   background: rgba(255, 255, 255, 0.28);
@@ -364,29 +340,7 @@ body.clubs-body #root {
   transform: translateY(-1px);
 }
 
-/* Footer only when on Clubs page */
-body.clubs-body footer {
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
-  color: rgba(31, 42, 68, 0.75) !important;
-  padding: 40px 0 !important;
-  margin-top: 80px;
-  text-align: center;
-  font-size: 14px;
-}
 
-body.clubs-body footer a,
-body.clubs-body footer strong {
-  color: var(--club-hot-pink) !important;
-  text-decoration: none;
-  font-weight: 800;
-}
-
-body.clubs-body footer a:hover {
-  color: var(--club-lavender) !important;
-}
 
 /* Responsive */
 @media (max-width: 768px) {

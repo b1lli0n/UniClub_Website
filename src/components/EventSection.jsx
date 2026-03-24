@@ -1,49 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import EventCard from './EventCard';
+import api from '../api/api';
 import '../styles/EventSection.css';
 
 const EventSection = () => {
-  // Sample event data (public events)
-  const [events] = useState([
-    {
-      id: 1,
-      name: 'Hội thảo Công nghệ 2024',
-      description: 'Khám phá xu hướng công nghệ mới nhất trong năm 2024',
-      date: '2024-03-15',
-      location: 'Hội trường A',
-    },
-    {
-      id: 2,
-      name: 'Triển lãm Nghệ thuật Sinh viên',
-      description: 'Trưng bày các tác phẩm nghệ thuật của sinh viên',
-      date: '2024-03-20',
-      location: 'Phòng triển lãm',
-    },
-    {
-      id: 3,
-      name: 'Giải bóng đá liên khoa',
-      description: 'Giải đấu bóng đá giữa các khoa trong trường',
-      date: '2024-03-25',
-      location: 'Sân vận động',
-    },
-    {
-      id: 4,
-      name: 'Workshop Kỹ năng Viết',
-      description: 'Học cách viết hiệu quả và sáng tạo',
-      date: '2024-04-01',
-      location: 'Phòng 101',
-    },
-    {
-      id: 5,
-      name: 'Ngày hội Khởi nghiệp',
-      description: 'Cơ hội gặp gỡ các nhà đầu tư và doanh nhân',
-      date: '2024-04-10',
-      location: 'Hội trường B',
-    },
-  ]);
-
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        // Try to fetch all public events
+        const response = await api.get('/events');
+        const eventData = response.data.data || response.data || [];
+        setEvents(Array.isArray(eventData) ? eventData : []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        setError(err.message || 'Không thể tải danh sách sự kiện');
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
   const visibleEvents = 3;
 
   const handlePrev = () => {
@@ -55,6 +41,45 @@ const EventSection = () => {
   };
 
   const displayedEvents = events.slice(currentIndex, currentIndex + visibleEvents);
+
+  if (loading) {
+    return (
+      <section className="event-section">
+        <div className="section-header">
+          <h2 className="section-title">Event</h2>
+        </div>
+        <div className="event-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <p>Đang tải danh sách sự kiện...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="event-section">
+        <div className="section-header">
+          <h2 className="section-title">Event</h2>
+        </div>
+        <div className="event-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <p style={{ color: '#e74c3c' }}>Lỗi: {error}</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (events.length === 0) {
+    return (
+      <section className="event-section">
+        <div className="section-header">
+          <h2 className="section-title">Event</h2>
+        </div>
+        <div className="event-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <p>Không có sự kiện nào</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="event-section">

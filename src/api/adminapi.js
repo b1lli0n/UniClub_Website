@@ -50,6 +50,13 @@ axiosInstance.interceptors.response.use(
 // ==================== CLUB APIS ====================
 
 /**
+ * Lấy dữ liệu tổng quan dashboard hệ thống
+ */
+export const getDashboardSummary = async () => {
+  return axiosInstance.get('/clubs/dashboard-summary')
+}
+
+/**
  * Lấy danh sách yêu cầu tạo CLB (pending)
  */
 export const getClubCreationRequests = async (params = {}) => {

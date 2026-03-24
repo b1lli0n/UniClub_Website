@@ -4,7 +4,7 @@ import ProtectedRoute from './ProtectedRoute'
 
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
-import MainLayout from '../layouts/MainLayout'
+import LeaderLayout from '../layouts/LeaderLayout'
 
 import Register from '../pages/Auth/Register'
 import Login from '../pages/Auth/Login'
@@ -25,7 +25,9 @@ import Profile from '../pages/Profile'
 
 import About from '../pages/About'
 import Contacts from '../pages/Contacts'
-// import ViewJoinRequests from '../pages/ViewJoinRequests'
+import ViewJoinRequests from '../pages/ViewJoinRequests'
+import MyMembershipFees from '../pages/MyMembershipFees'
+import PaymentReceipt from '../pages/PaymentReceipt'
 import NotFound from '../pages/NotFound'
 
 //Admin Pages
@@ -43,6 +45,10 @@ import CreateEventPage from '../pages/CreateEvent';
 import UpdateEventPage from '../pages/UpdateEvent';
 import NotificationsPage from '../pages/Notifications';
 import Home from '../pages/Home';
+
+import PointRulesManagement from '../pages/PointRules/PointRulesManagement'
+import EventTimelineManagement from '../pages/EventTimelineManagement'
+
 
 const AppRouter = () => {
   return (
@@ -63,13 +69,19 @@ const AppRouter = () => {
         <Route path="/club/:clubId/events/:eventId" element={<EventDetail />} />
 
         <Route path="/my-events" element={<MyEvent />} />
-        {/* <Route path="/my-requests" element={<ViewJoinRequests />} /> */}
+        <Route path="/my-requests" element={<ViewJoinRequests />} />
+        <Route path="/my-membership-fees" element={<MyMembershipFees />} />
+        <Route path="/payment/receipt" element={<PaymentReceipt />} />
+        <Route path="/payment/return" element={<PaymentReceipt />} />
 
         <Route path="/profile" element={<Profile />} />
+
+        <Route path="/about" element={<About />} />
+        <Route path="/contacts" element={<Contacts />} />
       </Route>
 
-      {/* Dashboard/Club Routes with MainLayout (includes Sidebar) */}
-      <Route element={<MainLayout />}>
+      {/* Dashboard/Club Routes with LeaderLayout (includes Sidebar) */}
+      <Route element={<LeaderLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         <Route path="/events" element={<EventsPage />} />
@@ -78,6 +90,11 @@ const AppRouter = () => {
         <Route path="/events/:eventId/update" element={<UpdateEventPage />} />
         <Route path="/memberships" element={<MembershipsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+
+        {/* Point Rules Management */}
+        <Route path="/clubs/:clubId/point-rules" element={<PointRulesManagement />} />
+        {/* Event Timeline Management */}
+        <Route path="/events/:eventId/timeline" element={<EventTimelineManagement />} />
       </Route>
 
       {/* Admin Routes with ProtectedRoute */}

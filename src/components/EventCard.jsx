@@ -6,8 +6,12 @@ const EventCard = ({ event }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/events/${event.id}`);
+    navigate(`/events/${event.id || event._id}`);
   };
+
+  // Try multiple possible image field names
+  let imageUrl = event?.media_urls;
+  
   const formatDate = (dateString) => {
     if (!dateString) return 'TBA';
     const date = new Date(dateString);
@@ -21,15 +25,29 @@ const EventCard = ({ event }) => {
   return (
     <div className="event-card" onClick={handleClick}>
       <div className="event-card-image">
-        <div className="event-image-placeholder">
+        {imageUrl ? (
+          <img 
+            src={`http://localhost:5000${imageUrl}`} 
+            alt={event.name || 'Event Image'}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextElementSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div 
+          className="event-image-placeholder"
+          style={{ display: imageUrl ? 'none' : 'flex' }}
+        >
           <span>Event Image</span>
         </div>
         <div className="event-date-badge">
-          {formatDate(event.date)}
+          {formatDate(event.date || event.start_at)}
         </div>
       </div>
       <div className="event-card-content">
-        <h3 className="event-card-title">{event.name || 'Event Name'}</h3>
+        <h3 className="event-card-title">{event.name || event.title || 'Event Name'}</h3>
         <p className="event-card-description">
           {event.description || 'Mô tả về sự kiện này...'}
         </p>

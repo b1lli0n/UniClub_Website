@@ -21,7 +21,7 @@ const ClubDetailCard = ({ club }) => {
   const handleSeeMore = () => {
     const clubId = club.id || club._id;
     const roleNum = club.membershipRole ?? club.role;
-
+    localStorage.setItem('clubId', clubId); // Lưu clubId vào localStorage để SidebarNav có thể truy cập
     // Management roles (Leader, Sub Leader, Secretary, Treasurer) can access dashboard
     // Role: 1=leader, 2=sub_leader, 3=secretary, 4=treasurer
     if (roleNum > 0) {

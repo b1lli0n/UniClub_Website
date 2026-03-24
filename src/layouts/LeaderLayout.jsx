@@ -1,11 +1,11 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import { SidebarNav } from '../components/layout/SidebarNav'
+import { SidebarNav } from '../components/navbar/SidebarNav'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import '../styles/MainLayout.css'
+import '../styles/LeaderLayout.css'
 
-const MainLayout = () => {
+const LeaderLayout = () => {
     return (
         <div className="main-layout">
             <Header />
@@ -20,4 +20,4 @@ const MainLayout = () => {
     )
 }
 
-export default MainLayout
+export default LeaderLayout

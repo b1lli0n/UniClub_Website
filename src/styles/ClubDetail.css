@@ -153,15 +153,22 @@ body.clubdetail-body #root {
   box-shadow: 0 8px 20px rgba(31, 42, 68, 0.15);
 }
 
-.clubdetail-join-btn:hover {
+.clubdetail-join-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 12px 28px rgba(31, 42, 68, 0.2);
+}
+
+.clubdetail-join-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .clubdetail-join-btn.is-joined {
   background: rgba(76, 175, 80, 0.2);
   color: rgba(46, 125, 50, 0.95);
   box-shadow: none;
+  cursor: default;
 }
 
 /* Description */
@@ -424,29 +431,7 @@ body.clubdetail-body #root {
   margin: 0;
 }
 
-/* Footer only when on Club Detail page */
-body.clubdetail-body footer {
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
-  color: rgba(31, 42, 68, 0.75) !important;
-  padding: 40px 0 !important;
-  margin-top: 40px;
-  text-align: center;
-  font-size: 14px;
-}
 
-body.clubdetail-body footer a,
-body.clubdetail-body footer strong {
-  color: var(--clubdetail-hot-pink) !important;
-  text-decoration: none;
-  font-weight: 800;
-}
-
-body.clubdetail-body footer a:hover {
-  color: var(--clubdetail-lavender) !important;
-}
 
 /* Responsive */
 @media (max-width: 992px) {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { getClubById, getEventsByClub } from '../../api/clubApi';
+import { getClubById, getEventsByClub, requestToJoinClub } from '../../api/clubApi';
 import '../../styles/ClubDetail.css';
 
 // Backend base URL để build full URL cho logo_url / imageUrl nếu BE trả về đường dẫn tương đối
@@ -21,9 +21,15 @@ const ClubDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isJoined, setIsJoined] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Add body class for styling
   useEffect(() => {
@@ -72,8 +78,33 @@ const ClubDetail = () => {
     fetchClubDetail();
   }, [id]);
 
-  const handleJoin = () => {
-    setIsJoined(!isJoined);
+  const handleJoin = async () => {
+    if (!id) return;
+    
+    setJoinLoading(true);
+    try {
+      const response = await requestToJoinClub(id);
+      console.log('✅ Join response:', response);
+      
+      // Success response
+      setIsJoined(true);
+      const successMessage = 'Gửi yêu cầu tham gia thành công! Hãy chờ phê duyệt từ ban quản trị.';
+      toast.success(successMessage);
+    } catch (error) {
+      console.error('❌ Join club error:', error);
+      
+      // Check if error message indicates success
+      const errorMsg = error?.message || error?.data?.message || error || '';
+      if (errorMsg.toLowerCase().includes('success') || errorMsg.toLowerCase().includes('thành công')) {
+        setIsJoined(true);
+        toast.success(errorMsg);
+      } else {
+        const errorMessage = error?.message || error?.data?.message || 'Không thể gửi yêu cầu tham gia';
+        toast.error(errorMessage);
+      }
+    } finally {
+      setJoinLoading(false);
+    }
   };
 
   // Derived data từ club
@@ -214,8 +245,9 @@ const ClubDetail = () => {
                 type="button"
                 className={`clubdetail-join-btn ${isJoined ? 'is-joined' : ''}`}
                 onClick={handleJoin}
+                disabled={joinLoading || isJoined}
               >
-                {isJoined ? 'Đã tham gia ✓' : 'Tham gia ngay'}
+                {joinLoading ? 'Đang gửi yêu cầu...' : isJoined ? 'Đã tham gia ✓' : 'Tham gia ngay'}
               </button>
             </div>
 

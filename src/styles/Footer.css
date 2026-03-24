@@ -1,8 +1,12 @@
 .main-footer {
-  background-color: #333;
-  color: white;
-  padding: 2rem 0;
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: rgba(31, 42, 68, 0.75) !important;
+  padding: 40px 0 !important;
   margin-top: auto;
+  text-align: center;
+  font-size: 14px;
 }
 
 .footer-content {
@@ -16,4 +20,14 @@
   margin: 0;
   font-size: 0.95rem;
   opacity: 0.9;
+}
+
+footer a,
+footer strong {
+  text-decoration: none;
+  font-weight: 800;
+}
+
+footer a:hover {
+  opacity: 0.8;
 }

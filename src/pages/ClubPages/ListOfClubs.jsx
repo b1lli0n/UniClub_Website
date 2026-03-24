@@ -5,6 +5,7 @@ import ClubDetailCard from '../../components/ClubDetailCard';
 import { getAllClubs } from '../../api/clubApi';
 import '../../styles/ListOfClubs.css';
 
+
 // Icon Components
 const IconBase = ({ children, viewBox = '0 0 24 24' }) => (
   <svg
@@ -110,6 +111,11 @@ const ListOfClubs = () => {
   const [clubs, setClubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
+
+// Scroll to top khi navigate đến trang này
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Add body class for styling
   useEffect(() => {

@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { Home, LayoutGrid, Users, Bell, Info, Calendar, LogOut } from 'lucide-react';
+import { Home, LayoutGrid, Users, Bell, Info, Calendar, LogOut, Trophy } from 'lucide-react';
 import '../../styles/SidebarNav.css';
 
 const getNavItems = (clubId) => [
     { icon: Home, label: 'Dashboard', path: clubId ? `/clubs/${clubId}/dashboard` : '/dashboard' },
     { icon: LayoutGrid, label: 'Sự kiện', path: '/events' },
     { icon: Users, label: 'Thành viên', path: '/memberships' },
+    { icon: Trophy, label: 'Quy tắc điểm', path: clubId ? `/clubs/${clubId}/point-rules` : '/point-rules' },
     { icon: Bell, label: 'Thông báo', path: '/notifications' },
     { icon: Info, label: 'Thông tin', path: '/about' },
 ];

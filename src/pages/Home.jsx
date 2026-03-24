@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Carousel from '../components/Carousel';
 import ClubSection from '../components/ClubSection';
@@ -7,6 +7,10 @@ import '../styles/Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="home-page">

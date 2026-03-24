@@ -8,6 +8,10 @@ import EmptyEventState from '../components/events/EmptyEventState';
 import '../styles/Events.css';
 
 export default function EventsPage() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     const navigate = useNavigate();
     const { clubId: paramClubId } = useParams();
     const { user } = useAuth();

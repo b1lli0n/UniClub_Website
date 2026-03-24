@@ -1,8 +1,4 @@
-.list-of-events-page {
-  min-height: calc(100vh - 200px);
-  padding: 2rem 0;
-  background: #f8f9fa;
-}
+
 
 .events-container {
   max-width: 1400px;
@@ -364,7 +360,7 @@
 @media (max-width: 768px) {
   .events-container {
     padding: 0 1rem;
-  }
+  } 
 
   .filter-button {
     width: 100px;
