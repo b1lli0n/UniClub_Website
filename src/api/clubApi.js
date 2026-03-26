@@ -84,7 +84,65 @@ export const deleteClub = async (clubId) => {
   }
 };
 
+<<<<<<< Updated upstream
 // Thêm thành viên vào club
+=======
+// Cập nhật trạng thái club (1: active, 2: paused)
+export const updateClubStatus = async (clubId, status) => {
+  try {
+    const response = await clubAPI.patch(`/${clubId}/status`, { status });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// ===== MEMBER MANAGEMENT (Active Members) =====
+
+// Xem danh sách thành viên active của club
+export const getClubMembers = async (clubId) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// [Leader] Lấy danh sách thành viên active kèm role (API mới)
+export const getClubMembersWithRoles = async (clubId) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// [Leader] Tìm kiếm thành viên trong club theo tên hoặc email
+export const searchClubMembers = async (clubId, keyword) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members/search`, {
+      params: { keyword },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// [Leader] Xóa / kick thành viên khỏi club (đặt status = 3)
+export const removeMember = async (clubId, membershipId) => {
+  try {
+    const response = await clubAPI.delete(`/clubs/${clubId}/memberships/leader/members/${membershipId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Thêm thành viên vào club (BE chưa có route)
+>>>>>>> Stashed changes
 export const addMemberToClub = async (clubId, memberId) => {
   try {
     const response = await clubAPI.post(`/${clubId}/members`, { memberId });

@@ -14,6 +14,10 @@ import ListOfClubs from '../pages/ClubPages/ListOfClubs'
 import ClubDetail from '../pages/ClubPages/ClubDetail'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
+<<<<<<< Updated upstream
+=======
+import EventAttendanceList from '../pages/leader/EventAttendanceList'
+>>>>>>> Stashed changes
 import ClubMemberManagement from '../pages/leader/ClubMemberManagement'
 import CreateClub from '../pages/ClubPages/CreateClub'
 import TransactionList from '../pages/TransactionList'
@@ -79,6 +83,12 @@ const AppRouter = () => {
       <Route element={<MainLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/members" element={<ClubMemberManagement />} />
+<<<<<<< Updated upstream
+=======
+        <Route path="/clubs/:id/transactions" element={<TransactionList />} />
+        <Route path='/clubs/:id/point-rules-management' element={<PointRulesManagement />} />
+        
+>>>>>>> Stashed changes
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         {/* Treasurer: Quản lý tài chính CLB */}
         <Route path="/clubs/:id/transactions" element={<TransactionList />} />

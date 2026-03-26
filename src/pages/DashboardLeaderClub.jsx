@@ -193,8 +193,14 @@ export default function Dashboard() {
             onClick={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/clubs')}
           />
           <QuickActionCard
+<<<<<<< Updated upstream
             title="Quản lý thành viên"
             subtitle="Xem, tìm kiếm và xóa thành viên"
+=======
+            title="Thêm thành viên"
+            subtitle="Duyệt thành viên vào nhóm"
+            icon="👥"
+>>>>>>> Stashed changes
             onClick={() => navigate(clubId ? `/clubs/${clubId}/members` : '/clubs')}
           />
           <QuickActionCard
