@@ -70,7 +70,8 @@ const Register = () => {
       const response = await registerService({
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
-        password: formData.password
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
       });
 
       if (response.success) {
@@ -161,16 +162,14 @@ const Register = () => {
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     placeholder="••••••••"
                     className="auth-input"
-                    style={{ paddingLeft: '3.5rem' }}
+                    style={{ paddingLeft: '3.5rem', paddingRight: '3.25rem' }}
                     required
                   />
                   <button
                     type="button"
-                    style={{
-                      position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)',
-                      background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer'
-                    }}
+                    className="auth-password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -187,16 +186,14 @@ const Register = () => {
                     onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                     placeholder="••••••••"
                     className="auth-input"
-                    style={{ paddingLeft: '3.5rem' }}
+                    style={{ paddingLeft: '3.5rem', paddingRight: '3.25rem' }}
                     required
                   />
                   <button
                     type="button"
-                    style={{
-                      position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)',
-                      background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer'
-                    }}
+                    className="auth-password-toggle"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? 'Ẩn mật khẩu xác nhận' : 'Hiện mật khẩu xác nhận'}
                   >
                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>

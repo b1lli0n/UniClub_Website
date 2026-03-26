@@ -136,6 +136,32 @@
   color: #FFAFCC;
 }
 
+.auth-password-toggle {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 6px;
+  border-radius: 10px;
+  color: #6b7280;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-password-toggle:hover {
+  background: rgba(255, 175, 204, 0.18);
+  color: #2D1B3D;
+}
+
+.auth-password-toggle:focus-visible {
+  outline: 3px solid rgba(255, 175, 204, 0.45);
+  outline-offset: 2px;
+}
+
 .auth-input {
   width: 100%;
   background: white;
