@@ -14,6 +14,7 @@ import ListOfClubs from '../pages/ClubPages/ListOfClubs'
 import ClubDetail from '../pages/ClubPages/ClubDetail'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
+import ClubMemberManagement from '../pages/leader/ClubMemberManagement'
 import CreateClub from '../pages/ClubPages/CreateClub'
 import TransactionList from '../pages/TransactionList'
 
@@ -77,6 +78,7 @@ const AppRouter = () => {
       {/* Dashboard/Club Routes with MainLayout (includes Sidebar) */}
       <Route element={<MainLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
+        <Route path="/clubs/:id/members" element={<ClubMemberManagement />} />
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         {/* Treasurer: Quản lý tài chính CLB */}
         <Route path="/clubs/:id/transactions" element={<TransactionList />} />

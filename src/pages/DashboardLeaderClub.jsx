@@ -193,9 +193,9 @@ export default function Dashboard() {
             onClick={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/clubs')}
           />
           <QuickActionCard
-            title="Thêm thành viên"
-            subtitle="Duyệt thành viên vào nhóm"
-            onClick={() => navigate('/memberships')}
+            title="Quản lý thành viên"
+            subtitle="Xem, tìm kiếm và xóa thành viên"
+            onClick={() => navigate(clubId ? `/clubs/${clubId}/members` : '/clubs')}
           />
           <QuickActionCard
             title="Quản lý tài chính"
@@ -220,7 +220,7 @@ export default function Dashboard() {
 
           <MemberListCard
             members={previewMembers}
-            onManage={() => setShowMembersModal(true)}
+            onManage={() => navigate(clubId ? `/clubs/${clubId}/members` : '/clubs')}
           />
         </div>
       </div>
