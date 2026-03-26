@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { getClubBadges } from '../../api/clubBadgeApi'
 import { getAllClubs } from '../../api/clubApi'
-import '../../styles/rewards.css'
+import '../../styles/badges.css'
+
 
 const Badges = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -29,6 +30,7 @@ const Badges = () => {
         const fetchClubs = async () => {
             try {
                 const res = await getAllClubs()
+                console.log('Fetched clubs for badge filter:', res)
                 setClubs(res?.clubs || res?.data || [])
             } catch (err) {
                 setClubs([])
@@ -55,6 +57,7 @@ const Badges = () => {
     const fetchBadges = async () => {
         setLoading(true)
         setError(null)
+        console.log('Fetching badges with params:',clubFilter )
         try {
             let is_active;
             if (isActiveFilter === 'true') is_active = true;
@@ -66,6 +69,8 @@ const Badges = () => {
                 club_id: clubFilter !== 'all' ? clubFilter : undefined,
                 sort_by: sortBy,
             };
+            console.log('Final params for API call:', params)
+
             if (typeof is_active === 'boolean') params.is_active = is_active;
             const res = await getClubBadges(params);
             setBadges(res?.badges || res?.data || [])
@@ -92,7 +97,7 @@ const Badges = () => {
                     </p>
                 </div>
                 <button
-                    className="reward-create-btn"
+                    className="badges-create-btn"
                     onClick={() => setShowCreateModal(true)}
                 >
                     <i className="fa-solid fa-plus" style={{ marginRight: 8 }} />

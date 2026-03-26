@@ -91,7 +91,7 @@ const ClubMembers = () => {
 
             // Fetch members with filters
             const membersResponse = await getClubMembers(id, params)
-
+            console.log(membersResponse)
             setMembers(membersResponse.data.members)
             setTotalPages(membersResponse.data.pagination.totalPages)
             setTotalItems(membersResponse.data.pagination.totalItems)

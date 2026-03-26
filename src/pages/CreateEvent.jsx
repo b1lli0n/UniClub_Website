@@ -185,7 +185,7 @@ export default function CreateEventPage() {
 
       // Redirect after 2 seconds
       setTimeout(() => {
-        navigate('/events');
+        navigate('/clubEvent');
       }, 2000);
     } catch (err) {
       console.error('❌ Create event error:', err);
@@ -441,7 +441,7 @@ export default function CreateEventPage() {
               <div className="form-actions-premium">
                 <button
                   type="button"
-                  onClick={() => navigate('/events')}
+                  onClick={() => navigate('/clubEvent')}
                   className="btn-cancel-glass"
                 >
                   Hủy bỏ

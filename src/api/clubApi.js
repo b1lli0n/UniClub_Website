@@ -132,7 +132,7 @@ export const requestToJoinClub = async (clubId) => {
 // Xem danh sách yêu cầu tham gia (của club hiện tại - dành cho leader/admin)
 export const getJoinRequests = async (clubId) => {
   try {
-    const response = await clubAPI.get(`/clubs/${clubId}/join-request`);
+    const response = await clubAPI.get(`/clubs/${clubId}/join-requests`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

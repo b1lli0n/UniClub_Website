@@ -14,6 +14,27 @@ const ROLE_DISPLAY = {
 const ClubDetailCard = ({ club }) => {
   const navigate = useNavigate();
 
+  const normalizeClubStatus = (c) => {
+    const raw = c?.status ?? c?.club_status ?? c?.clubStatus;
+    if (typeof raw === 'number') return raw;
+    if (typeof raw === 'string') {
+      const s = raw.trim().toLowerCase();
+      if (s === 'active' || s === 'approved' || s === '1') return 1;
+      if (s === 'pending' || s === '0') return 0;
+      if (s === 'pause' || s === 'paused' || s === 'inactive' || s === '2') return 2;
+      if (s === 'reject' || s === 'rejected' || s === 'declined' || s === '3') return 3;
+    }
+    // Fallback (nếu BE trả boolean)
+    const isActive = c?.is_active ?? c?.isActive ?? c?.active;
+    if (typeof isActive === 'boolean') return isActive ? 1 : 2;
+    return null;
+  };
+
+  const clubStatus = normalizeClubStatus(club);
+  const isPaused = clubStatus === 2;
+  const isRejected = clubStatus === 3;
+  const statusLabel = isPaused ? 'Tạm dừng' : isRejected ? 'Từ chối' : '';
+
   const handleSeeMore = () => {
     const clubId = club.id || club._id;
     const roleNum = club.membershipRole ?? club.role;
@@ -54,7 +75,7 @@ const ClubDetailCard = ({ club }) => {
 
   return (
     <div
-      className="club-detail-card"
+      className={`club-detail-card${isPaused ? ' club-detail-card--paused' : ''}`}
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -84,6 +105,14 @@ const ClubDetailCard = ({ club }) => {
         <span className="club-detail-tag club-detail-tag--meta">
           {(club.category || 'Khác').toUpperCase()}
         </span>
+        {(isPaused || isRejected) && (
+          <span
+            className={`club-detail-status-pill${isPaused ? ' club-detail-status-pill--paused' : ' club-detail-status-pill--rejected'}`}
+            aria-hidden
+          >
+            {statusLabel}
+          </span>
+        )}
       </div>
       <div className="club-detail-card-body">
         <h3 className="club-detail-title">{club.name || 'Club Name'}</h3>

@@ -4,9 +4,13 @@ import '../styles/EventCard.css';
 
 const EventCard = ({ event }) => {
   const navigate = useNavigate();
+  const eventId = event?.id || event?._id;
+  const clubId = event?.club_id || event?.clubId || event?.club?.id || event?.club?._id;
 
   const handleClick = () => {
-    navigate(`/events/${event.id || event._id}`);
+    if (!eventId) return;
+    const targetPath = clubId ? `/club/${clubId}/events/${eventId}` : `/events/${eventId}`;
+    navigate(targetPath);
   };
 
   // Try multiple possible image field names
@@ -23,7 +27,20 @@ const EventCard = ({ event }) => {
   };
 
   return (
-    <div className="event-card" onClick={handleClick}>
+    <div
+      className="event-card"
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+      aria-disabled={!eventId}
+      style={{ cursor: eventId ? 'pointer' : 'default' }}
+    >
       <div className="event-card-image">
         {imageUrl ? (
           <img 

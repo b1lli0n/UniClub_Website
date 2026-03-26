@@ -89,12 +89,15 @@ const Rewards = () => {
         try {
             const res = await getClubRewards(selectedClubId, {
                 page,
+                
                 limit: 10,
                 search: appliedSearch || undefined,
                 is_active: isActiveFilter !== 'all' ? isActiveFilter : undefined,
             })
-            setRewards(res?.rewards || [])
-            setPagination(res?.pagination || { total: 0, page: 1, totalPages: 1 })
+            console.log('res:', res)
+            console.log(res?.rewards)
+            setRewards(res?.rewards)
+            setPagination(res?.data?.pagination || { total: 0, page: 1, totalPages: 1 })
         } catch (err) {
             console.error('fetchRewards error:', err)
             setError(err?.message || 'Không thể tải phần thưởng')
@@ -308,7 +311,10 @@ const Rewards = () => {
                         ) : (
                             rewards.map((r) => (
                                 <div className="admin-row-wrap" key={r._id}>
-                                    <div className="admin-row">
+                                    <div className="admin-row" 
+                                        onClick={() => navigate(`/admin/rewards/${r.club_id}/${r._id}`)}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <div className="admin-col reward-col--name" style={{ fontWeight: 600 }}>
                                             {r.name}
                                         </div>

@@ -25,7 +25,7 @@ import EventAttendanceList from '../pages/leader/EventAttendanceList'
 import CreateClub from '../pages/ClubPages/CreateClub'
 import ClubTransactions from '../pages/ClubPages/ClubTransactions'
 import TransactionList from '../pages/TransactionList'
-
+import PointRulesManagement from '../pages/PointRulesManagement'
 import Event from '../pages/EventPages/EventInClub'
 import EventPublic from '../pages/EventPages/EventPublic'
 import MyEvent from '../pages/EventPages/MyEvent';
@@ -65,7 +65,10 @@ import ViewRewards from '../pages/RewardPages/ViewRewards';
 import ViewRewardDetail from '../pages/RewardPages/ViewRewardDetail';
 import ViewRedemptionHistory from '../pages/RewardPages/ViewRedemptionHistory';
 import RedeemReward from '../pages/RewardPages/RedeemReward';
-import RewardRequestsLeader from '../pages/RewardPages/RewardRequestsLeader';
+import { List } from 'lucide-react'
+import MyMembershipFees from '../pages/MyMembershipFees'
+import ViewJoinRequests from '../pages/ViewJoinRequests'
+import EventTimelineManagement from '../pages/EventTimelineManagement'
 
 const AppRouter = () => {
   return (
@@ -81,6 +84,7 @@ const AppRouter = () => {
       <Route element={<UserLayout />}>
         <Route index element={<Home />} />
         <Route path="/clubs" element={<ListOfClubs />} />
+        <Route path="/clubs/:id" element={<ClubDetail />} />
         <Route path="/clubs/create" element={<CreateClub />} />
         <Route path="/events" element={<EventPublic />} />
         <Route path="/my-clubs" element={<ListOfMyClubs />} />
@@ -89,6 +93,8 @@ const AppRouter = () => {
         <Route path="/my-notifications" element={<NotificationCenter />} />
         <Route path="/club/:clubId/rewards" element={<ViewRewards />} />
         <Route path="/club/:clubId/rewards/:rewardId" element={<ViewRewardDetail />} />
+        <Route path="/my-membership-fees" element={<MyMembershipFees />} />
+        <Route path='/my-requests' element={<ViewJoinRequests />} />
         <Route
           path="/club/:clubId/rewards/history"
           element={
@@ -126,23 +132,23 @@ const AppRouter = () => {
       <Route element={<LeaderLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/transactions" element={<TransactionList />} />
+        <Route path='/clubs/:id/point-rules-management' element={<PointRulesManagement />} />
+        
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/events/:eventId/attendance" element={<EventAttendanceList />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/create" element={<CreateEventPage />} />
         <Route path="/events/:eventId" element={<EventDetailPage />} />
         <Route path="/events/:eventId/update" element={<UpdateEventPage />} />
-
-        <Route path="/clubs/:clubId/rewards/requests" element={<RewardRequestsLeader />} />
-
+         
         <Route path="/clubEvent" element={<EventsPage />} />
         <Route path="/clubEvent/create" element={<CreateEventPage />} />
         <Route path="/clubEvent/:eventId" element={<EventDetailPage />} />
         <Route path="/clubEvent/:eventId/update" element={<UpdateEventPage />} />
-
+        <Route path='/clubEvent/:id/event-timeline-management' element={<EventTimelineManagement />} />
         <Route path="/events" element={<Navigate to="/clubEvent" replace />} />
 
-        <Route path="/memberships" element={<MembershipsPage />} />
+        <Route path="/clubs/:id/join-requests" element={<MembershipsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route
           path="/clubs/:clubId/finance"
@@ -170,7 +176,7 @@ const AppRouter = () => {
         <Route path="club-detail/:id" element={<ClubDetailAdmin />} />
         <Route path="club-members/:id" element={<ClubMembers />} />
         <Route path="rewards" element={<RewardsAdmin />} />
-        <Route path="rewards/:rewardId" element={<RewardDetailAdmin />} />
+        <Route path="rewards/:clubId/:rewardId" element={<RewardDetailAdmin />} />
         <Route path="reward-history" element={<RedemptionHistoryAdmin />} />
         <Route path="reward-point-logs" element={<RewardPointLogs />} />
         <Route path="badges" element={<BadgesAdmin />} />

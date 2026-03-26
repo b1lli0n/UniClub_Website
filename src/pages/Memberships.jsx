@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { getJoinRequests } from '../api/clubApi';
 import '../styles/Memberships.css';
 
@@ -6,8 +7,8 @@ function Memberships() {
     const [memberships, setMemberships] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
-    const clubId = localStorage.getItem('clubId');
+    const { id } = useParams();
+    const clubId = id;
 
     useEffect(() => {
         const loadMemberships = async () => {

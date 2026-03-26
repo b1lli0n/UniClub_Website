@@ -131,7 +131,7 @@ const EventSection = () => {
 
         <div className="event-cards-container">
           {displayedEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event.id || event._id} event={event} />
           ))}
         </div>
 

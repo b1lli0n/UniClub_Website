@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import '../styles/EventTimelineManagement.css';
 
 export default function EventTimelineManagement() {
-  const { eventId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [timeline, setTimeline] = useState([]);
   const [currentTimeline, setCurrentTimeline] = useState(null);
@@ -17,7 +17,7 @@ export default function EventTimelineManagement() {
   const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
-    if (!eventId) {
+    if (!id) {
       toast.error('Không tìm thấy sự kiện');
       navigate(-1);
       return;
@@ -34,12 +34,12 @@ export default function EventTimelineManagement() {
     fetchCurrentTimeline();
 
     return () => clearInterval(pollInterval);
-  }, [eventId, navigate]);
+  }, [id, navigate]);
 
   const fetchTimeline = async () => {
     try {
       setLoading(true);
-      const data = await getEventTimeline(eventId);
+      const data = await getEventTimeline(id);
       console.log('Raw timeline data:', data);
       console.log('typeof data:', typeof data);
       console.log('data keys:', Object.keys(data));
@@ -60,7 +60,7 @@ export default function EventTimelineManagement() {
 
   const fetchCurrentTimeline = async () => {
     try {
-      const data = await getCurrentEventTimeline(eventId);
+      const data = await getCurrentEventTimeline(id);
       setCurrentTimeline(data?.current_timeline || null);
     } catch (err) {
       console.error('Error fetching current timeline:', err);
@@ -111,7 +111,7 @@ export default function EventTimelineManagement() {
   const handleCreateTimeline = async (formData) => {
     try {
       setFormLoading(true);
-      const response = await createTimelineItem(eventId, formData);
+      const response = await createTimelineItem(id, formData);
       console.log('Create timeline response:', response);
       toast.success('Tạo mốc timeline thành công!');
       setShowForm(false);
@@ -287,7 +287,7 @@ export default function EventTimelineManagement() {
 
       {showForm && (
         <EventTimelineForm
-          eventId={eventId}
+          eventId={id}
           initialData={selectedItem}
           onSubmit={selectedItem ? handleEditTimeline : handleCreateTimeline}
           onCancel={() => {

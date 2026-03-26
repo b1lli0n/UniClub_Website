@@ -5,7 +5,7 @@ import { getRewardDetail, updateReward } from '../../api/rewardApi'
 import '../../styles/rewards.css'
 
 const RewardDetail = () => {
-    const { rewardId } = useParams()
+    const {clubId, rewardId } = useParams()
     const navigate = useNavigate()
 
     const [reward, setReward] = useState(null)
@@ -33,15 +33,16 @@ const RewardDetail = () => {
         setLoading(true)
         setError(null)
         try {
-            const res = await getRewardDetail(rewardId)
+            const res = await getRewardDetail(clubId, rewardId)
             // Response là reward object trực tiếp (interceptor trả response.data)
-            const data = res?._id ? res : res?.reward || res
-            setReward(data)
+            console.log('Fetched reward detail:', res)
+            console.log('Fetched reward detail (raw):', res?.data?.name)
+            setReward(res.data)
             setEditForm({
-                name: data.name,
-                description: data.description,
-                points_required: data.points_required,
-                quantity: data.quantity,
+                name: res.data.name,
+                description: res.data.description,
+                points_required: res.data.points_required,
+                quantity: res.data.quantity,
             })
         } catch (err) {
             console.error('getRewardDetail error:', err)
@@ -87,10 +88,11 @@ const RewardDetail = () => {
                 points_required: Number(points_required),
                 quantity: Number(quantity),
             })
-            const updated = res?.reward || res
+            const updated = res?.data || res
             setReward((prev) => ({ ...prev, ...updated }))
             toast.success('Cập nhật phần thưởng thành công!')
             setIsEditing(false)
+            window.location.reload()
         } catch (err) {
             console.error('updateReward error:', err)
             toast.error(err?.message || 'Cập nhật thất bại')
@@ -268,11 +270,19 @@ const RewardDetail = () => {
                                     {reward.is_active ? 'Đang hiển thị' : 'Đã ẩn'}
                                 </span>
                                 <span style={{ fontSize: 13, color: '#9ca3af' }}>
-                                    Tạo lúc: {new Date(reward.created_at).toLocaleDateString('vi-VN')}
+                                    Tạo lúc: {new Date(reward.created_at).toLocaleDateString('vi-VN', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric'
+                                    })}
                                 </span>
                                 {reward.updated_at && reward.updated_at !== reward.created_at && (
                                     <span style={{ fontSize: 13, color: '#9ca3af' }}>
-                                        • Cập nhật: {new Date(reward.updated_at).toLocaleDateString('vi-VN')}
+                                        • Cập nhật: {new Date(reward.updated_at).toLocaleDateString('vi-VN', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        })}
                                     </span>
                                 )}
                             </div>
@@ -283,11 +293,11 @@ const RewardDetail = () => {
                     <div className="reward-detail-grid">
                         <div className="reward-stat-card highlight">
                             <span className="stat-label">⭐ Điểm cần đổi</span>
-                            <span className="stat-value">{reward.points_required.toLocaleString('vi-VN')}</span>
+                            <span className="stat-value">{reward.points_required}</span>
                         </div>
                         <div className="reward-stat-card">
                             <span className="stat-label">📦 Tổng số lượng</span>
-                            <span className="stat-value">{reward.quantity}</span>
+                            <span className="stat-value">{reward?.quantity}</span>
                         </div>
                         <div className="reward-stat-card">
                             <span className="stat-label">🏢 Câu lạc bộ</span>
@@ -298,7 +308,7 @@ const RewardDetail = () => {
                     {/* Description */}
                     <div className="reward-desc-section">
                         <h4>Mô tả phần thưởng</h4>
-                        <p>{reward.description}</p>
+                        <p>{reward?.description}</p>
                     </div>
                 </div>
             )}

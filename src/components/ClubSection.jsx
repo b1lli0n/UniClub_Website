@@ -129,7 +129,7 @@ const ClubSection = () => {
 
         <div className="club-cards-container">
           {displayedClubs.map((club) => (
-            <ClubCard key={club.id} club={club} />
+            <ClubCard key={club.id || club._id} club={club} />
           ))}
         </div>
 

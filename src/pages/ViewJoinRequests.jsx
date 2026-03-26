@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 import { getUserJoinRequests, cancelJoinRequest } from '../api/userApi';
 import '../styles/ViewJoinRequests.css';
 
@@ -8,6 +10,7 @@ const ViewJoinRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [canceling, setCanceling] = useState(null);
+  // Không cần pendingCancelId nữa
 
   // Scroll to top on mount
   useEffect(() => {
@@ -16,7 +19,7 @@ const ViewJoinRequests = () => {
 
   // Add body class for styling
   useEffect(() => {
-    document.body.classList.add('joinreques ts-body');
+    document.body.classList.add('joinrequests-body');
     return () => {
       document.body.classList.remove('joinrequests-body');
     };
@@ -28,50 +31,26 @@ const ViewJoinRequests = () => {
       setLoading(true);
       try {
         const response = await getUserJoinRequests();
-        console.log('Raw response from API:', response);
-        console.log('Response type:', typeof response);
-        console.log('Is Array?:', Array.isArray(response));
-        
+
         let allRequests = [];
-        
+
         // Try different ways to extract the array from response
         if (Array.isArray(response)) {
-          // Response is directly an array
           allRequests = response;
-          console.log('Got array directly from response');
         } else if (response?.data) {
           if (Array.isArray(response.data)) {
-            // response.data is an array
             allRequests = response.data;
-            console.log('Got array from response.data');
           } else if (Array.isArray(response.data.data)) {
-            // response.data.data is an array
             allRequests = response.data.data;
-            console.log('Got array from response.data.data');
           } else if (Array.isArray(response.data.requests)) {
-            // response.data.requests is an array
             allRequests = response.data.requests;
-            console.log('Got array from response.data.requests');
           }
         } else if (Array.isArray(response?.requests)) {
-          // response.requests is an array (from your attachment)
           allRequests = response.requests;
-          console.log('Got array from response.requests');
         }
-        
-        console.log('All requests extracted:', allRequests);
-        console.log('All requests is array?:', Array.isArray(allRequests));
-        
-        // Filter only pending requests (status = 0)
-        const pendingRequests = allRequests.filter(req => req.status === 0);
-        console.log('Pending requests after filter:', pendingRequests);
-        
-        setRequests(pendingRequests);
-        
-        if (pendingRequests.length === 0 && !loading) {
-          console.log('No pending requests found');
-          toast.info('Bạn không có yêu cầu tham gia nào đang chờ phê duyệt');
-        }
+
+        // Hiển thị tất cả request user đã gửi cho CLB
+        setRequests(Array.isArray(allRequests) ? allRequests : []);
       } catch (error) {
         console.error('Error fetching join requests:', error);
         toast.error(error?.message || 'Không thể tải danh sách yêu cầu');
@@ -93,6 +72,8 @@ const ViewJoinRequests = () => {
         return 'Đã phê duyệt';
       case 2:
         return 'Bị từ chối';
+      case 3:
+        return 'Đã hủy';
       default:
         return 'Không xác định';
     }
@@ -107,28 +88,43 @@ const ViewJoinRequests = () => {
         return 'status-approved';
       case 2:
         return 'status-rejected';
+      case 3:
+        return 'status-cancelled';
       default:
         return 'status-unknown';
     }
   };
 
-  // Handle cancel request
-  const handleCancelRequest = async (requestId) => {
-    if (!window.confirm('Bạn chắc chắn muốn hủy yêu cầu này?')) {
-      return;
-    }
-
-    setCanceling(requestId);
-    try {
-      await cancelJoinRequest(requestId);
-      setRequests(requests.filter(req => req._id !== requestId));
-      toast.success('Đã hủy yêu cầu tham gia');
-    } catch (error) {
-      console.error('Error canceling request:', error);
-      toast.error(error?.message || 'Không thể hủy yêu cầu');
-    } finally {
-      setCanceling(null);
-    }
+  // Handle cancel request with react-confirm-alert
+  const handleCancelRequest = (requestId) => {
+    confirmAlert({
+      title: 'Xác nhận hủy yêu cầu',
+      message: 'Bạn chắc chắn muốn hủy yêu cầu này?',
+      buttons: [
+        {
+          label: 'Xác nhận',
+          onClick: async () => {
+            setCanceling(requestId);
+            try {
+              await cancelJoinRequest(requestId);
+              setRequests(requests.filter(req => req._id !== requestId));
+              toast.success('Đã hủy yêu cầu tham gia');
+            } catch (error) {
+              console.error('Error canceling request:', error);
+              toast.error(error?.message || 'Không thể hủy yêu cầu');
+            } finally {
+              setCanceling(null);
+            }
+          }
+        },
+        {
+          label: 'Hủy',
+          onClick: () => {}
+        }
+      ],
+      closeOnClickOutside: false,
+      closeOnEscape: true,
+    });
   };
 
   return (
@@ -136,9 +132,9 @@ const ViewJoinRequests = () => {
       <Container className="py-4">
         {/* Header */}
         <section className="joinrequests-header">
-          <h1 className="joinrequests-title">Yêu cầu tham gia đang chờ</h1>
+          <h1 className="joinrequests-title">Yêu cầu tham gia đã gửi</h1>
           <p className="joinrequests-subtitle">
-            Danh sách các yêu cầu tham gia câu lạc bộ đang chờ phê duyệt
+            Danh sách các yêu cầu bạn đã gửi tới các câu lạc bộ
           </p>
         </section>
 
@@ -158,7 +154,7 @@ const ViewJoinRequests = () => {
               <div className="empty-icon">📋</div>
               <h3 className="empty-title">Không có yêu cầu nào</h3>
               <p className="empty-message">
-                Bạn không có yêu cầu tham gia câu lạc bộ nào đang chờ phê duyệt.
+                Bạn chưa gửi yêu cầu tham gia câu lạc bộ nào.
               </p>
             </div>
           </section>
@@ -169,7 +165,7 @@ const ViewJoinRequests = () => {
           <section className="joinrequests-section">
             <div className="joinrequests-list">
               {requests.map((request) => (
-                <div key={request._id} className="joinrequests-card glass-panel">
+                <div key={request._id || request.id} className="joinrequests-card glass-panel">
                   {/* Club Info and Status */}
                   <div className="joinrequests-card-header">
                     <div className="joinrequests-club-info">
@@ -211,9 +207,9 @@ const ViewJoinRequests = () => {
                     <button
                       className="btn-cancel-request"
                       onClick={() => handleCancelRequest(request._id)}
-                      disabled={canceling === request._id}
+                      disabled={request.status !== 0 || canceling === request._id}
                     >
-                      {canceling === request._id ? 'Đang hủy...' : 'Hủy yêu cầu'}
+                      {canceling === request._id ? 'Đang hủy...' : request.status === 0 ? 'Hủy yêu cầu' : 'Không thể hủy'}
                     </button>
                   </div>
 

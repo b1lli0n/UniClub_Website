@@ -95,25 +95,6 @@ const MyEvent = () => {
         </div>
 
         <Row className="g-4">
-          <Col lg={3}>
-            <div className="myevent-sidebar glass-panel">
-              <button
-                type="button"
-                className={`myevent-navItem ${activeNav === "club" ? "is-active" : ""}`}
-                onClick={() => setActiveNav("club")}
-              >
-                Quản lý câu lạc bộ
-              </button>
-              <button
-                type="button"
-                className={`myevent-navItem ${activeNav === "events" ? "is-active" : ""}`}
-                onClick={() => setActiveNav("events")}
-              >
-                Quản lý sự kiện
-              </button>
-            </div>
-          </Col>
-
           <Col lg={9}>
             <div className="myevent-toolbar">
               <div className="myevent-sort">

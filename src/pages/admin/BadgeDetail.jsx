@@ -26,8 +26,8 @@ const BadgeDetail = () => {
         try {
             // Response: { badge, earned_count }
             const res = await getBadgeTemplateDetail(badgeId)
-            setBadge(res?.badge || res)
-            setEarnedCount(res?.earned_count ?? 0)
+            console.log('Fetched badge detail:', res.badge)
+            setBadge(res.badge)
         } catch (err) {
             console.error('getBadgeTemplateDetail error:', err)
             setError(err?.message || 'Không thể tải chi tiết huy hiệu')
@@ -83,8 +83,8 @@ const BadgeDetail = () => {
             <div className="badge-detail-hero">
                 {badge.icon_url ? (
                     <img
-                        src={badge.icon_url}
-                        alt={badge.name}
+                        src={badge?.icon_url}
+                        alt={badge?.name}
                         className="badge-detail-img"
                         onError={(e) => {
                             e.currentTarget.onerror = null
@@ -98,14 +98,14 @@ const BadgeDetail = () => {
                 )}
 
                 <div className="badge-detail-hero-info">
-                    <h2>{badge.name}</h2>
-                    <p>{badge.description}</p>
+                    <h2>{badge?.name}</h2>
+                    <p>{badge?.description}</p>
                     <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
                         <span
                             className={`admin-status ${badge.is_active ? 'admin-status--active' : 'admin-status--inactive'
                                 }`}
                         >
-                            {badge.is_active ? 'Đang hoạt động' : 'Đã ẩn'}
+                            {badge?.is_active ? 'Đang hoạt động' : 'Đã ẩn'}
                         </span>
                         <span style={{ fontSize: 13, color: '#6d28d9' }}>
                             Tạo: {new Date(badge.created_at).toLocaleDateString('vi-VN')}
@@ -113,11 +113,11 @@ const BadgeDetail = () => {
                     </div>
                 </div>
 
-                {/* Earned count */}
+                {/* Earned count
                 <div className="badge-detail-earned">
                     <span className="earned-count">{earnedCount.toLocaleString('vi-VN')}</span>
                     <div className="earned-label">thành viên<br />đã nhận</div>
-                </div>
+                </div> */}
             </div>
 
             {/* Info Grid */}
@@ -126,10 +126,10 @@ const BadgeDetail = () => {
                     <div className="info-label">🎯 Loại điều kiện</div>
                     <div className="info-value">{badge.condition_type}</div>
                 </div>
-                <div className="badge-info-card">
+                {/* <div className="badge-info-card">
                     <div className="info-label">🔢 Giá trị mốc</div>
                     <div className="info-value">{badge.condition_value.toLocaleString('vi-VN')}</div>
-                </div>
+                </div> */}
                 <div className="badge-info-card">
                     <div className="info-label">📅 Ngày tạo</div>
                     <div className="info-value">{new Date(badge.created_at).toLocaleDateString('vi-VN')}</div>

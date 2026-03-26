@@ -25,21 +25,17 @@ const getNavItems = (clubId, isTreasurer) => {
     const hasClubId = isValidClubId(clubId);
     const items = [
         { icon: Home, label: 'Dashboard', path: hasClubId ? `/clubs/${clubId}/dashboard` : '/dashboard' },
-        { icon: LayoutGrid, label: 'Sự kiện', path: '/events' },
-        { icon: Users, label: 'Thành viên', path: '/memberships' },
-        { icon: Gift, label: 'Request Reward', path: hasClubId ? `/clubs/${clubId}/rewards/requests` : '/clubs' },
+        { icon: LayoutGrid, label: 'Sự kiện CLB', path: '/clubEvent' },
+        { icon: Users, label: 'Thành viên', path: hasClubId ? `/clubs/${clubId}/members` : '/clubs' },
+        { icon: BookMarked, label: 'Quy tắc điểm', path: hasClubId ? `/clubs/${clubId}/point-rules-management` : '/clubs' },
+        { icon: Users, label: 'Duyệt Tham gia', path: hasClubId ? `/clubs/${clubId}/join-requests` : '/clubs' },
         { icon: Wallet, label: 'Giao dịch', path: hasClubId ? `/clubs/${clubId}/transactions` : '/dashboard' },
+        { icon: Bell, label: 'Thông báo', path: '/notifications' },
     ];
 
     if (isTreasurer && hasClubId) {
-        items.push({ icon: Banknote, label: 'Financial', path: `/clubs/${clubId}/finance` });
+        items.push({ icon: Banknote, label: 'Tài chính', path: `/clubs/${clubId}/finance` });
     }
-
-    items.push(
-        { icon: Bell, label: 'Thông báo', path: '/notifications' },
-        { icon: Info, label: 'Thông tin', path: '/about' }
-    );
-
     return items;
 };
 

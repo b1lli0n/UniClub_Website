@@ -10,6 +10,8 @@ export const getRewards = async (clubId, params = {}) => {
 
 export const getRewardDetail = async (clubId, rewardId) => {
     const response = await api.get(`/rewards/${clubId}/${rewardId}`)
+    // console.log('getRewardDetail response:', response)
+    // console.log('getRewardDetail response.data:', response.data)
     return response.data
 }
 
@@ -35,8 +37,9 @@ export const getClubRewards = async (clubId, params = {}) => {
     if (is_active !== undefined && is_active !== 'all') {
         query.is_active = is_active
     }
-    const response = await axiosInstance.get(`/clubs/${clubId}/rewards`, { params: query })
-    return response.data
+    const response = await axiosInstance.get(`/rewards/clubs/${clubId}`, { params: query })
+    // console.log('getClubRewards response:', response)
+    return response
 }
 
 /**
@@ -204,8 +207,8 @@ export const getBadgeTemplates = async (params = {}) => {
  * GET /api/admin/badges/:id
  */
 export const getBadgeTemplateDetail = async (id) => {
-    const response = await axiosInstance.get(`/badges/${id}`)
-    return response.data
+    const response = await axiosInstance.get(`/club-badges/${id}`)
+    return response
 }
 
 const rewardApi = {

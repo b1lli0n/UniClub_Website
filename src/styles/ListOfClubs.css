@@ -330,7 +330,7 @@ body.clubs-list-body #root {
 
 .clubs-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   margin-top: 22px;
   padding-top: 24px;
@@ -338,9 +338,6 @@ body.clubs-list-body #root {
   margin-bottom: 20px;
 }
 
-.clubs-list.is-single-item {
-  grid-template-columns: minmax(260px, 50%);
-}
 
 .loc-pagination {
   display: flex;
@@ -394,11 +391,7 @@ body.clubs-list-body #root {
   letter-spacing: 0.08em;
 }
 
-@media (max-width: 992px) {
-  .clubs-list {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  }
-}
+
 
 @media (max-width: 768px) {
   .loc-toolbar-row--search {
@@ -410,14 +403,6 @@ body.clubs-list-body #root {
     flex: 1 1 100%;
     width: 100%;
     max-width: none;
-  }
-
-  .clubs-list {
-    grid-template-columns: 1fr;
-  }
-
-  .clubs-list.is-single-item {
-    grid-template-columns: 1fr;
   }
 
   .loc-pagination {

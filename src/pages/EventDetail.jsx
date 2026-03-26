@@ -245,7 +245,7 @@ export default function EventDetailPage() {
                         <div className="action-buttons-group">
                             <button
                                 className="btn-secondary-glass"
-                                onClick={() => navigate(`/events/${eventId}/timeline`)}
+                                onClick={() => navigate(`/clubEvent/${eventId}/event-timeline-management`)}
                             >
                                 <Calendar size={18} />
                                 <span>Xem lịch trình</span>

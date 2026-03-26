@@ -770,3 +770,10 @@
   border-color: #6366f1;
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
+
+.admin-logo-circle {
+  background-image: url('/src/assets/logo-uniclub.png'); /* đổi path của bạn */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

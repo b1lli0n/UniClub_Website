@@ -181,7 +181,43 @@ const ClubDetail = () => {
   }, [id, user]);
 
   const handleJoin = async () => {
-    if (!id) return;
+    if (!id || joinLoading || isJoined) return;
+
+    const normalizeClubStatus = (c) => {
+      const raw = c?.status ?? c?.club_status ?? c?.clubStatus;
+      if (typeof raw === 'number') return raw;
+      if (typeof raw === 'string') {
+        const s = raw.trim().toLowerCase();
+        if (s === 'active' || s === 'approved' || s === '1') return 1;
+        if (s === 'pending' || s === '0') return 0;
+        if (s === 'pause' || s === 'paused' || s === 'inactive' || s === '2') return 2;
+        if (s === 'reject' || s === 'rejected' || s === 'declined' || s === '3') return 3;
+      }
+      const isActive = c?.is_active ?? c?.isActive ?? c?.active;
+      if (typeof isActive === 'boolean') return isActive ? 1 : 2;
+      return null;
+    };
+
+    const clubStatus = normalizeClubStatus(club);
+    if (clubStatus === 2) {
+      toast.error('Câu lạc bộ đang ngưng hoạt động. Bạn không thể gửi yêu cầu tham gia.');
+      return;
+    }
+    if (clubStatus === 3) {
+      toast.error('Câu lạc bộ không còn tiếp nhận thành viên. Bạn không thể gửi yêu cầu tham gia.');
+      return;
+    }
+    if (clubStatus === 0) {
+      toast.info('Câu lạc bộ đang chờ duyệt. Vui lòng thử lại sau.');
+      return;
+    }
+
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    if (!token) {
+      toast.info('Bạn cần đăng nhập để gửi yêu cầu tham gia.');
+      navigate('/login');
+      return;
+    }
     
     setJoinLoading(true);
     try {
@@ -230,6 +266,32 @@ const ClubDetail = () => {
     };
   });
   const adminBoard = club?.adminBoard || [];
+
+  const normalizeClubStatus = (c) => {
+    const raw = c?.status ?? c?.club_status ?? c?.clubStatus;
+    if (typeof raw === 'number') return raw;
+    if (typeof raw === 'string') {
+      const s = raw.trim().toLowerCase();
+      if (s === 'active' || s === 'approved' || s === '1') return 1;
+      if (s === 'pending' || s === '0') return 0;
+      if (s === 'pause' || s === 'paused' || s === 'inactive' || s === '2') return 2;
+      if (s === 'reject' || s === 'rejected' || s === 'declined' || s === '3') return 3;
+    }
+    const isActive = c?.is_active ?? c?.isActive ?? c?.active;
+    if (typeof isActive === 'boolean') return isActive ? 1 : 2;
+    return null;
+  };
+
+  const clubStatus = normalizeClubStatus(club);
+  const canRequestJoin = clubStatus == null ? true : clubStatus === 1;
+  const joinDisabledMessage =
+    clubStatus === 2
+      ? 'Câu lạc bộ đang ngưng hoạt động.'
+      : clubStatus === 3
+        ? 'Câu lạc bộ không còn tiếp nhận thành viên.'
+        : clubStatus === 0
+          ? 'Câu lạc bộ đang chờ duyệt.'
+          : '';
 
   useEffect(() => {
     const fetchRewards = async () => {
@@ -373,10 +435,19 @@ const ClubDetail = () => {
                         <p className="clubdetail-hero-lead">{club.description}</p>
                       </div>
                       {!isMember && (
-                        <button type="button" className="clubdetail-join-btn clubdetail-join-btn--primary">
-                          <span>Tham gia ngay</span>
+                        <button
+                          type="button"
+                          className={`clubdetail-join-btn clubdetail-join-btn--primary${clubStatus === 2 ? ' clubdetail-join-btn--inactive' : ''}`}
+                          onClick={handleJoin}
+                          disabled={joinLoading || isJoined || !canRequestJoin}
+                        >
+                          <span>{joinLoading ? 'Đang gửi...' : isJoined ? 'Đã gửi yêu cầu' : 'Tham gia ngay'}</span>
                           <ArrowRight size={16} strokeWidth={2.6} aria-hidden />
                         </button>
+                      )}
+
+                      {!isMember && !canRequestJoin && clubStatus != null && (
+                        <p className="clubdetail-join-hint">{joinDisabledMessage}</p>
                       )}
                     </div>
                   </section>

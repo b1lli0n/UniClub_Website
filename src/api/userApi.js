@@ -98,7 +98,7 @@ export const getUserJoinRequests = async () => {
 // Hủy yêu cầu tham gia câu lạc bộ
 export const cancelJoinRequest = async (requestId) => {
   try {
-    const response = await userAPI.delete(`/users/join-requests/${requestId}`);
+    const response = await userAPI.delete(`/requests/${requestId}/cancel`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

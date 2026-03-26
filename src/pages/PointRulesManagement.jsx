@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams} from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { createPointRule, getPointRules, updatePointRule, togglePointRule } from '../../api/pointRulesApi';
-import { getActionTypes  } from '../../api/actionTypesAPI';
-import '../../styles/PointRulesManagement.css';
+import { createPointRule, getPointRules, updatePointRule, togglePointRule } from '../api/pointRulesApi';
+import { getActionTypes  } from '../api/actionTypesAPI';
+import '../styles/PointRulesManagement.css';
 
 const PointRulesManagement = () => {
-
-  const navigate = useNavigate();
-  const { clubId } = useParams();
-
+  const { id } = useParams();
+console.log('PointRulesManagement mounted with clubId:',id);
   const [rules, setRules] = useState([]);
   const [actionTypes, setActionTypes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -29,10 +27,10 @@ const PointRulesManagement = () => {
   // Fetch action types and rules on mount
   useEffect(() => {
     fetchActionTypes();
-    if (clubId) {
+    if (id) {
       fetchRules();
     }
-  }, [clubId]);
+  }, [id]);
 
   const fetchActionTypes = async () => {
     try {
@@ -46,7 +44,7 @@ const PointRulesManagement = () => {
   const fetchRules = async () => {
     try {
       setLoading(true);
-      const data = await getPointRules(clubId);
+      const data = await getPointRules(id);
       console.log('Raw point rules response:', data);
       const rulesArray = data?.rules || [];
       setRules(rulesArray);
@@ -112,10 +110,11 @@ const PointRulesManagement = () => {
       setLoading(true);
 
       if (editingId) {
-        await updatePointRule(clubId, editingId, formData);
+        await updatePointRule(id, editingId, formData);
         toast.success('Cập nhật quy tắc điểm thành công');
       } else {
-        await createPointRule(clubId, formData);
+              console.log('Fetching point rules for clubId:', id);
+        await createPointRule(id, formData);
         toast.success('Tạo quy tắc điểm thành công');
       }
 
@@ -176,7 +175,7 @@ const PointRulesManagement = () => {
     
     await toast.promise(
       (async () => {
-        await togglePointRule(clubId, rule._id);
+        await togglePointRule(id, rule._id);
         await fetchRules();
       })(),
       {
