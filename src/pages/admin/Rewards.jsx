@@ -340,7 +340,7 @@ const Rewards = () => {
                                             <button
                                                 type="button"
                                                 className={`admin-status-btn ${r.is_active ? 'admin-status-btn--approve' : 'admin-status-btn--reject'}`}
-                                                onClick={() => handleToggleActive(r)}
+                                                onClick={(e) => { e.stopPropagation(); handleToggleActive(r) }}
                                                 title={r.is_active ? 'Ẩn phần thưởng' : 'Hiện phần thưởng'}
                                             >
                                                 <i className={`fa-solid ${r.is_active ? 'fa-eye' : 'fa-eye-slash'}`} />

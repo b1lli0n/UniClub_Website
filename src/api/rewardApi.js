@@ -60,6 +60,14 @@ export const updateReward = async (id, data) => {
   return axiosInstance.put(`/rewards/${id}`, data);
 };
 
+/**
+ * Lấy chi tiết phần thưởng (Admin) — không bị lọc is_active
+ * GET /api/admin/rewards/:rewardId
+ */
+export const getAdminRewardDetail = async (rewardId) => {
+    return axiosInstance.get(`/rewards/rewards/${rewardId}`)
+}
+
 // ==================== REDEMPTION HISTORY APIS ====================
 
 /**
@@ -223,6 +231,7 @@ const rewardApi = {
     getClubRewards,
     createReward,
     updateReward,
+    getAdminRewardDetail,
     getRedemptionHistoryAdmin,
     getAdminRewardPointLogs,
     getBadgeTemplates,
