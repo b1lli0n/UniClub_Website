@@ -319,6 +319,43 @@ body.profile-body #root {
   padding-top: 1.25rem;
 }
 
+.profile-action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-edit-btn,
+.profile-cancel-btn {
+  margin-top: 0.5rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 175, 204, 0.9);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--candy-text);
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(31, 42, 68, 0.12);
+  transition: all 0.2s ease;
+}
+
+.profile-edit-btn:hover,
+.profile-cancel-btn:hover {
+  transform: translateY(-2px);
+  background: #fff;
+}
+
+.profile-edit-btn:disabled,
+.profile-cancel-btn:disabled,
+.profile-save-btn:disabled,
+.profile-avatar-edit:disabled,
+.profile-change-pass-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .profile-save-btn {
   margin-top: 0.5rem;
   padding: 0.8rem 1.8rem;

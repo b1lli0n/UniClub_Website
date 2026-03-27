@@ -267,7 +267,7 @@ export const getMemberContributions = async (clubId, memberId) => {
 
 export const getClubTransactions = async (clubId, params = {}) => {
   try {
-    const response = await clubAPI.get(`/clubs/${clubId}/transactions`, { params });
+    const response = await clubAPI.get(`/clubs/${clubId}/transactions/leader`, { params });
     return response.data;
   } catch (error) {
     console.error('Get club transactions error:', error);
@@ -277,7 +277,7 @@ export const getClubTransactions = async (clubId, params = {}) => {
 
 export const getClubTransactionDetail = async (clubId, transactionId) => {
   try {
-    const response = await clubAPI.get(`/clubs/${clubId}/transactions/${transactionId}`);
+    const response = await clubAPI.get(`/clubs/${clubId}/transactions/leader/${transactionId}`);
     return response.data;
   } catch (error) {
     console.error('Get club transaction detail error:', error);
@@ -287,7 +287,7 @@ export const getClubTransactionDetail = async (clubId, transactionId) => {
 
 export const reviewClubTransaction = async (clubId, transactionId, payload) => {
   try {
-    const response = await clubAPI.patch(`/clubs/${clubId}/transactions/${transactionId}/review`, payload);
+    const response = await clubAPI.patch(`/clubs/${clubId}/transactions/leader/${transactionId}/review`, payload);
     return response.data;
   } catch (error) {
     console.error('Review club transaction error:', error);

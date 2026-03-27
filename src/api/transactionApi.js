@@ -14,12 +14,14 @@ const BASE = (clubId) => `/clubs/${clubId}/transactions`;
 export const getTransactions = (clubId, params = {}) =>
     api.get(BASE(clubId), { params });
 
-/**
- * Lấy chi tiết một giao dịch
- * GET /api/clubs/:clubId/transactions/:transactionId
- */
+export const getLeaderTransactions = (clubId, params = {}) =>
+    api.get(`${BASE(clubId)}/leader`, { params });
+
+export const reviewLeaderTransaction = (clubId, transactionId, payload) =>
+    api.patch(`${BASE(clubId)}/leader/${transactionId}/review`, payload);
+
 export const getTransactionDetail = (clubId, transactionId) =>
-    api.get(`${BASE(clubId)}/${transactionId}`);
+    api.get(`${BASE(clubId)}/leader/${transactionId}`);
 
 /**
  * Tạo yêu cầu giao dịch mới (Treasurer)

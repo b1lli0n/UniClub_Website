@@ -124,9 +124,11 @@ const Profile = () => {
     dob: '',
     avatar: '',
   });
+  const [originalProfile, setOriginalProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const avatarInputRef = useRef(null);
 
   const maxDobStr = useMemo(() => {
@@ -157,14 +159,17 @@ const Profile = () => {
         const response = await getProfile();
         if (response.success && response.data) {
           const userData = response.data;
-          setProfile({
+          const next = {
             fullName: userData.fullName || '',
             email: userData.email || '',
             phone: userData.phone_number ?? userData.phone ?? '',
             gender: userData.gender || 'other',
             dob: formatDateForInput(userData.date_of_birth ?? userData.dob),
             avatar: normalizeAssetPath(userData.avatar_url || userData.avatar || ''),
-          });
+          };
+          setProfile(next);
+          setOriginalProfile(next);
+          setIsEditing(false);
         } else {
           toast.error(response.message || 'Không thể tải thông tin profile');
         }
@@ -184,10 +189,21 @@ const Profile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (!isEditing) return;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
+  const beginEdit = () => {
+    setIsEditing(true);
+  };
+
+  const cancelEdit = () => {
+    if (originalProfile) setProfile(originalProfile);
+    setIsEditing(false);
+  };
+
   const handleSave = async () => {
+    if (!isEditing) return;
     const nameTrim = (profile.fullName || '').trim();
     if (nameTrim.length < 2 || nameTrim.length > 70) {
       toast.error('Họ và tên phải từ 2 đến 70 ký tự');
@@ -238,14 +254,17 @@ const Profile = () => {
       }
       toast.success(res.message || 'Cập nhật profile thành công');
       const u = res.data;
-      setProfile({
+      const next = {
         fullName: u.fullName || '',
         email: u.email || '',
         phone: u.phone_number ?? u.phone ?? '',
         gender: u.gender || 'other',
         dob: formatDateForInput(u.date_of_birth ?? u.dob),
         avatar: normalizeAssetPath(u.avatar_url || u.avatar || ''),
-      });
+      };
+      setProfile(next);
+      setOriginalProfile(next);
+      setIsEditing(false);
       if (user && typeof updateUser === 'function') {
         const av = normalizeAssetPath(u.avatar_url ?? u.avatar ?? '');
         updateUser({
@@ -268,6 +287,7 @@ const Profile = () => {
   };
 
   const handleAvatarButtonClick = () => {
+    if (!isEditing) return;
     avatarInputRef.current?.click();
   };
 
@@ -275,6 +295,7 @@ const Profile = () => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    if (!isEditing) return;
     if (file.size > 2 * 1024 * 1024) {
       toast.error('Ảnh tối đa 2MB');
       return;
@@ -294,6 +315,7 @@ const Profile = () => {
       const u = res.data;
       const av = normalizeAssetPath(u.avatar_url || u.avatar || '');
       setProfile((prev) => ({ ...prev, avatar: av }));
+      setOriginalProfile((prev) => (prev ? { ...prev, avatar: av } : prev));
       if (user && typeof updateUser === 'function') {
         updateUser({
           ...user,
@@ -375,7 +397,7 @@ const Profile = () => {
                 type="button"
                 className="profile-avatar-edit"
                 onClick={handleAvatarButtonClick}
-                disabled={uploadingAvatar || saving}
+                        disabled={!isEditing || uploadingAvatar || saving}
               >
                 {uploadingAvatar ? 'Đang tải...' : 'Đổi ảnh'}
               </button>
@@ -402,6 +424,7 @@ const Profile = () => {
                     value={profile.fullName}
                     onChange={handleChange}
                     placeholder="Họ và tên"
+                    disabled={!isEditing || saving}
                   />
                 </div>
                 <div className="profile-field">
@@ -416,6 +439,7 @@ const Profile = () => {
                     value={profile.phone}
                     onChange={handleChange}
                     placeholder="Nhập số điện thoại"
+                    disabled={!isEditing || saving}
                   />
                 </div>
                 <div className="profile-field-group profile-field-group--left">
@@ -449,6 +473,7 @@ const Profile = () => {
                         type="button"
                         className="profile-change-pass-btn"
                         onClick={() => navigate('/profile/change-password')}
+                        disabled={!isEditing}
                       >
                         Đổi mật khẩu
                       </button>
@@ -468,6 +493,7 @@ const Profile = () => {
                       value={genderOptions.find((opt) => opt.value === profile.gender) || genderOptions[0]}
                       onChange={(option) => setProfile((prev) => ({ ...prev, gender: option?.value || prev.gender }))}
                       isSearchable={false}
+                      isDisabled={!isEditing || saving}
                     />
                   </div>
                   <div className="profile-field-half">
@@ -484,6 +510,7 @@ const Profile = () => {
                         onChange={handleChange}
                         min={minDobStr}
                         max={maxDobStr}
+                        disabled={!isEditing || saving}
                       />
                       <span className="profile-date-icon" aria-hidden="true">
 
@@ -495,14 +522,35 @@ const Profile = () => {
             </div>
 
             <div className="profile-section profile-section--actions">
-              <button
-                type="button"
-                className="profile-save-btn"
-                onClick={handleSave}
-                disabled={saving || uploadingAvatar}
-              >
-                {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
-              </button>
+              {!isEditing ? (
+                <button
+                  type="button"
+                  className="profile-edit-btn"
+                  onClick={beginEdit}
+                  disabled={saving || uploadingAvatar}
+                >
+                  Cập nhật
+                </button>
+              ) : (
+                <div className="profile-action-row">
+                  <button
+                    type="button"
+                    className="profile-cancel-btn"
+                    onClick={cancelEdit}
+                    disabled={saving || uploadingAvatar}
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="button"
+                    className="profile-save-btn"
+                    onClick={handleSave}
+                    disabled={saving || uploadingAvatar}
+                  >
+                    {saving ? 'Đang lưu...' : 'Lưu'}
+                  </button>
+                </div>
+              )}
             </div>
           </Container>
         </div>
