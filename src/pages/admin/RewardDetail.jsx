@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { getRewardDetail, updateReward } from '../../api/rewardApi'
+import { getAdminRewardDetail, updateReward } from '../../api/rewardApi'
 import '../../styles/rewards.css'
 
 const RewardDetail = () => {
@@ -33,16 +33,18 @@ const RewardDetail = () => {
         setLoading(true)
         setError(null)
         try {
-            const res = await getRewardDetail(clubId, rewardId)
-            // Response là reward object trực tiếp (interceptor trả response.data)
+            const res = await getAdminRewardDetail(rewardId)
+            // Admin interceptor trả response.data trực tiếp,
+            // nên res có thể là { data: reward } hoặc reward object luôn
+            const rewardData = res?.data ?? res
             console.log('Fetched reward detail:', res)
-            console.log('Fetched reward detail (raw):', res?.data?.name)
-            setReward(res.data)
+            console.log('Fetched reward detail (raw):', rewardData?.name)
+            setReward(rewardData)
             setEditForm({
-                name: res.data.name,
-                description: res.data.description,
-                points_required: res.data.points_required,
-                quantity: res.data.quantity,
+                name: rewardData.name,
+                description: rewardData.description,
+                points_required: rewardData.points_required,
+                quantity: rewardData.quantity,
             })
         } catch (err) {
             console.error('getRewardDetail error:', err)
