@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuth } from '../context/AuthContext';
-import { getTransactions } from '../api/transactionApi';
+import { getTransactions, getLeaderTransactions, reviewLeaderTransaction } from '../api/transactionApi';
 import TransactionForm from '../components/TransactionForm';
 import '../styles/admin.css';
 import '../styles/rewards.css';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 const STATUS_MAP = {
     0: { label: 'Chờ duyệt', color: '#92400e', bg: '#fef3c7', border: '#f59e0b' },
     1: { label: 'Đã duyệt', color: '#065f46', bg: '#d1fae5', border: '#34d399' },
@@ -22,15 +20,28 @@ const TYPE_MAP = {
 const formatVND = (amount) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 
-/**
- * Trang quản lý giao dịch tài chính CLB (Treasurer)
- * Route: /clubs/:clubId/transactions  (hoặc tương tự)
- */
-const TransactionList = () => {
-    const { id: clubId } = useParams();    // lấy clubId từ URL
-    const { user } = useAuth();
+const creatorDisplayName = (txn) => {
+    const u = txn?.created_by;
+    if (!u) return 'N/A';
+    const nested = u.user_id?.fullName || u.user_id?.full_name;
+    if (nested) return nested;
+    return u.fullName || u.full_name || u.name || 'N/A';
+};
 
-    // ── State ──────────────────────────────────────────────────────────────
+const approverDisplayName = (txn) => {
+    const u = txn?.approved_by;
+    if (!u) return 'N/A';
+    const nested = u.user_id?.fullName || u.user_id?.full_name;
+    if (nested) return nested;
+    return u.fullName || u.full_name || u.name || 'N/A';
+};
+
+const TransactionList = () => {
+    const { id: clubId } = useParams();
+    const clubRole = Number(localStorage.getItem('clubRole'));
+    const isLeader = clubRole === 1;
+    const isFinance = clubRole === 3 || clubRole === 4;
+
     const [transactions, setTransactions] = useState([]);
     const [pagination, setPagination] = useState({ total: 0, page: 1, totalPages: 1 });
     const [page, setPage] = useState(1);
@@ -47,36 +58,55 @@ const TransactionList = () => {
     // Expand detail view
     const [expandedId, setExpandedId] = useState(null);
 
-    // ── Fetch data ─────────────────────────────────────────────────────────
     const fetchTransactions = useCallback(async () => {
         if (!clubId) return;
+        if (!isLeader && !isFinance) {
+            setError('Bạn không có quyền xem trang này');
+            setTransactions([]);
+            return;
+        }
         setLoading(true);
         setError(null);
         try {
             const params = { page, limit: 10 };
             if (statusFilter !== '') params.status = statusFilter;
             if (typeFilter !== '') params.type = typeFilter;
-            const res = await getTransactions(clubId, params);
-            // Axios returns data in res.data
-            const data = res?.data || res;
-            setTransactions(data?.transactions || []);
-            setPagination(data?.pagination || { total: 0, page: 1, totalPages: 1 });
+            const res = isLeader
+                ? await getLeaderTransactions(clubId, params)
+                : await getTransactions(clubId, params);
+            const body = res?.data ?? res;
+            const list = body?.data ?? body?.transactions ?? [];
+            const pag = body?.pagination ?? {};
+            setTransactions(Array.isArray(list) ? list : []);
+            setPagination({
+                total: pag.total ?? 0,
+                page: pag.page ?? page,
+                totalPages: pag.totalPages ?? pag.pages ?? 1,
+            });
         } catch (err) {
             console.error('fetchTransactions error:', err);
             setError(err?.response?.data?.message || err?.message || 'Không thể tải danh sách giao dịch');
         } finally {
             setLoading(false);
         }
-    }, [clubId, page, statusFilter, typeFilter]);
+    }, [clubId, page, statusFilter, typeFilter, isLeader, isFinance]);
 
     useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
 
-    // ── Summary (tính tổng thu/chi) ────────────────────────────────────────
+    const handleLeaderReview = async (txnId, action) => {
+        try {
+            await reviewLeaderTransaction(clubId, txnId, { action });
+            toast.success(action === 'approve' ? 'Đã duyệt giao dịch' : 'Đã từ chối giao dịch');
+            fetchTransactions();
+        } catch (err) {
+            toast.error(err?.response?.data?.message || err?.message || 'Không thể xử lý');
+        }
+    };
+
     const totalIncome = transactions.filter(t => t.type === 0 && t.status === 1).reduce((s, t) => s + t.amount, 0);
     const totalExpense = transactions.filter(t => t.type === 1 && t.status === 1).reduce((s, t) => s + t.amount, 0);
     const balance = totalIncome - totalExpense;
 
-    // ── Render ─────────────────────────────────────────────────────────────
     return (
         <div className="admin-panel admin-panel--animate" style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}>
 
@@ -89,12 +119,14 @@ const TransactionList = () => {
                     </h2>
                     <p style={{ margin: '4px 0 0', fontSize: 14, color: '#6b7280' }}>Theo dõi thu chi quỹ câu lạc bộ</p>
                 </div>
-                <button
-                    className="reward-create-btn"
-                    onClick={() => setFormModal({ open: true, editData: null })}
-                >
-                    <i className="fa-solid fa-plus" /> Tạo giao dịch
-                </button>
+                {isFinance ? (
+                    <button
+                        className="reward-create-btn"
+                        onClick={() => setFormModal({ open: true, editData: null })}
+                    >
+                        <i className="fa-solid fa-plus" /> Tạo giao dịch
+                    </button>
+                ) : null}
             </div>
 
             {/* Summary cards */}
@@ -182,7 +214,7 @@ const TransactionList = () => {
                         const statusInfo = STATUS_MAP[txn.status] || {};
                         const isExpanded = expandedId === txn._id;
                         const isPending = txn.status === 0;
-                        const creatorName = txn.created_by?.user_id?.fullName || txn.created_by?.user_id?.full_name || 'N/A';
+                        const creatorName = creatorDisplayName(txn);
 
                         return (
                             <div key={txn._id}>
@@ -230,7 +262,7 @@ const TransactionList = () => {
                                     {/* Actions */}
                                     <div className="admin-col" style={{ flex: 1.2 }}
                                         onClick={e => e.stopPropagation()}>
-                                        {isPending && (
+                                        {isPending && isFinance && (
                                             <button
                                                 className="admin-status-btn--approve"
                                                 style={{ fontSize: 12, padding: '5px 12px' }}
@@ -238,6 +270,24 @@ const TransactionList = () => {
                                             >
                                                 <i className="fa-solid fa-pen" /> Sửa
                                             </button>
+                                        )}
+                                        {isPending && isLeader && (
+                                            <div className="txn-leader-actions">
+                                                <button
+                                                    type="button"
+                                                    className="admin-status-btn--approve txn-leader-btn"
+                                                    onClick={() => handleLeaderReview(txn._id, 'approve')}
+                                                >
+                                                    Duyệt
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="admin-status-btn--reject txn-leader-btn"
+                                                    onClick={() => handleLeaderReview(txn._id, 'reject')}
+                                                >
+                                                    Từ chối
+                                                </button>
+                                            </div>
                                         )}
                                         {!isPending && (
                                             <span style={{ color: '#9ca3af', fontSize: 13 }}>—</span>
@@ -268,7 +318,7 @@ const TransactionList = () => {
                                                 <div>
                                                     <span style={{ fontSize: 12, color: '#6b7280', display: 'block' }}>Người duyệt</span>
                                                     <span style={{ fontSize: 14, color: '#111827' }}>
-                                                        {txn.approved_by?.user_id?.fullName || txn.approved_by?.user_id?.full_name || 'N/A'}
+                                                        {approverDisplayName(txn)}
                                                     </span>
                                                 </div>
                                             )}
@@ -297,13 +347,15 @@ const TransactionList = () => {
             )}
 
             {/* Form Modal */}
-            <TransactionForm
-                open={formModal.open}
-                onClose={() => setFormModal({ open: false, editData: null })}
-                clubId={clubId}
-                editData={formModal.editData}
-                onSuccess={fetchTransactions}
-            />
+            {isFinance ? (
+                <TransactionForm
+                    open={formModal.open}
+                    onClose={() => setFormModal({ open: false, editData: null })}
+                    clubId={clubId}
+                    editData={formModal.editData}
+                    onSuccess={fetchTransactions}
+                />
+            ) : null}
         </div>
     );
 };
