@@ -97,7 +97,7 @@ const Register = () => {
         {/* Left Side: Visuals */}
         <div className="auth-visual-side">
           <img src={logoUniclub} alt="UniClub" className="auth-logo-top" />
-          
+
           <div className="auth-illustration-center">
             <div className="illustration-blob-bg"></div>
             <div className="auth-main-icon">
@@ -108,7 +108,7 @@ const Register = () => {
               <p>Kết nối cùng hàng nghìn sinh viên ưu tú tại các câu lạc bộ hàng đầu</p>
             </div>
           </div>
-          
+
           <div className="auth-footer-copyright">
             <p>© 2026 UniClub - Bản quyền đã trợ bảo lưu.</p>
           </div>
@@ -118,7 +118,7 @@ const Register = () => {
         <div className="auth-form-side">
           <div className="auth-form-content">
             <h1 className="auth-title">Đăng ký</h1>
-            
+
             <form onSubmit={handleSubmit}>
               <div className="auth-input-group">
                 <label className="auth-label">Họ và tên</label>
@@ -127,8 +127,8 @@ const Register = () => {
                   <input
                     type="text"
                     value={formData.fullName}
-                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                    placeholder="Nguyễn Văn A"
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    placeholder="Mai An Tiêm"
                     className="auth-input"
                     style={{ paddingLeft: '3.5rem' }}
                     required
@@ -143,7 +143,7 @@ const Register = () => {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="uniclub@fpt.edu.vn"
                     className="auth-input"
                     style={{ paddingLeft: '3.5rem' }}
@@ -159,7 +159,7 @@ const Register = () => {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder="••••••••"
                     className="auth-input"
                     style={{ paddingLeft: '3.5rem', paddingRight: '3.25rem' }}
@@ -183,7 +183,7 @@ const Register = () => {
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     placeholder="••••••••"
                     className="auth-input"
                     style={{ paddingLeft: '3.5rem', paddingRight: '3.25rem' }}
