@@ -85,6 +85,7 @@ export const deleteClub = async (clubId) => {
   }
 };
 
+
 // Cập nhật trạng thái club (1: active, 2: paused)
 export const updateClubStatus = async (clubId, status) => {
   try {
@@ -100,7 +101,8 @@ export const updateClubStatus = async (clubId, status) => {
 // Xem danh sách thành viên active của club
 export const getClubMembers = async (clubId) => {
   try {
-    const response = await clubAPI.get(`/${clubId}/members`);
+
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -108,6 +110,7 @@ export const getClubMembers = async (clubId) => {
 };
 
 // Thêm thành viên vào club (BE chưa có route)
+
 export const addMemberToClub = async (clubId, memberId) => {
   try {
     const response = await clubAPI.post(`/${clubId}/members`, { memberId });
@@ -231,7 +234,7 @@ export const getMemberContributions = async (clubId, memberId) => {
 
 export const getClubTransactions = async (clubId, params = {}) => {
   try {
-    const response = await clubAPI.get(`/clubs/${clubId}/transactions`, { params });
+    const response = await clubAPI.get(`/clubs/${clubId}/transactions/leader`, { params });
     return response.data;
   } catch (error) {
     console.error('Get club transactions error:', error);
@@ -241,7 +244,7 @@ export const getClubTransactions = async (clubId, params = {}) => {
 
 export const getClubTransactionDetail = async (clubId, transactionId) => {
   try {
-    const response = await clubAPI.get(`/clubs/${clubId}/transactions/${transactionId}`);
+    const response = await clubAPI.get(`/clubs/${clubId}/transactions/leader/${transactionId}`);
     return response.data;
   } catch (error) {
     console.error('Get club transaction detail error:', error);
@@ -251,7 +254,7 @@ export const getClubTransactionDetail = async (clubId, transactionId) => {
 
 export const reviewClubTransaction = async (clubId, transactionId, payload) => {
   try {
-    const response = await clubAPI.patch(`/clubs/${clubId}/transactions/${transactionId}/review`, payload);
+    const response = await clubAPI.patch(`/clubs/${clubId}/transactions/leader/${transactionId}/review`, payload);
     return response.data;
   } catch (error) {
     console.error('Review club transaction error:', error);
@@ -293,3 +296,4 @@ export const removeMember = async (clubId, membershipId) => {
 };
  
 export default clubAPI;
+
