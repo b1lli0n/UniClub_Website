@@ -4,7 +4,7 @@ import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { Users, Calendar, Tag, ImageIcon, ArrowRight, Crown, UserCircle2, ShieldCheck, FileBadge2, Wallet } from 'lucide-react';
 import ClubDetailNav from '../../components/ClubDetailNav';
-import { getClubById, getEventsByClub, requestToJoinClub } from '../../api/clubApi';
+import { getClubById, getEventsByClub, requestToJoinClub, leaveClub } from '../../api/clubApi';
 import { getRewards } from '../../api/rewardApi';
 import { getUserClubs } from '../../api/userApi';
 import { useAuth } from '../../context/AuthContext';
@@ -245,6 +245,20 @@ const ClubDetail = () => {
     }
   };
 
+  const handleLeaveClub = async () => {
+    if (!id) return;
+    if (!window.confirm('Bạn chắc chắn muốn rời khỏi câu lạc bộ này?')) return;
+    try {
+      await leaveClub(id);
+      toast.success('Bạn đã rời khỏi câu lạc bộ!');
+      setIsMember(false);
+      setIsJoined(false);
+      // Optionally: navigate('/clubs')
+    } catch (error) {
+      toast.error(error?.message || 'Không thể rời câu lạc bộ');
+    }
+  };
+
   const normalizeRewardStatus = (status) => {
     if (status === 1 || status === 'active' || status === 'approved') return 'active';
     if (status === 0 || status === 'pending') return 'pending';
@@ -448,6 +462,17 @@ const ClubDetail = () => {
 
                       {!isMember && !canRequestJoin && clubStatus != null && (
                         <p className="clubdetail-join-hint">{joinDisabledMessage}</p>
+                      )}
+
+                      {isMember && (
+                        <button
+                          type="button"
+                          className="clubdetail-leave-btn"
+                          style={{ marginTop: 12, background: '#f44336', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 6, fontWeight: 500, cursor: 'pointer' }}
+                          onClick={handleLeaveClub}
+                        >
+                          Rời CLB
+                        </button>
                       )}
                     </div>
                   </section>

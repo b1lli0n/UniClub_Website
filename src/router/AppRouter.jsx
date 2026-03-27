@@ -22,7 +22,6 @@ import PointRules from '../pages/ClubPages/PointRules'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
 import EventAttendanceList from '../pages/leader/EventAttendanceList'
-import ClubMemberManagement from '../pages/leader/ClubMemberManagement'
 import CreateClub from '../pages/ClubPages/CreateClub'
 import ClubTransactions from '../pages/ClubPages/ClubTransactions'
 import TransactionList from '../pages/TransactionList'
@@ -70,6 +69,7 @@ import { List } from 'lucide-react'
 import MyMembershipFees from '../pages/MyMembershipFees'
 import ViewJoinRequests from '../pages/ViewJoinRequests'
 import EventTimelineManagement from '../pages/EventTimelineManagement'
+import ClubMemberManagement from '../pages/ClubPages/ClubMemberManagement'
 
 const AppRouter = () => {
   return (

@@ -259,4 +259,37 @@ export const reviewClubTransaction = async (clubId, transactionId, payload) => {
   }
 };
 
+// ===== LEADER MEMBER MANAGEMENT APIS =====
+
+// 1. Lấy danh sách thành viên với roles (dành cho leader)
+export const getClubMembersWithRoles = async (clubId) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: error.message || 'Failed to fetch club members' };
+  }
+};
+
+// 2. Tìm kiếm thành viên (dành cho leader)
+export const searchClubMembers = async (clubId, keyword) => {
+  try {
+    const params = keyword ? { keyword } : {};
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members/search`, { params });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: error.message || 'Failed to search club members' };
+  }
+};
+
+// 3. Xóa thành viên khỏi club (dành cho leader)
+export const removeMember = async (clubId, membershipId) => {
+  try {
+    const response = await clubAPI.delete(`/clubs/${clubId}/memberships/leader/members/${membershipId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: error.message || 'Failed to remove member' };
+  }
+};
+ 
 export default clubAPI;
