@@ -21,7 +21,15 @@ import ClubBadges from '../pages/ClubPages/ClubBadges'
 import PointRules from '../pages/ClubPages/PointRules'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
+<<<<<<< HEAD
 import EventAttendanceList from '../pages/leader/EventAttendanceList'
+=======
+<<<<<<< Updated upstream
+=======
+import EventAttendanceList from '../pages/leader/EventAttendanceList'
+>>>>>>> Stashed changes
+import ClubMemberManagement from '../pages/leader/ClubMemberManagement'
+>>>>>>> 9b0a0557bfaa35eb0a9d3bd96dcbb87d3c5fd4cd
 import CreateClub from '../pages/ClubPages/CreateClub'
 import ClubTransactions from '../pages/ClubPages/ClubTransactions'
 import TransactionList from '../pages/TransactionList'
@@ -131,6 +139,18 @@ const AppRouter = () => {
       {/* Dashboard/Club Routes with MainLayout (includes Sidebar) */}
       <Route element={<LeaderLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
+<<<<<<< HEAD
+=======
+        <Route path="/clubs/:id/members" element={<ClubMemberManagement />} />
+<<<<<<< Updated upstream
+=======
+        <Route path="/clubs/:id/transactions" element={<TransactionList />} />
+        <Route path='/clubs/:id/point-rules-management' element={<PointRulesManagement />} />
+        
+>>>>>>> Stashed changes
+        <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
+        {/* Treasurer: Quản lý tài chính CLB */}
+>>>>>>> 9b0a0557bfaa35eb0a9d3bd96dcbb87d3c5fd4cd
         <Route path="/clubs/:id/transactions" element={<TransactionList />} />
         <Route path='/clubs/:id/point-rules-management' element={<PointRulesManagement />} />
         

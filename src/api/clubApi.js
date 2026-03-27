@@ -85,6 +85,12 @@ export const deleteClub = async (clubId) => {
   }
 };
 
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+// Thêm thành viên vào club
+=======
+>>>>>>> 9b0a0557bfaa35eb0a9d3bd96dcbb87d3c5fd4cd
 // Cập nhật trạng thái club (1: active, 2: paused)
 export const updateClubStatus = async (clubId, status) => {
   try {
@@ -100,7 +106,43 @@ export const updateClubStatus = async (clubId, status) => {
 // Xem danh sách thành viên active của club
 export const getClubMembers = async (clubId) => {
   try {
+<<<<<<< HEAD
     const response = await clubAPI.get(`/${clubId}/members`);
+=======
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// [Leader] Lấy danh sách thành viên active kèm role (API mới)
+export const getClubMembersWithRoles = async (clubId) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// [Leader] Tìm kiếm thành viên trong club theo tên hoặc email
+export const searchClubMembers = async (clubId, keyword) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members/search`, {
+      params: { keyword },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// [Leader] Xóa / kick thành viên khỏi club (đặt status = 3)
+export const removeMember = async (clubId, membershipId) => {
+  try {
+    const response = await clubAPI.delete(`/clubs/${clubId}/memberships/leader/members/${membershipId}`);
+>>>>>>> 9b0a0557bfaa35eb0a9d3bd96dcbb87d3c5fd4cd
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -108,6 +150,10 @@ export const getClubMembers = async (clubId) => {
 };
 
 // Thêm thành viên vào club (BE chưa có route)
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> 9b0a0557bfaa35eb0a9d3bd96dcbb87d3c5fd4cd
 export const addMemberToClub = async (clubId, memberId) => {
   try {
     const response = await clubAPI.post(`/${clubId}/members`, { memberId });
@@ -201,6 +247,7 @@ export const leaveClub = async (clubId) => {
   }
 };
 
+<<<<<<< HEAD
 // ===== CONTRIBUTION / POINT HISTORY APIS =====
 
 // Lấy lịch sử điểm của chính mình (Member)
@@ -260,3 +307,39 @@ export const reviewClubTransaction = async (clubId, transactionId, payload) => {
 };
 
 export default clubAPI;
+=======
+// ===== LEADER MEMBER MANAGEMENT APIS =====
+
+// 1. Lấy danh sách thành viên với roles (dành cho leader)
+export const getClubMembersWithRoles = async (clubId) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: error.message || 'Failed to fetch club members' };
+  }
+};
+
+// 2. Tìm kiếm thành viên (dành cho leader)
+export const searchClubMembers = async (clubId, keyword) => {
+  try {
+    const params = keyword ? { keyword } : {};
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members/search`, { params });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: error.message || 'Failed to search club members' };
+  }
+};
+
+// 3. Xóa thành viên khỏi club (dành cho leader)
+export const removeMember = async (clubId, membershipId) => {
+  try {
+    const response = await clubAPI.delete(`/clubs/${clubId}/memberships/leader/members/${membershipId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: error.message || 'Failed to remove member' };
+  }
+};
+
+export default clubAPI;
+>>>>>>> 9b0a0557bfaa35eb0a9d3bd96dcbb87d3c5fd4cd
