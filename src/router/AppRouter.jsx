@@ -22,6 +22,7 @@ import PointRules from '../pages/ClubPages/PointRules'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
 import EventAttendanceList from '../pages/leader/EventAttendanceList'
+import ClubMemberManagement from '../pages/leader/ClubMemberManagement'
 import CreateClub from '../pages/ClubPages/CreateClub'
 import ClubTransactions from '../pages/ClubPages/ClubTransactions'
 import TransactionList from '../pages/TransactionList'
@@ -131,6 +132,7 @@ const AppRouter = () => {
       {/* Dashboard/Club Routes with MainLayout (includes Sidebar) */}
       <Route element={<LeaderLayout />}>
         <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
+        <Route path="/clubs/:id/members" element={<ClubMemberManagement />} />
         <Route path="/clubs/:id/transactions" element={<TransactionList />} />
         <Route path='/clubs/:id/point-rules-management' element={<PointRulesManagement />} />
         
