@@ -197,7 +197,7 @@ export const getMyClubs = async () => {
 // Rời khỏi club
 export const leaveClub = async (clubId) => {
   try {
-    const response = await clubAPI.post(`/${clubId}/leave`);
+    const response = await clubAPI.post(`/clubs/${clubId}/leave`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
