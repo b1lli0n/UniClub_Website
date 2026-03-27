@@ -70,7 +70,8 @@ const Register = () => {
       const response = await registerService({
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
-        password: formData.password
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
       });
 
       if (response.success) {
@@ -182,7 +183,7 @@ const Register = () => {
                 <div className="auth-input-wrapper">
                   <i><Lock size={18} /></i>
                   <input
-                    type={showConfirmPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? 'text' : 'confirmPassword'}
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                     placeholder="••••••••"
