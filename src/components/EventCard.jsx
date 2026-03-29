@@ -13,9 +13,9 @@ const EventCard = ({ event }) => {
     navigate(targetPath);
   };
 
-  // Try multiple possible image field names
-  let imageUrl = event?.media_urls;
-  
+  // Handle both array and string formats safely
+  let rawUrl = event?.media_urls || event?.media_url || event?.image_url;
+  let imageUrl = Array.isArray(rawUrl) && rawUrl.length > 0 ? rawUrl[0] : (typeof rawUrl === 'string' ? rawUrl : null);
   const formatDate = (dateString) => {
     if (!dateString) return 'TBA';
     const date = new Date(dateString);
@@ -28,7 +28,7 @@ const EventCard = ({ event }) => {
 
   return (
     <div
-      className="event-card"
+      className="event-card-modern"
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -41,12 +41,12 @@ const EventCard = ({ event }) => {
       aria-disabled={!eventId}
       style={{ cursor: eventId ? 'pointer' : 'default' }}
     >
-      <div className="event-card-image">
+      <div className="event-card-media-wrapper">
         {imageUrl ? (
           <img 
-            src={`http://localhost:5000${imageUrl}`} 
-            alt={event.name || 'Event Image'}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            src={typeof imageUrl === 'string' && imageUrl.startsWith('http') ? imageUrl : `http://localhost:5000${imageUrl}`}  
+            alt={event.name || event.title || 'Event Image'}
+            className="event-card-img"
             onError={(e) => {
               e.target.style.display = 'none';
               e.target.nextElementSibling.style.display = 'flex';
@@ -54,23 +54,28 @@ const EventCard = ({ event }) => {
           />
         ) : null}
         <div 
-          className="event-image-placeholder"
+          className="event-card-img-placeholder"
           style={{ display: imageUrl ? 'none' : 'flex' }}
         >
-          <span>Event Image</span>
+          <span>{formatDate(event.date || event.start_at || event.start_time)}</span>
         </div>
-        <div className="event-date-badge">
-          {formatDate(event.date || event.start_at)}
+        <div className="event-card-badges">
+          <span style={{ background: 'rgba(45, 27, 61, 0.75)', backdropFilter: 'blur(4px)', color: '#fff', padding: '6px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+             {formatDate(event.date || event.start_at || event.start_time)}
+          </span>
         </div>
       </div>
-      <div className="event-card-content">
-        <h3 className="event-card-title">{event.name || event.title || 'Event Name'}</h3>
-        <p className="event-card-description">
-          {event.description || 'Mô tả về sự kiện này...'}
+      
+      <div className="event-card-body">
+        <h3 className="event-card-title-modern">{event.name || event.title || 'Sự kiện chưa có tên'}</h3>
+        <p className="event-card-desc-modern">
+          {event.description || 'Tham gia sự kiện này cùng câu lạc bộ để có những trải nghiệm thật thú vị!'}
         </p>
-        <div className="event-card-footer">
-          <span className="event-location">
+
+        <div className="event-card-info-grid">
+          <div className="info-item-modern">
             <svg
+              className="info-icon"
               width="16"
               height="16"
               viewBox="0 0 16 16"
@@ -88,8 +93,18 @@ const EventCard = ({ event }) => {
                 strokeWidth="1.5"
               />
             </svg>
-            {event.location || 'TBA'}
-          </span>
+            <span className="info-text">{event.location || 'Chưa cập nhật địa điểm'}</span>
+          </div>
+        </div>
+
+        <div className="event-card-footer">
+          <button className="btn-view-modern">
+            Xem chi tiết
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
         </div>
       </div>
     </div>

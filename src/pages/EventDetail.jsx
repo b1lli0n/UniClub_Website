@@ -251,38 +251,6 @@ export default function EventDetailPage() {
                                 <span>Xem lịch trình</span>
                             </button>
 
-                            {isRegistered ? (
-                                <button
-                                    className="btn-danger-premium"
-                                    onClick={handleCancelEvent}
-                                    disabled={registering}
-                                >
-                                    {registering ? (
-                                        <div className="mini-spinner"></div>
-                                    ) : (
-                                        <>
-                                            <XCircle size={18} />
-                                            <span>Hủy đăng ký</span>
-                                        </>
-                                    )}
-                                </button>
-                            ) : (
-                                <button
-                                    className="btn-success-premium"
-                                    onClick={handleRegisterEvent}
-                                    disabled={registering || event.status === 'canceled'}
-                                >
-                                    {registering ? (
-                                        <div className="mini-spinner"></div>
-                                    ) : (
-                                        <>
-                                            <CheckCircle size={18} />
-                                            <span>Đăng ký tham gia</span>
-                                        </>
-                                    )}
-                                </button>
-                            )}
-
                             {isOrganizer && event.status !== 'canceled' && (
                                 <button
                                     className="btn-danger-solid-premium"

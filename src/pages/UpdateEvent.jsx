@@ -246,6 +246,28 @@ function UpdateEventPage() {
         );
     }
 
+    if (event.status === 'canceled') {
+        return (
+            <div className="home-page">
+                <div className="home-overlay" />
+                <div className="myclub-container">
+                    <div className="glass-card update-event-notfound-card">
+                        <div className="update-event-notfound-icon">🚫</div>
+                        <h3 className="update-event-notfound-title">
+                            Sự kiện đã bị hủy
+                        </h3>
+                        <p className="update-event-notfound-text">
+                            Trạng thái hiện tại không cho phép chỉnh sửa thông tin.
+                        </p>
+                        <button className="card-button" onClick={() => navigate(`/events/${eventId}`)}>
+                            ← Quay lại chi tiết
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="create-event-page-wrapper">
             <div className="create-event-container">
@@ -292,6 +314,7 @@ function UpdateEventPage() {
                     updating={updating}
                     onBack={() => navigate(`/events/${eventId}`)}
                     eventTitle={event.title}
+
                 />
 
                 {event.status !== 'canceled' && (

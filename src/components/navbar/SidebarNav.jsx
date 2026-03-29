@@ -110,10 +110,13 @@ export function SidebarNav() {
             </nav>
 
             <div className="sidebar-bottom">
-                <button className="sidebar-button" type="button">
+                <NavLink 
+                    to={isValidClubId(clubId) ? `/clubs/${clubId}/activity-schedule` : '/dashboard'} 
+                    className={({ isActive }) => `sidebar-item${isActive ? ' active' : ''}`}
+                >
                     <Calendar className="sidebar-icon" />
                     <span className="sidebar-label">Lịch</span>
-                </button>
+                </NavLink>
             </div>
         </aside>
     );
