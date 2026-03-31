@@ -141,7 +141,7 @@ const AppRouter = () => {
         <Route path="/clubs/:id/transactions" element={<TransactionList />} />
         <Route path='/clubs/:id/point-rules-management' element={<PointRulesManagement />} />
         <Route path="/clubs/:id/polls" element={<ClubPollManagement />} />
-
+        
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/events/:eventId/attendance" element={<EventAttendanceList />} />
         <Route path="/events" element={<EventsPage />} />

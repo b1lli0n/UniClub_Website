@@ -4,6 +4,7 @@ import {
     Home,
     LayoutGrid,
     Users,
+    Vote,
     Bell,
     Info,
     Calendar,
@@ -15,7 +16,6 @@ import {
     BookMarked,
     CircleStar,
     ScrollText,
-    Vote,
 } from 'lucide-react';
 import '../../styles/SidebarNav.css';
 

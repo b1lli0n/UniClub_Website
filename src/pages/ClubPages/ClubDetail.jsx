@@ -1,15 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { Users, Calendar, Tag, ImageIcon, ArrowRight, Crown, UserCircle2, ShieldCheck, FileBadge2, Wallet, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Calendar, Tag, ImageIcon, ArrowRight, Crown, UserCircle2, ShieldCheck, FileBadge2, Wallet } from 'lucide-react';
 import ClubDetailNav from '../../components/ClubDetailNav';
 import { getClubById, getEventsByClub, requestToJoinClub, leaveClub } from '../../api/clubApi';
 import { getRewards } from '../../api/rewardApi';
 import { getUserClubs } from '../../api/userApi';
-import { listPolls } from '../../api/pollApi';
-import ClubPollStrip from '../../components/ClubPollStrip';
-import PollVoteModal from '../../components/PollVoteModal';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/ClubDetail.css';
 import { ASSET_BASE } from '../../api/api';
@@ -88,13 +85,6 @@ const ClubDetail = () => {
   const [heroImgError, setHeroImgError] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
-  const [pollItems, setPollItems] = useState([]);
-  const [pollLoading, setPollLoading] = useState(false);
-  const [pollSearch, setPollSearch] = useState('');
-  const [pollStatus, setPollStatus] = useState('');
-  const [pollSort, setPollSort] = useState('all');
-  const [pollCarouselIndex, setPollCarouselIndex] = useState(0);
-  const [voteModalPollId, setVoteModalPollId] = useState(null);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -342,48 +332,6 @@ const ClubDetail = () => {
 
     fetchRewards();
   }, [id]);
-
-  const fetchPollsForClub = useCallback(async () => {
-    if (!id || !isMember) return;
-    setPollLoading(true);
-    try {
-      const sortParam = pollSort === 'all' ? undefined : pollSort;
-      const res = await listPolls(id, {
-        status: pollStatus || undefined,
-        sort: sortParam,
-        limit: 100,
-      });
-      if (res?.success) setPollItems(res.items || []);
-      else setPollItems([]);
-    } catch {
-      setPollItems([]);
-    } finally {
-      setPollLoading(false);
-    }
-  }, [id, isMember, pollStatus, pollSort]);
-
-  useEffect(() => {
-    if (!isMember) {
-      setPollItems([]);
-      setVoteModalPollId(null);
-      return;
-    }
-    fetchPollsForClub();
-  }, [isMember, fetchPollsForClub]);
-
-  useEffect(() => {
-    setPollCarouselIndex(0);
-  }, [pollSearch, pollStatus, pollSort, pollItems]);
-
-  const visiblePollItems = useMemo(() => {
-    const q = pollSearch.trim().toLowerCase();
-    if (!q) return pollItems;
-    return pollItems.filter((p) => String(p.title || '').toLowerCase().includes(q));
-  }, [pollItems, pollSearch]);
-
-  const pollMaxIdx = Math.max(0, visiblePollItems.length - 1);
-  const pollSafeIdx = Math.min(pollCarouselIndex, pollMaxIdx);
-  const currentPoll = visiblePollItems.length ? visiblePollItems[pollSafeIdx] : null;
 
   // Chuẩn hoá dữ liệu thư viện ảnh từ BE
   // Hỗ trợ cả:
@@ -663,91 +611,6 @@ const ClubDetail = () => {
                 </section>
               </div>
 
-              {isMember && (
-                <div className="clubdetail-cell clubdetail-cell-polls">
-                  <section className="clubdetail-polls-section">
-                    <header className="clubdetail-polls-head">
-                      <div>
-                        <h2 className="clubdetail-polls-title">Bình chọn</h2>
-                        <p className="clubdetail-polls-sub">Bảng vote trong câu lạc bộ</p>
-                      </div>
-                    </header>
-                    <div className="clubdetail-polls-toolbar">
-                      <label className="clubdetail-polls-field">
-                        <span>Tìm tiêu đề</span>
-                        <input
-                          type="search"
-                          className="clubdetail-polls-input"
-                          placeholder="Từ khóa..."
-                          value={pollSearch}
-                          onChange={(e) => setPollSearch(e.target.value)}
-                        />
-                      </label>
-                      <label className="clubdetail-polls-field">
-                        <span>Trạng thái</span>
-                        <select
-                          className="clubdetail-polls-select"
-                          value={pollStatus}
-                          onChange={(e) => setPollStatus(e.target.value)}
-                        >
-                          <option value="">Tất cả</option>
-                          <option value="open">Đang mở</option>
-                          <option value="closed">Đã đóng</option>
-                        </select>
-                      </label>
-                      <label className="clubdetail-polls-field">
-                        <span>Sắp xếp</span>
-                        <select
-                          className="clubdetail-polls-select"
-                          value={pollSort}
-                          onChange={(e) => setPollSort(e.target.value)}
-                        >
-                          <option value="all">Tất cả</option>
-                          <option value="newest">Mới nhất</option>
-                          <option value="ending_soon">Sắp kết thúc</option>
-                        </select>
-                      </label>
-                    </div>
-                    {pollLoading ? (
-                      <p className="clubdetail-polls-empty">Đang tải...</p>
-                    ) : visiblePollItems.length === 0 ? (
-                      <p className="clubdetail-polls-empty">Không có bảng vote phù hợp.</p>
-                    ) : (
-                      <div className="clubdetail-polls-carousel">
-                        <button
-                          type="button"
-                          className="clubdetail-polls-nav"
-                          aria-label="Trước"
-                          disabled={pollSafeIdx <= 0}
-                          onClick={() => setPollCarouselIndex((i) => Math.max(0, i - 1))}
-                        >
-                          <ChevronLeft size={22} strokeWidth={2.25} />
-                        </button>
-                        <div className="clubdetail-polls-strip-wrap">
-                          <ClubPollStrip
-                            poll={currentPoll}
-                            onOpenModal={() => currentPoll && setVoteModalPollId(currentPoll._id)}
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          className="clubdetail-polls-nav"
-                          aria-label="Sau"
-                          disabled={pollSafeIdx >= pollMaxIdx}
-                          onClick={() =>
-                            setPollCarouselIndex((i) =>
-                              Math.min(visiblePollItems.length - 1, i + 1)
-                            )
-                          }
-                        >
-                          <ChevronRight size={22} strokeWidth={2.25} />
-                        </button>
-                      </div>
-                    )}
-                  </section>
-                </div>
-              )}
-
               <div className="clubdetail-cell clubdetail-cell-admin">
                 <div className="clubdetail-card clubdetail-card--members clubdetail-card--dash">
                   <h2 className="clubdetail-section-title clubdetail-section-title--in-card">Thành viên</h2>
@@ -849,15 +712,6 @@ const ClubDetail = () => {
 
             {showFloatingNav !== false && (
               <ClubDetailNav clubName={club?.name} isMember={isMember} />
-            )}
-
-            {voteModalPollId && id && (
-              <PollVoteModal
-                clubId={id}
-                pollId={voteModalPollId}
-                onClose={() => setVoteModalPollId(null)}
-                onVoteSuccess={fetchPollsForClub}
-              />
             )}
           </>
         )}
