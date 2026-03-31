@@ -31,6 +31,7 @@ import CreateClub from '../pages/ClubPages/CreateClub'
 import ClubTransactions from '../pages/ClubPages/ClubTransactions'
 import TransactionList from '../pages/TransactionList'
 import PointRulesManagement from '../pages/PointRulesManagement'
+import ClubPollManagement from '../pages/ClubPages/ClubPollManagement'
 import Event from '../pages/EventPages/EventInClub'
 import EventPublic from '../pages/EventPages/EventPublic'
 import MyEvent from '../pages/EventPages/MyEvent';
@@ -139,7 +140,8 @@ const AppRouter = () => {
         <Route path="/clubs/:id/members" element={<ClubMemberManagement />} />
         <Route path="/clubs/:id/transactions" element={<TransactionList />} />
         <Route path='/clubs/:id/point-rules-management' element={<PointRulesManagement />} />
-        
+        <Route path="/clubs/:id/polls" element={<ClubPollManagement />} />
+
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/events/:eventId/attendance" element={<EventAttendanceList />} />
         <Route path="/events" element={<EventsPage />} />

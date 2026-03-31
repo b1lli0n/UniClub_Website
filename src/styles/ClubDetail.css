@@ -1534,3 +1534,116 @@ body.clubdetail-body #root {
     font-size: 0.8rem;
   }
 }
+
+/* Bình chọn (thành viên) */
+.clubdetail-cell-polls {
+  grid-column: 1 / -1;
+}
+
+.clubdetail-polls-section {
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border-radius: var(--cd-radius);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 175, 204, 0.35);
+  box-shadow: var(--cd-shadow);
+}
+
+.clubdetail-polls-head {
+  margin-bottom: 1rem;
+}
+
+.clubdetail-polls-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: var(--cd-ink);
+}
+
+.clubdetail-polls-sub {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--cd-muted);
+}
+
+.clubdetail-polls-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  align-items: flex-end;
+}
+
+.clubdetail-polls-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 140px;
+  flex: 1;
+}
+
+.clubdetail-polls-field span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.clubdetail-polls-input,
+.clubdetail-polls-select {
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(205, 180, 219, 0.55);
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.clubdetail-polls-empty {
+  text-align: center;
+  color: var(--cd-muted);
+  margin: 0;
+  padding: 1.25rem 0.5rem;
+}
+
+.clubdetail-polls-carousel {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.clubdetail-polls-strip-wrap {
+  min-width: 0;
+}
+
+.clubdetail-polls-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(205, 180, 219, 0.45);
+  background: rgba(255, 255, 255, 0.85);
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.clubdetail-polls-nav:hover:not(:disabled) {
+  border-color: rgba(255, 143, 171, 0.65);
+  background: rgba(255, 248, 252, 0.95);
+}
+
+.clubdetail-polls-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .clubdetail-polls-carousel {
+    grid-template-columns: 1fr;
+  }
+
+  .clubdetail-polls-nav {
+    width: 100%;
+    height: 40px;
+  }
+}
