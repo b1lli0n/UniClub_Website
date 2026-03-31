@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import SendClubInvitation from '../components/SendClubInvitation';
+import { useAuth } from '../context/AuthContext';
 import { useParams } from 'react-router-dom';
 import { getJoinRequests } from '../api/clubApi';
 import '../styles/Memberships.css';
@@ -9,6 +11,7 @@ function Memberships() {
     const [error, setError] = useState('');
     const { id } = useParams();
     const clubId = id;
+    const { user, userRole } = useAuth();
 
     useEffect(() => {
         const loadMemberships = async () => {
@@ -182,6 +185,12 @@ function Memberships() {
                 <header className="myclub-header">
                     <h1 className="myclub-title">Yêu cầu tham gia</h1>
                 </header>
+                {/* Chỉ thư ký mới thấy form mời thành viên */}
+                {userRole === 3 && (
+                    <div style={{ marginBottom: 24 }}>
+                        <SendClubInvitation clubId={clubId} />
+                    </div>
+                )}
 
                 {memberships.length > 0 ? (
                     <div className="memberships-list">
