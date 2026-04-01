@@ -1,166 +1,577 @@
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import { listPolls, closePoll } from '../../api/pollApi';
+import { Container } from 'react-bootstrap';
+import { PlusCircle, X } from 'lucide-react';
+import { closePoll, createPoll, getPollDetail, listPolls, updatePoll } from '../../api/pollApi';
+import { getClubById } from '../../api/clubApi';
+import PollVoteModal from '../../components/PollVoteModal';
 import PollList from '../../components/poll/PollList';
 import PollDetail from '../../components/poll/PollDetail';
-import PollFormModal from '../../components/poll/PollFormModal';
 import '../../styles/ClubPollManagement.css';
 
-export default function ClubPollManagement() {
+const createInitialForm = () => ({
+  title: '',
+  options: ['', ''],
+  type: '0',
+  start_date: '',
+  end_date: '',
+  min_points_required: '',
+  allow_change_vote: false,
+});
+
+const toIso = (localValue) => {
+  if (!localValue) return null;
+  const d = new Date(localValue);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString();
+};
+
+const formatDate = (input) => {
+  if (!input) return '—';
+  const d = new Date(input);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const toLocalInput = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+const formFromDetail = (d) => {
+  const p = d?.poll;
+  const rawOpts = (d?.options || []).map((o) => String(o?.label ?? '').trim()).filter(Boolean);
+  const opts = rawOpts.length >= 2 ? rawOpts : ['', ''];
+  return {
+    title: p?.title ?? '',
+    options: opts,
+    type: String(p?.type ?? '0'),
+    start_date: toLocalInput(p?.start_date),
+    end_date: toLocalInput(p?.end_date),
+    min_points_required: p?.min_points_required != null && p?.min_points_required !== '' ? String(p.min_points_required) : '',
+    allow_change_vote: !!p?.allow_change_vote,
+  };
+};
+
+const normalizeFormForCompare = (f) => ({
+  title: String(f?.title ?? '').trim(),
+  options: Array.isArray(f?.options) ? f.options.map((x) => String(x ?? '').trim()) : [],
+  type: String(f?.type ?? '0'),
+  start_date: String(f?.start_date ?? ''),
+  end_date: String(f?.end_date ?? ''),
+  min_points_required: f?.min_points_required === '' ? '' : String(f?.min_points_required ?? '').trim(),
+  allow_change_vote: !!f?.allow_change_vote,
+});
+
+const hasFormChanged = (current, initial) => {
+  if (!initial) return false;
+  return JSON.stringify(normalizeFormForCompare(current)) !== JSON.stringify(normalizeFormForCompare(initial));
+};
+
+const ClubPollManagement = () => {
   const { id: clubId } = useParams();
-  const clubRole = Number(localStorage.getItem('clubRole'));
-  const isLeader = clubRole === 1;
 
-  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [sortKey, setSortKey] = useState('all');
-
-  const [selectedPollId, setSelectedPollId] = useState(null);
-  const [refreshNonce, setRefreshNonce] = useState(0);
-
+  const [creating, setCreating] = useState(false);
+  const [polls, setPolls] = useState([]);
+  const [selectedPollId, setSelectedPollId] = useState('');
+  const [modalPollId, setModalPollId] = useState('');
+  const [status, setStatus] = useState('');
+  const [sort, setSort] = useState('newest');
+  const [searchText, setSearchText] = useState('');
+  const [form, setForm] = useState(createInitialForm);
+  const [isLeader, setIsLeader] = useState(false);
+  const [userPoints, setUserPoints] = useState(null);
+  const [detail, setDetail] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [editDetail, setEditDetail] = useState(null);
+  const [editingPollId, setEditingPollId] = useState('');
+  const [editInitialForm, setEditInitialForm] = useState(null);
+  const [closingPoll, setClosingPoll] = useState(false);
 
-  const fetchList = useCallback(async () => {
+  const loadPolls = async () => {
     if (!clubId) return;
     setLoading(true);
     try {
-      const sortParam = sortKey === 'all' ? undefined : sortKey;
       const res = await listPolls(clubId, {
-        status: statusFilter || undefined,
-        sort: sortParam,
-        limit: 100,
+        status,
+        sort: sort || undefined,
+        page: 1,
+        limit: 30,
       });
-      if (res?.success) setItems(res.items || []);
-      else setItems([]);
+      if (res?.success) {
+        const items = Array.isArray(res.items) ? res.items : [];
+        setPolls(items);
+        if (selectedPollId && !items.some((x) => String(x._id) === String(selectedPollId))) {
+          setSelectedPollId('');
+        }
+      } else {
+        setPolls([]);
+        toast.error(res?.message || 'Không tải được danh sách poll');
+      }
     } catch (e) {
-      toast.error(e.message || 'Không tải được danh sách');
-      setItems([]);
+      setPolls([]);
+      if (e?.response?.status === 403) {
+        toast.error('Bạn không phải thành viên CLB này');
+      } else {
+        toast.error(e?.message || 'Không tải được danh sách poll');
+      }
     } finally {
       setLoading(false);
     }
-  }, [clubId, statusFilter, sortKey]);
+  };
 
   useEffect(() => {
-    fetchList();
-  }, [fetchList]);
+    loadPolls();
+  }, [clubId, status, sort]);
 
-  const bump = () => setRefreshNonce((n) => n + 1);
+  useEffect(() => {
+    const loadRole = async () => {
+      if (!clubId) return;
+      try {
+        const res = await getClubById(clubId);
+        const club = res?.data || {};
+        const role = club?.membershipRole ?? club?.my_role ?? club?.role;
+        const roleNum = Number(role);
+        const roleFromStorage = Number(localStorage.getItem('clubRole'));
+        const canCreateByRole = roleNum === 1 || roleNum === 2;
+        const canCreateByStorage = roleFromStorage === 1 || roleFromStorage === 2;
+        setIsLeader(canCreateByRole || canCreateByStorage);
+        const scoreRaw = club?.my_points ?? club?.points ?? club?.member_points;
+        if (scoreRaw != null && !Number.isNaN(Number(scoreRaw))) {
+          setUserPoints(Number(scoreRaw));
+        }
+      } catch {
+        const roleFromStorage = Number(localStorage.getItem('clubRole'));
+        setIsLeader(roleFromStorage === 1 || roleFromStorage === 2);
+      }
+    };
+    loadRole();
+  }, [clubId]);
 
-  const handleClosePoll = () => {
-    if (!clubId || !selectedPollId) return;
+  const loadDetail = useCallback(async () => {
+    if (!clubId || !selectedPollId) {
+      setDetail(null);
+      return;
+    }
+    setLoadingDetail(true);
+    try {
+      const res = await getPollDetail(clubId, selectedPollId);
+      if (res?.success && res?.data) {
+        setDetail(res.data);
+      } else {
+        setDetail(null);
+      }
+    } catch {
+      setDetail(null);
+    } finally {
+      setLoadingDetail(false);
+    }
+  }, [clubId, selectedPollId]);
+
+  useEffect(() => {
+    loadDetail();
+  }, [loadDetail]);
+
+  const options = form.options;
+
+  const canCreate = useMemo(() => isLeader, [isLeader]);
+  const filteredPolls = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return polls;
+    return polls.filter((p) => String(p?.title || '').toLowerCase().includes(q));
+  }, [polls, searchText]);
+
+  const closeCreateModal = () => {
+    setCreateOpen(false);
+    setEditingPollId('');
+    setEditInitialForm(null);
+    setForm(createInitialForm());
+  };
+
+  const handleOpenEdit = () => {
+    if (!canCreate || !detail) return;
+    const editForm = formFromDetail(detail);
+    setForm(editForm);
+    setEditInitialForm(editForm);
+    setEditingPollId(String(selectedPollId));
+    setCreateOpen(true);
+  };
+
+  const handleClosePollRequest = () => {
+    if (!canCreate || !clubId || !selectedPollId || closingPoll) return;
     confirmAlert({
+      overlayClassName: 'club-pm-confirm-overlay',
       customUI: ({ onClose }) => (
-        <div className="poll-pm-confirm-overlay" onClick={onClose} role="presentation">
-          <div className="poll-pm-confirm-card" onClick={(e) => e.stopPropagation()}>
-            <h4 className="poll-pm-confirm-title">Đóng bình chọn?</h4>
-            <p className="poll-pm-confirm-text">Thành viên sẽ không còn bỏ phiếu sau khi đóng.</p>
-            <div className="poll-pm-confirm-actions">
-              <button type="button" className="poll-pm-btn poll-pm-btn--soft" onClick={onClose}>
-                Hủy
-              </button>
-              <button
-                type="button"
-                className="poll-pm-btn poll-pm-btn--gradient poll-pm-btn--confirm"
-                onClick={async () => {
-                  try {
-                    await closePoll(clubId, selectedPollId);
-                    toast.success('Đã đóng bình chọn');
-                    onClose();
-                    bump();
-                    await fetchList();
-                  } catch (e) {
-                    toast.error(e.message || 'Không đóng được');
+        <div className="club-pm-confirm-card" role="dialog" aria-modal="true" aria-label="Đóng bình chọn">
+          <h1>Đóng bình chọn</h1>
+          <p>Bạn có chắc muốn đóng bảng bình chọn này? Thành viên sẽ không thể bình chọn thêm.</p>
+          <div className="react-confirm-alert-button-group">
+            <button
+              type="button"
+              className="club-pm-confirm-btn club-pm-confirm-btn--ghost"
+              onClick={onClose}
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              className="club-pm-confirm-btn club-pm-confirm-btn--danger"
+              onClick={async () => {
+                onClose();
+                setClosingPoll(true);
+                try {
+                  const res = await closePoll(clubId, selectedPollId);
+                  if (res?.success) {
+                    toast.success(res?.message || 'Đã đóng bảng bình chọn');
+                    await loadPolls();
+                    await loadDetail();
+                  } else {
+                    toast.error(res?.message || 'Không thể đóng bảng bình chọn');
                   }
-                }}
-              >
-                Xác nhận đóng
-              </button>
-            </div>
+                } catch (err) {
+                  toast.error(err?.response?.data?.message || err?.message || 'Không thể đóng bảng bình chọn');
+                } finally {
+                  setClosingPoll(false);
+                }
+              }}
+            >
+              Đóng bình chọn
+            </button>
           </div>
         </div>
       ),
-      closeOnClickOutside: true,
     });
   };
 
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    if (!canCreate) return;
+
+    const title = form.title.trim();
+    const cleanOptions = form.options.map((s) => s.trim()).filter(Boolean);
+    const unique = new Set(cleanOptions.map((s) => s.toLowerCase()));
+    const startIso = toIso(form.start_date);
+    const endIso = toIso(form.end_date);
+
+    if (!title) {
+      toast.error('Tiêu đề poll không được để trống');
+      return;
+    }
+    if (cleanOptions.length < 2) {
+      toast.error('Cần ít nhất 2 lựa chọn');
+      return;
+    }
+    if (unique.size !== cleanOptions.length) {
+      toast.error('Các lựa chọn không được trùng nhau');
+      return;
+    }
+    if (!startIso || !endIso) {
+      toast.error('Ngày bắt đầu/kết thúc không hợp lệ');
+      return;
+    }
+    if (new Date(endIso).getTime() <= new Date(startIso).getTime()) {
+      toast.error('Ngày kết thúc phải sau ngày bắt đầu');
+      return;
+    }
+    if (new Date(endIso).getTime() < Date.now()) {
+      toast.error('Không thể đặt ngày kết thúc trong quá khứ');
+      return;
+    }
+
+    const isEditing = !!editingPollId;
+    const editHasVotes =
+      isEditing &&
+      ((Number(detail?.total_votes) || 0) > 0 || (detail?.options || []).some((opt) => (Number(opt?.votes) || 0) > 0));
+    const formChanged = !isEditing || hasFormChanged(form, editInitialForm);
+
+    if (isEditing && !formChanged) {
+      toast.info('Chưa có thay đổi để lưu');
+      return;
+    }
+
+    let payload = {
+      title,
+      options: cleanOptions,
+      type: Number(form.type),
+      start_date: startIso,
+      end_date: endIso,
+      allow_change_vote: !!form.allow_change_vote,
+    };
+    if (form.min_points_required !== '') {
+      payload.min_points_required = Number(form.min_points_required);
+    }
+    if (editHasVotes) {
+      payload = {
+        end_date: endIso,
+      };
+    }
+
+    setCreating(true);
+    try {
+      if (editingPollId) {
+        const res = await updatePoll(clubId, editingPollId, payload);
+        if (res?.success) {
+          toast.success(res?.message || 'Cập nhật poll thành công');
+          closeCreateModal();
+          await loadPolls();
+          await loadDetail();
+        } else {
+          toast.error(res?.message || 'Không thể cập nhật poll');
+        }
+      } else {
+        const res = await createPoll(clubId, payload);
+        if (res?.success) {
+          toast.success(res?.message || 'Tạo poll thành công');
+          closeCreateModal();
+          await loadPolls();
+        } else {
+          toast.error(res?.message || 'Không thể tạo poll');
+        }
+      }
+    } catch (e2) {
+      toast.error(e2?.response?.data?.message || e2?.message || (editingPollId ? 'Không thể cập nhật poll' : 'Không thể tạo poll'));
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
-    <div className="poll-pm-page">
-      <h1 className="poll-pm-page-title">Quản lý bình chọn</h1>
+    <div className="club-pm-page">
+      <Container className="club-pm-container">
+        <div className="club-pm-header-card">
+          <div>
+            <h1>Quản lí bình chọn</h1>
+            <p>Danh sách, chi tiết và kết quả bình chọn của câu lạc bộ.</p>
+          </div>
+          {canCreate ? (
+            <button
+              type="button"
+              className="club-pm-create-btn club-pm-create-btn--gradient"
+              onClick={() => {
+                setEditingPollId('');
+                setEditInitialForm(null);
+                setForm(createInitialForm());
+                setCreateOpen(true);
+              }}
+            >
+              <PlusCircle size={16} /> Tạo bình chọn
+            </button>
+          ) : null}
+        </div>
 
-      <div className="poll-pm-page-actions">
-        {isLeader && (
-          <button type="button" className="poll-pm-btn poll-pm-btn--gradient" onClick={() => setCreateOpen(true)}>
-            + Tạo mới
-          </button>
-        )}
-      </div>
-
-      <div className="poll-pm-layout">
-        <div className="poll-pm-col poll-pm-col--list">
+        <div className="club-pm-split">
           <PollList
-            items={items}
+            searchText={searchText}
+            onSearchChange={setSearchText}
+            status={status}
+            onStatusChange={setStatus}
+            sort={sort}
+            onSortChange={setSort}
             loading={loading}
-            search={search}
-            onSearchChange={setSearch}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            sortKey={sortKey}
-            onSortChange={setSortKey}
+            filteredPolls={filteredPolls}
             selectedPollId={selectedPollId}
-            onSelectPoll={(pid) => setSelectedPollId(pid)}
+            onSelectPoll={setSelectedPollId}
+            formatDate={formatDate}
           />
-        </div>
-        <div className="poll-pm-col poll-pm-col--detail">
           <PollDetail
-            clubId={clubId}
-            pollId={selectedPollId}
-            refreshNonce={refreshNonce}
-            isLeader={isLeader}
-            onRefreshList={fetchList}
-            onRequestEdit={(d) => {
-              setEditDetail(d);
-              setEditOpen(true);
-            }}
-            onRequestClose={handleClosePoll}
+            loadingDetail={loadingDetail}
+            detail={detail}
+            selectedPollId={selectedPollId}
+            onOpenVote={setModalPollId}
+            canManage={canCreate}
+            onEditPoll={handleOpenEdit}
+            onClosePoll={handleClosePollRequest}
+            closingPoll={closingPoll}
           />
         </div>
-      </div>
+      </Container>
 
-      {createOpen && (
-        <PollFormModal
-          mode="create"
-          clubId={clubId}
-          onClose={() => setCreateOpen(false)}
-          onSuccess={() => {
-            fetchList();
-            bump();
-          }}
-        />
-      )}
-      {editOpen && editDetail && (
-        <PollFormModal
-          mode="edit"
-          clubId={clubId}
-          initialDetail={editDetail}
-          onClose={() => {
-            setEditOpen(false);
-            setEditDetail(null);
-          }}
-          onSuccess={() => {
-            fetchList();
-            bump();
-            setEditOpen(false);
-            setEditDetail(null);
-          }}
-        />
-      )}
+      {createOpen ? (
+        <div className="club-pm-create-overlay" role="presentation" onClick={closeCreateModal}>
+          <div
+            className="club-pm-create-modal club-pm-create-modal--dark"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="club-pm-create-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {(() => {
+              const isEditing = !!editingPollId;
+              const editHasVotes =
+                isEditing &&
+                ((Number(detail?.total_votes) || 0) > 0 || (detail?.options || []).some((opt) => (Number(opt?.votes) || 0) > 0));
+              const lockForVotedPoll = isEditing && editHasVotes;
+              const canSubmit = !creating && (!isEditing || hasFormChanged(form, editInitialForm));
+              return (
+            <form className="club-pm-create-form club-pm-create-form--split" onSubmit={handleCreate}>
+              <div className="club-pm-create-modal-top">
+                <span className="club-pm-create-label" id="club-pm-create-title">{editingPollId ? 'Chỉnh sửa' : 'Tạo mới'}</span>
+                <button type="button" className="club-pm-create-close" onClick={closeCreateModal} aria-label="Đóng">
+                  <X size={20} strokeWidth={2.2} />
+                </button>
+              </div>
+
+              <div className="club-pm-create-split">
+                <aside className="club-pm-create-settings">
+                  <p className="club-pm-create-settings-title">Cài đặt</p>
+                  <label className="club-pm-dark-field">
+                    <span>Loại poll</span>
+                    <select
+                      value={form.type}
+                      onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value }))}
+                      disabled={lockForVotedPoll}
+                    >
+                      <option value="0">Chọn một (single)</option>
+                      <option value="1">Chọn nhiều (multiple)</option>
+                    </select>
+                  </label>
+                  <label className="club-pm-dark-field">
+                    <span>Bắt đầu</span>
+                    <input
+                      type="datetime-local"
+                      value={form.start_date}
+                      onChange={(e) => setForm((prev) => ({ ...prev, start_date: e.target.value }))}
+                      disabled={lockForVotedPoll}
+                    />
+                  </label>
+                  <label className="club-pm-dark-field">
+                    <span>Kết thúc</span>
+                    <input
+                      type="datetime-local"
+                      value={form.end_date}
+                      onChange={(e) => setForm((prev) => ({ ...prev, end_date: e.target.value }))}
+                    />
+                  </label>
+                  <label className="club-pm-dark-field">
+                    <span>Điểm tối thiểu (tùy chọn)</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.min_points_required}
+                      onChange={(e) => setForm((prev) => ({ ...prev, min_points_required: e.target.value }))}
+                      placeholder="Không giới hạn"
+                      disabled={lockForVotedPoll}
+                    />
+                  </label>
+                  <label className="club-pm-dark-check">
+                    <input
+                      type="checkbox"
+                      checked={form.allow_change_vote}
+                      onChange={(e) => setForm((prev) => ({ ...prev, allow_change_vote: e.target.checked }))}
+                      disabled={lockForVotedPoll}
+                    />
+                    <span>Cho phép đổi lựa chọn sau khi vote</span>
+                  </label>
+                  {lockForVotedPoll ? (
+                    <p className="club-pm-create-settings-title">Poll đã có lượt vote, chỉ được chỉnh ngày kết thúc.</p>
+                  ) : null}
+                </aside>
+
+                <div className="club-pm-create-poll">
+                  <label className="club-pm-dark-question">
+                    <span className="club-pm-visually-hidden">Tiêu đề poll</span>
+                    <input
+                      value={form.title}
+                      onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                      placeholder="Bạn đang nghĩ điều gì?..."
+                      className="club-pm-dark-title-input"
+                      autoComplete="off"
+                      disabled={lockForVotedPoll}
+                    />
+                  </label>
+
+                  <div className="club-pm-dark-options">
+                    {options.map((opt, idx) => (
+                      <div key={idx} className="club-pm-dark-opt-row">
+                        <span className="club-pm-dark-opt-num" aria-hidden>
+                          {idx + 1}.
+                        </span>
+                        <input
+                          value={opt}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              options: prev.options.map((x, i) => (i === idx ? e.target.value : x)),
+                            }))
+                          }
+                          placeholder={idx === options.length - 1 ? 'Còn gì nữa?...' : `Lựa chọn ${idx + 1}`}
+                          className="club-pm-dark-opt-input"
+                          disabled={lockForVotedPoll}
+                        />
+                        {options.length > 2 ? (
+                          <button
+                            type="button"
+                            className="club-pm-dark-opt-remove"
+                            onClick={() =>
+                              setForm((prev) => ({
+                                ...prev,
+                                options: prev.options.filter((_, i) => i !== idx),
+                              }))
+                            }
+                            aria-label={`Xóa lựa chọn ${idx + 1}`}
+                            disabled={lockForVotedPoll}
+                          >
+                            <X size={16} strokeWidth={2.5} />
+                          </button>
+                        ) : (
+                          <span className="club-pm-dark-opt-spacer" aria-hidden />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="club-pm-dark-add-opt"
+                    onClick={() => setForm((prev) => ({ ...prev, options: [...prev.options, ''] }))}
+                  disabled={lockForVotedPoll}
+                  >
+                    + Thêm lựa chọn
+                  </button>
+                </div>
+              </div>
+
+              <div className="club-pm-create-actions club-pm-create-actions--dark">
+                <button type="button" className="club-pm-cancel-btn club-pm-cancel-btn--dark" onClick={closeCreateModal}>
+                  Hủy
+                </button>
+                <button type="submit" className="club-pm-create-submit-magenta" disabled={!canSubmit}>
+                  {creating ? (editingPollId ? 'Đang lưu...' : 'Đang tạo...') : editingPollId ? 'Lưu' : 'Tạo'}
+                </button>
+              </div>
+            </form>
+              );
+            })()}
+          </div>
+        </div>
+      ) : null}
+
+      <PollVoteModal
+        open={!!modalPollId}
+        clubId={clubId}
+        pollId={modalPollId}
+        onClose={() => setModalPollId('')}
+        onUpdated={() => {
+          loadPolls();
+          loadDetail();
+        }}
+        userPoints={userPoints}
+      />
     </div>
   );
-}
+};
+
+export default ClubPollManagement;

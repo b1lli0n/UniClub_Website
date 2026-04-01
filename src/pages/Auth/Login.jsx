@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Sparkles, Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { login as loginService } from '../../api/authApi';
+import { login as loginService, resendOtp } from '../../api/authApi';
 import { useAuth } from '../../context/AuthContext';
 import logoUniclub from '../../assets/logo-uniclub.png';
 import '../../styles/Login.css';
@@ -43,15 +43,55 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await loginService({ email: trimmedEmail, password });
-      if (response.success) {
-        login(response.data.user);
+      if (response.success && response.data) {
+        const data = response.data;
+        const needOtp =
+          data.needVerify === true || (data.user && data.user.isVerified === false);
+        if (needOtp) {
+          toast.info(response.message || 'Vui lòng xác thực email để tiếp tục.');
+          navigate('/verify-otp', {
+            state: { email: trimmedEmail, resendCooldownSeconds: 60 },
+          });
+          return;
+        }
+        if (data.user) {
+          login(data.user);
+        }
         toast.success(response.message || 'Đăng nhập thành công!');
         navigate('/');
       } else {
         toast.error(response.message || 'Đăng nhập thất bại');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || 'Đăng nhập thất bại');
+      const backend = error?.response?.data ?? error;
+      const msg = String(backend?.message || error?.message || '');
+      const code = backend?.code || backend?.errorCode;
+      const looksUnverified =
+        code === 'EMAIL_NOT_VERIFIED' ||
+        code === 'ACCOUNT_NOT_VERIFIED' ||
+        /chưa\s*xác\s*thực|chưa\s*verify|not\s*verified|unverified|xác\s*thực\s*email/i.test(
+          msg
+        );
+      if (looksUnverified) {
+        try {
+          const res = await resendOtp(trimmedEmail);
+          if (res?.success) {
+            toast.success(res.message || 'Đã gửi mã OTP đến email của bạn.');
+          } else {
+            toast.info(msg || 'Chuyển đến trang nhập mã xác thực.');
+          }
+        } catch {
+          toast.info(msg || 'Chuyển đến trang nhập mã xác thực.');
+        }
+        navigate('/verify-otp', {
+          state: {
+            email: trimmedEmail,
+            resendCooldownSeconds: 60,
+          },
+        });
+        return;
+      }
+      toast.error(backend?.message || error?.message || 'Đăng nhập thất bại');
     } finally {
       setLoading(false);
     }

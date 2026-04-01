@@ -634,35 +634,9 @@ body.clubdetail-body #root {
   box-shadow: 0 8px 20px rgba(17, 24, 39, 0.2);
 }
 
-.clubdetail-join-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.clubdetail-join-btn--inactive {
-  background: #9ca3af !important;
-  color: #111827 !important;
-  box-shadow: none !important;
-}
-
 .clubdetail-join-btn.is-joined {
   background: #10b981;
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
-}
-
-.clubdetail-join-hint {
-  margin: 0.75rem 0 0;
-  padding: 0.55rem 0.9rem;
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 0.95rem;
-  background: rgba(15, 23, 42, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .clubdetail-desc-text {
@@ -1535,115 +1509,211 @@ body.clubdetail-body #root {
   }
 }
 
-/* Bình chọn (thành viên) */
 .clubdetail-cell-polls {
   grid-column: 1 / -1;
+  margin-top: -6px;
 }
 
-.clubdetail-polls-section {
-  padding: clamp(1.25rem, 3vw, 1.75rem);
-  border-radius: var(--cd-radius);
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(255, 175, 204, 0.35);
-  box-shadow: var(--cd-shadow);
+.clubdetail-polls-bottom {
+  margin-top: 18px;
 }
 
-.clubdetail-polls-head {
-  margin-bottom: 1rem;
+.clubdetail-card--poll-list {
+  padding: 1.1rem;
 }
 
-.clubdetail-polls-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  margin: 0 0 0.25rem;
-  color: var(--cd-ink);
-}
-
-.clubdetail-polls-sub {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--cd-muted);
-}
-
-.clubdetail-polls-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-bottom: 1rem;
-  align-items: flex-end;
-}
-
-.clubdetail-polls-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 140px;
-  flex: 1;
-}
-
-.clubdetail-polls-field span {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #475569;
-}
-
-.clubdetail-polls-input,
-.clubdetail-polls-select {
-  padding: 0.45rem 0.6rem;
-  border-radius: 10px;
-  border: 1px solid rgba(205, 180, 219, 0.55);
-  font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.clubdetail-polls-empty {
-  text-align: center;
-  color: var(--cd-muted);
-  margin: 0;
-  padding: 1.25rem 0.5rem;
-}
-
-.clubdetail-polls-carousel {
+.clubdetail-poll-toolbar {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 0.75rem;
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1.9fr) 170px 150px;
+  gap: 10px;
+  width: min(900px, 88%);
+  margin: 0 auto 12px;
 }
 
-.clubdetail-polls-strip-wrap {
-  min-width: 0;
+.clubdetail-poll-search,
+.clubdetail-poll-select {
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f2937;
+  font-size: 0.78rem;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.clubdetail-polls-nav {
+.clubdetail-poll-search::placeholder {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.clubdetail-poll-search:focus,
+.clubdetail-poll-select:focus {
+  border-color: rgba(255, 139, 170, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 139, 170, 0.16);
+}
+
+.clubdetail-poll-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ff8baa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 30px;
+  cursor: pointer;
+}
+
+.clubdetail-poll-focus-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  border-radius: 12px;
-  border: 1px solid rgba(205, 180, 219, 0.45);
+  gap: 12px;
+}
+
+.clubdetail-poll-empty-note {
+  width: min(900px, 88%);
+  margin: 0 auto;
+  border: 1px dashed rgba(255, 139, 170, 0.45);
   background: rgba(255, 255, 255, 0.85);
+  color: #6b7280;
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.clubdetail-poll-focus-card {
+  width: min(900px, 88%);
+}
+
+.clubdetail-poll-nav {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid #e7ebf0;
+  background: rgba(255, 255, 255, 0.95);
   color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  transition: all 0.2s ease;
 }
 
-.clubdetail-polls-nav:hover:not(:disabled) {
-  border-color: rgba(255, 143, 171, 0.65);
-  background: rgba(255, 248, 252, 0.95);
+.clubdetail-poll-nav:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(255, 112, 81, 0.42);
+  color: #ff7051;
 }
 
-.clubdetail-polls-nav:disabled {
-  opacity: 0.35;
+.clubdetail-poll-nav:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-@media (max-width: 600px) {
-  .clubdetail-polls-carousel {
-    grid-template-columns: 1fr;
+.clubdetail-polls-bottom .club-poll-strip {
+  transform: scale(1);
+  transform-origin: center;
+}
+
+.clubdetail-polls-bottom-list {
+  display: none;
+}
+
+.clubdetail-polls-bottom-item {
+  display: none;
+}
+
+.clubdetail-polls-bottom-title {
+  display: none;
+}
+
+.clubdetail-polls-bottom-meta {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .clubdetail-poll-toolbar {
+    grid-template-columns: minmax(0, 1.4fr) 160px 140px;
+    width: min(780px, 92%);
   }
 
-  .clubdetail-polls-nav {
-    width: 100%;
-    height: 40px;
+  .clubdetail-poll-focus-wrap {
+    gap: 8px;
   }
+
+  .clubdetail-poll-focus-card {
+    width: min(780px, 92%);
+  }
+
+  .clubdetail-poll-empty-note {
+    width: min(780px, 92%);
+  }
+  .clubdetail-poll-nav {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (max-width: 620px) {
+  .clubdetail-poll-toolbar {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .clubdetail-poll-empty-note {
+    width: 100%;
+  }
+
+  .clubdetail-poll-focus-wrap {
+    display: grid;
+    grid-template-columns: 34px 1fr 34px;
+    align-items: center;
+  }
+  .clubdetail-poll-focus-card {
+    width: 100%;
+  }
+  .clubdetail-polls-bottom .club-poll-strip {
+    transform: none;
+  }
+}
+
+.clubdetail-polls-bottom-head button {
+  border: none;
+  background: transparent;
+  color: #ff7051;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.clubdetail-polls-bottom-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clubdetail-polls-bottom-item {
+  border: 1px solid #eceff3;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.clubdetail-polls-bottom-title {
+  color: #111827;
+  font-weight: 700;
+}
+
+.clubdetail-polls-bottom-meta {
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
