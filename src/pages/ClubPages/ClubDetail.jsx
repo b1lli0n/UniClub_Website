@@ -228,19 +228,19 @@ const ClubDetail = () => {
       navigate('/login');
       return;
     }
-    
+
     setJoinLoading(true);
     try {
       const response = await requestToJoinClub(id);
       console.log('✅ Join response:', response);
-      
+
       // Success response
       setIsJoined(true);
       const successMessage = 'Gửi yêu cầu tham gia thành công! Hãy chờ phê duyệt từ ban quản trị.';
       toast.success(successMessage);
     } catch (error) {
       console.error('❌ Join club error:', error);
-      
+
       // Check if error message indicates success
       const errorMsg = error?.message || error?.data?.message || error || '';
       if (errorMsg.toLowerCase().includes('success') || errorMsg.toLowerCase().includes('thành công')) {
@@ -484,7 +484,9 @@ const ClubDetail = () => {
   const librarySlots = [0, 1, 2, 3];
 
   const showcaseEvents = organizedEvents.slice(0, 5);
-  const openPoll = visiblePollItems.find((p) => p.status === 'open');
+  const hasOpenPollInClub = pollItems.some(
+    (p) => String(p?.status || '').toLowerCase() === 'open'
+  );
   const selectedPoll = visiblePollItems[activePollIndex] || null;
   const selectedPollData = featuredPollDetail?.poll || null;
   const selectedPollEndMs = selectedPollData?.end_date ? new Date(selectedPollData.end_date).getTime() : null;
@@ -495,6 +497,79 @@ const ClubDetail = () => {
   const userPoints = userPointRaw != null && !Number.isNaN(Number(userPointRaw))
     ? Number(userPointRaw)
     : null;
+
+  const pollToolbar = (
+    <div className="clubdetail-poll-toolbar">
+      <input
+        className="clubdetail-poll-search"
+        placeholder="Tìm bình chọn theo tiêu đề..."
+        value={pollSearchText}
+        onChange={(e) => setPollSearchText(e.target.value)}
+      />
+      <select
+        className="clubdetail-poll-select"
+        value={pollFilterStatus}
+        onChange={(e) => setPollFilterStatus(e.target.value)}
+      >
+        <option value="all">Tất cả trạng thái</option>
+        <option value="open">Đang mở</option>
+        <option value="closed">Đã đóng</option>
+      </select>
+      <select
+        className="clubdetail-poll-select"
+        value={pollSortBy}
+        onChange={(e) => setPollSortBy(e.target.value)}
+      >
+        <option value="all">Tất cả</option>
+        <option value="ending_soon">Sắp hết hạn</option>
+        <option value="newest">Mới nhất</option>
+      </select>
+    </div>
+  );
+
+  let pollSectionEl = null;
+  if (isMember && visiblePollItems.length === 0) {
+    pollSectionEl = (
+      <div className="clubdetail-cell clubdetail-cell-polls">
+        {pollToolbar}
+        <div className="clubdetail-poll-empty-note">Không có bảng vote phù hợp.</div>
+      </div>
+    );
+  } else if (isMember && visiblePollItems.length > 0 && selectedPoll && featuredPollDetail) {
+    pollSectionEl = (
+      <div className="clubdetail-cell clubdetail-cell-polls">
+        {pollToolbar}
+        <div className="clubdetail-poll-focus-wrap">
+          <button
+            type="button"
+            className="clubdetail-poll-nav clubdetail-poll-nav--left"
+            onClick={() => setActivePollIndex((prev) => Math.max(0, prev - 1))}
+            disabled={activePollIndex <= 0}
+            aria-label="Poll trước"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <div className="clubdetail-poll-focus-card">
+            <ClubPollStrip
+              detail={featuredPollDetail}
+              onOpen={canOpenSelectedPoll ? () => setPollModalId(selectedPoll._id) : undefined}
+            />
+          </div>
+          <button
+            type="button"
+            className="clubdetail-poll-nav clubdetail-poll-nav--right"
+            onClick={() =>
+              setActivePollIndex((prev) => Math.min(visiblePollItems.length - 1, prev + 1))
+            }
+            disabled={activePollIndex >= visiblePollItems.length - 1}
+            aria-label="Poll tiếp"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="clubdetail-container">
@@ -620,94 +695,7 @@ const ClubDetail = () => {
                 </div>
               </div>
 
-              {isMember && visiblePollItems.length === 0 ? (
-                <div className="clubdetail-cell clubdetail-cell-polls">
-                  <div className="clubdetail-poll-toolbar">
-                    <input
-                      className="clubdetail-poll-search"
-                      placeholder="Tìm poll theo tiêu đề..."
-                      value={pollSearchText}
-                      onChange={(e) => setPollSearchText(e.target.value)}
-                    />
-                    <select
-                      className="clubdetail-poll-select"
-                      value={pollFilterStatus}
-                      onChange={(e) => setPollFilterStatus(e.target.value)}
-                    >
-                      <option value="all">Tất cả trạng thái</option>
-                      <option value="open">Đang mở</option>
-                      <option value="closed">Đã đóng</option>
-                    </select>
-                    <select
-                      className="clubdetail-poll-select"
-                      value={pollSortBy}
-                      onChange={(e) => setPollSortBy(e.target.value)}
-                    >
-                      <option value="all">Tất cả</option>
-                      <option value="ending_soon">Sắp hết hạn</option>
-                      <option value="newest">Mới nhất</option>
-                    </select>
-                  </div>
-                  <div className="clubdetail-poll-empty-note">Không có bảng vote phù hợp.</div>
-                </div>
-              ) : null}
-
-              {isMember && visiblePollItems.length > 0 && selectedPoll && featuredPollDetail ? (
-                <div className="clubdetail-cell clubdetail-cell-polls">
-                  <div className="clubdetail-poll-toolbar">
-                    <input
-                      className="clubdetail-poll-search"
-                      placeholder="Tìm poll theo tiêu đề..."
-                      value={pollSearchText}
-                      onChange={(e) => setPollSearchText(e.target.value)}
-                    />
-                    <select
-                      className="clubdetail-poll-select"
-                      value={pollFilterStatus}
-                      onChange={(e) => setPollFilterStatus(e.target.value)}
-                    >
-                      <option value="all">Tất cả trạng thái</option>
-                      <option value="open">Đang mở</option>
-                      <option value="closed">Đã đóng</option>
-                    </select>
-                    <select
-                      className="clubdetail-poll-select"
-                      value={pollSortBy}
-                      onChange={(e) => setPollSortBy(e.target.value)}
-                    >
-                      <option value="all">Tất cả</option>
-                      <option value="ending_soon">Sắp hết hạn</option>
-                      <option value="newest">Mới nhất</option>
-                    </select>
-                  </div>
-                  <div className="clubdetail-poll-focus-wrap">
-                    <button
-                      type="button"
-                      className="clubdetail-poll-nav clubdetail-poll-nav--left"
-                      onClick={() => setActivePollIndex((prev) => Math.max(0, prev - 1))}
-                      disabled={activePollIndex <= 0}
-                      aria-label="Poll trước"
-                    >
-                      <ChevronLeft size={18} />
-                    </button>
-                    <div className="clubdetail-poll-focus-card">
-                      <ClubPollStrip
-                        detail={featuredPollDetail}
-                        onOpen={canOpenSelectedPoll ? () => setPollModalId(selectedPoll._id) : undefined}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="clubdetail-poll-nav clubdetail-poll-nav--right"
-                      onClick={() => setActivePollIndex((prev) => Math.min(visiblePollItems.length - 1, prev + 1))}
-                      disabled={activePollIndex >= visiblePollItems.length - 1}
-                      aria-label="Poll tiếp"
-                    >
-                      <ChevronRight size={18} />
-                    </button>
-                  </div>
-                </div>
-              ) : null}
+              {hasOpenPollInClub && pollSectionEl}
 
               <div className="clubdetail-cell clubdetail-cell-events">
                 <section className="clubdetail-events-showcase">
@@ -906,6 +894,12 @@ const ClubDetail = () => {
                 </div>
               </div>
             </div>
+
+            {!hasOpenPollInClub && pollSectionEl && (
+              <section className="clubdetail-polls-bottom" aria-label="Bình chọn">
+                {pollSectionEl}
+              </section>
+            )}
 
             {showFloatingNav !== false && (
               <ClubDetailNav clubName={club?.name} isMember={isMember} />

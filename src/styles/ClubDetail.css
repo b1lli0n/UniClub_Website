@@ -1515,7 +1515,7 @@ body.clubdetail-body #root {
 }
 
 .clubdetail-polls-bottom {
-  margin-top: 18px;
+  margin-top: clamp(2.25rem, 5.5vw, 3.5rem);
 }
 
 .clubdetail-card--poll-list {
