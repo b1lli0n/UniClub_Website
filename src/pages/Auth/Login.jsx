@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { Sparkles, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { login as loginService, resendOtp } from '../../api/authApi';
 import { useAuth } from '../../context/AuthContext';
+import ConfirmModal from '../../components/ConfirmModal';
 import logoUniclub from '../../assets/logo-uniclub.png';
 import '../../styles/Login.css';
 
@@ -12,8 +13,44 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verifyPrompt, setVerifyPrompt] = useState(null);
+  const [verifyConfirmLoading, setVerifyConfirmLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  const handleVerifyPromptClose = () => {
+    if (!verifyConfirmLoading) setVerifyPrompt(null);
+  };
+
+  const handleVerifyPromptConfirm = async () => {
+    if (!verifyPrompt) return;
+    const { email: em, needResend } = verifyPrompt;
+    if (needResend) {
+      setVerifyConfirmLoading(true);
+      try {
+        const res = await resendOtp(em);
+        if (res?.success) {
+          toast.success(res.message || 'Đã gửi mã OTP đến email của bạn.');
+        } else {
+          toast.info(
+            res?.message ||
+              'Không gửi lại mã được ngay. Bạn có thể bấm "Gửi lại" ở trang xác thực.'
+          );
+        }
+      } catch (err) {
+        toast.info(
+          err?.message ||
+            'Không gửi lại mã được ngay. Bạn có thể bấm "Gửi lại" ở trang xác thực.'
+        );
+      } finally {
+        setVerifyConfirmLoading(false);
+      }
+    }
+    setVerifyPrompt(null);
+    navigate('/verify-otp', {
+      state: { email: em, resendCooldownSeconds: 60 },
+    });
+  };
 
   const validateEmail = (value) => {
     const trimmedValue = value.trim();
@@ -48,10 +85,7 @@ const Login = () => {
         const needOtp =
           data.needVerify === true || (data.user && data.user.isVerified === false);
         if (needOtp) {
-          toast.info(response.message || 'Vui lòng xác thực email để tiếp tục.');
-          navigate('/verify-otp', {
-            state: { email: trimmedEmail, resendCooldownSeconds: 60 },
-          });
+          setVerifyPrompt({ email: trimmedEmail, needResend: false });
           return;
         }
         if (data.user) {
@@ -73,22 +107,7 @@ const Login = () => {
           msg
         );
       if (looksUnverified) {
-        try {
-          const res = await resendOtp(trimmedEmail);
-          if (res?.success) {
-            toast.success(res.message || 'Đã gửi mã OTP đến email của bạn.');
-          } else {
-            toast.info(msg || 'Chuyển đến trang nhập mã xác thực.');
-          }
-        } catch {
-          toast.info(msg || 'Chuyển đến trang nhập mã xác thực.');
-        }
-        navigate('/verify-otp', {
-          state: {
-            email: trimmedEmail,
-            resendCooldownSeconds: 60,
-          },
-        });
+        setVerifyPrompt({ email: trimmedEmail, needResend: true });
         return;
       }
       toast.error(backend?.message || error?.message || 'Đăng nhập thất bại');
@@ -99,6 +118,17 @@ const Login = () => {
 
   return (
     <div className="login-page">
+      <ConfirmModal
+        show={!!verifyPrompt}
+        onHide={handleVerifyPromptClose}
+        onConfirm={handleVerifyPromptConfirm}
+        title="Cần xác thực email"
+        message="Tài khoản của bạn chưa được xác thực. Bạn có muốn chuyển đến trang nhập mã OTP đã gửi tới email không?"
+        confirmText="Đồng ý"
+        cancelText="Hủy"
+        type="info"
+        loading={verifyConfirmLoading}
+      />
       <div className="login-auth-container">
         {/* Left Side: Illustration & Logo */}
         <div className="auth-visual-side">
