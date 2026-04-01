@@ -58,7 +58,7 @@ export const getClubs = async () => {
 // Lấy chi tiết club
 export const getClubDetail = async (clubId) => {
   try {
-    const response = await clubAPI.get(`/${clubId}`);
+    const response = await clubAPI.get(`/clubs/${clubId}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -88,7 +88,11 @@ export const deleteClub = async (clubId) => {
 // Cập nhật trạng thái club (1: active, 2: paused)
 export const updateClubStatus = async (clubId, status) => {
   try {
-    const response = await clubAPI.patch(`/${clubId}/status`, { status });
+    const normalizedStatus = Number(status);
+    if (![1, 2].includes(normalizedStatus)) {
+      throw new Error('Status chỉ hợp lệ với 1 (active) hoặc 2 (paused)');
+    }
+    const response = await clubAPI.patch(`/${clubId}/status`, { status: normalizedStatus });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -100,7 +104,7 @@ export const updateClubStatus = async (clubId, status) => {
 // Xem danh sách thành viên active của club
 export const getClubMembers = async (clubId) => {
   try {
-    const response = await clubAPI.get(`/${clubId}/members`);
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/members`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -133,6 +137,29 @@ export const requestToJoinClub = async (clubId) => {
 export const getJoinRequests = async (clubId) => {
   try {
     const response = await clubAPI.get(`/clubs/${clubId}/join-requests`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const approveJoinRequest = async (clubId, membershipId, payload = { role: 0 }) => {
+  try {
+    const response = await clubAPI.post(
+      `/clubs/${clubId}/memberships/${membershipId}/approve`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const rejectJoinRequest = async (clubId, membershipId) => {
+  try {
+    const response = await clubAPI.post(
+      `/clubs/${clubId}/memberships/${membershipId}/reject`
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

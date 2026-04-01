@@ -1,12 +1,10 @@
-import axios from 'axios';
+import { cancelInvitation } from '../api/invitationApi';
 
 function CancelInvitationButton({ invitationId, clubId, onSuccess, disabled }) {
     const handleCancel = async () => {
         if (!window.confirm('Bạn chắc chắn muốn hủy lời mời này?')) return;
         try {
-            await axios.patch(`/api/invitations/${invitationId}/cancel`, { clubId }, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-            });
+            await cancelInvitation(invitationId, clubId);
             alert('Đã hủy lời mời thành công!');
             if (onSuccess) onSuccess();
         } catch (err) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { getInvitationDetail } from '../api/invitationApi';
 
 function InvitationDetail({ invitationId, onClose }) {
     const [detail, setDetail] = useState(null);
@@ -8,9 +8,7 @@ function InvitationDetail({ invitationId, onClose }) {
     useEffect(() => {
         if (!invitationId) return;
         setLoading(true);
-        axios.get(`/api/invitations/${invitationId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-        })
+        getInvitationDetail(invitationId)
             .then(res => setDetail(res.data.data))
             .catch(() => setDetail(null))
             .finally(() => setLoading(false));

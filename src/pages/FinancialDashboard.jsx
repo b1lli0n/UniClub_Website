@@ -263,7 +263,8 @@ const FinancialDashboard = () => {
     const { clubId } = useParams()
     const navigate = useNavigate()
     const clubRole = Number(localStorage.getItem('clubRole'))
-    const isTreasurer = clubRole === 4
+    const [isTreasurer, setIsTreasurer] = useState(clubRole === 4)
+    const deniedOnceRef = React.useRef(false)
 
     const [tab, setTab] = useState('overview')
 
@@ -322,6 +323,14 @@ const FinancialDashboard = () => {
             setByCategory(d.byCategory ?? [])
             setMonthlyTrend(normalizeMonthlyTrend(d.monthlyTrend))
         } catch (err) {
+            if (err?.response?.status === 403) {
+                if (!deniedOnceRef.current) {
+                    deniedOnceRef.current = true
+                    toast.error(err?.response?.data?.message || 'Chỉ Treasurer mới có quyền truy cập mục Financial')
+                }
+                navigate(-1)
+                return
+            }
             toast.error(err?.response?.data?.message || 'Không thể tải dữ liệu tổng quan')
         } finally {
             setDashLoading(false)
@@ -345,20 +354,57 @@ const FinancialDashboard = () => {
             const pg = res.data?.pagination ?? {}
             setPagination({ page: pg.page ?? 1, pages: pg.pages ?? 1, total: pg.total ?? 0 })
         } catch (err) {
+            if (err?.response?.status === 403) {
+                if (!deniedOnceRef.current) {
+                    deniedOnceRef.current = true
+                    toast.error(err?.response?.data?.message || 'Chỉ Treasurer mới có quyền truy cập mục Financial')
+                }
+                navigate(-1)
+                return
+            }
             toast.error(err?.response?.data?.message || 'Không thể tải danh sách giao dịch')
         } finally {
             setTxnLoading(false)
         }
     }, [clubId, page, filterType, filterStatus, filterCategory, txnFrom, txnTo])
 
+    const extractRoleFromClub = (response) => {
+        const payload = response?.data?.club || response?.club || response?.data || response || {}
+        const rawRole =
+            payload?.membershipRole ??
+            payload?.role ??
+            payload?.currentUserRole ??
+            payload?.membership?.role
+        const roleNum = Number(rawRole)
+        return Number.isFinite(roleNum) ? roleNum : null
+    }
+
     useEffect(() => {
-        if (!isTreasurer) {
-            toast.error('Chỉ Treasurer mới có quyền truy cập mục Financial')
-            navigate(-1)
-            return
+        let cancelled = false
+        const verifyRoleAndLoad = async () => {
+            try {
+                const res = await getClubDetail(clubId)
+                if (cancelled) return
+                const roleNum = extractRoleFromClub(res)
+                const isTr = roleNum === 4 || Number(localStorage.getItem('clubRole')) === 4
+                setIsTreasurer(isTr)
+                if (!isTr) {
+                    if (!deniedOnceRef.current) {
+                        deniedOnceRef.current = true
+                        toast.error('Chỉ Treasurer mới có quyền truy cập mục Financial')
+                    }
+                    navigate(-1)
+                    return
+                }
+                await fetchDashboard()
+            } catch (err) {
+                // Nếu lấy chi tiết club lỗi, fallback vào check backend khi gọi dashboard
+                await fetchDashboard()
+            }
         }
-        fetchDashboard()
-    }, [isTreasurer, fetchDashboard, navigate])
+        verifyRoleAndLoad()
+        return () => { cancelled = true }
+    }, [clubId, fetchDashboard, navigate])
 
     useEffect(() => {
         const loadClubName = async () => {
@@ -1151,7 +1197,7 @@ const FinancialDashboard = () => {
                             </div>
 
                             <div className="finance-reminder-note">
-                                Không chọn thành viên nào thì hệ thống sẽ gửi cho toàn bộ thành viên chưa đóng phí.
+                                Không chọn thành viên nào thì hệ thống sẽ gửi cho toàn bộ thành viên đang hoạt động của CLB.
                             </div>
 
                             <div className="finance-reminder-toolbar">

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { getRedemptionHistory } from '../../api/rewardApi'
+import { getUserRedemptionHistory } from '../../api/rewardApi'
 import '../../styles/Rewards.css'
+import ClubDetailNav from '../../components/ClubDetailNav'
 
 const normalizeHistoryResponse = (payload) => {
     const dataNode = payload?.data || payload || {}
@@ -53,7 +54,7 @@ const ViewRedemptionHistory = () => {
     const location = useLocation()
     const [history, setHistory] = useState([])
     const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 })
-    const [statusFilter, setStatusFilter] = useState('all')
+    const [statusFilter, setStatusFilter] = useState('1')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -71,7 +72,7 @@ const ViewRedemptionHistory = () => {
                     params.status = Number(statusFilter)
                 }
 
-                const payload = await getRedemptionHistory(clubId, params)
+                const payload = await getUserRedemptionHistory(clubId, params)
                 const normalized = normalizeHistoryResponse(payload)
                 setHistory(normalized.items)
                 setPagination(normalized.pagination)
@@ -113,6 +114,7 @@ const ViewRedemptionHistory = () => {
 
     return (
         <div className="rewards-page">
+            <ClubDetailNav />
             <div className="rewards-shell">
                 <div className="rewards-header">
                     <div>
@@ -140,7 +142,6 @@ const ViewRedemptionHistory = () => {
                             <option value="0">Pending</option>
                             <option value="1">Approved</option>
                             <option value="2">Rejected</option>
-                            <option value="3">Cancelled</option>
                         </select>
                     </label>
                 </div>

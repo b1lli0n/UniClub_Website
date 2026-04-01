@@ -26,9 +26,8 @@ const getNavItems = (clubId, isTreasurer) => {
     const items = [
         { icon: Home, label: 'Dashboard', path: hasClubId ? `/clubs/${clubId}/dashboard` : '/dashboard' },
         { icon: LayoutGrid, label: 'Sự kiện CLB', path: '/clubEvent' },
-        { icon: Users, label: 'Thành viên', path: hasClubId ? `/clubs/${clubId}/members` : '/clubs' },
+        { icon: Users, label: 'Duyệt thành viên', path: hasClubId ? `/clubs/${clubId}/members` : '/clubs' },
         { icon: BookMarked, label: 'Quy tắc điểm', path: hasClubId ? `/clubs/${clubId}/point-rules-management` : '/clubs' },
-        { icon: Users, label: 'Duyệt Tham gia', path: hasClubId ? `/clubs/${clubId}/join-requests` : '/clubs' },
         { icon: Wallet, label: 'Giao dịch', path: hasClubId ? `/clubs/${clubId}/transactions` : '/dashboard' },
         { icon: Bell, label: 'Thông báo', path: '/notifications' },
     ];

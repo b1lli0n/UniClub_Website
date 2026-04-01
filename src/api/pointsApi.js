@@ -16,6 +16,20 @@ export const getPointsHistory = async (clubId, month) => {
   }
 };
 
+export const getMembershipRewardPoint = async (membershipId) => {
+  try {
+    const response = await api.get(`/membership/${membershipId}/reward-point`);
+    return response.data;
+  } catch (error) {
+    console.error('Get membership reward point error:', error);
+    throw (
+      error.response?.data || {
+        message: error.message || 'Không thể tải điểm thưởng theo membership',
+      }
+    );
+  }
+};
+
 export const getMonthlyLeaderboard = async (clubId, month, limit = 10) => {
   try {
     const response = await api.get('/points/leaderboard', {

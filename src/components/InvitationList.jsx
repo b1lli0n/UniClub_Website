@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import CancelInvitationButton from './CancelInvitationButton';
 import { useAuth } from '../context/AuthContext';
+import { getClubInvitations } from '../api/invitationApi';
 
 function InvitationList({ clubId }) {
     const [invitations, setInvitations] = useState([]);
@@ -13,10 +13,7 @@ function InvitationList({ clubId }) {
         const fetchInvitations = async () => {
             setLoading(true);
             try {
-                const res = await axios.get('/api/invitations/club-list', {
-                    params: { clubId, status },
-                    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-                });
+                const res = await getClubInvitations({ clubId, status, page: 1, limit: 10 });
                 setInvitations(res.data.data);
             } catch (err) {
                 setInvitations([]);

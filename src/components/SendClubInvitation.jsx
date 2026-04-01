@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { getAllUsers } from '../api/userApi';
-import axios from 'axios';
+import { sendInvitation } from '../api/invitationApi';
 
-function SendClubInvitation({ clubId }) {
+function SendClubInvitation({ clubId, onSuccess }) {
     const [userId, setUserId] = useState('');
-    const [message, setMessage] = useState('');
     const [status, setStatus] = useState('');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -13,7 +12,9 @@ function SendClubInvitation({ clubId }) {
         async function fetchUsers() {
             try {
                 const data = await getAllUsers();
-                setUsers(data);
+                // API trả {message, users: [...]}
+                const userList = data?.users || data || [];
+                setUsers(Array.isArray(userList) ? userList : []);
             } catch (err) {
                 setStatus('Không thể tải danh sách user');
             }
@@ -26,20 +27,19 @@ function SendClubInvitation({ clubId }) {
         setStatus('Đang gửi...');
         setLoading(true);
         try {
-            await axios.post('/api/invitations/invite', {
+            await sendInvitation({
                 clubId,
                 userId,
-                message,
-            }, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-                },
             });
             setStatus('Gửi lời mời thành công!');
             setUserId('');
-            setMessage('');
+            if (onSuccess) onSuccess();
         } catch (err) {
-            setStatus('Gửi thất bại: ' + (err.response?.data?.message || err.message));
+            if (err?.response?.status === 409) {
+                setStatus('Gửi thất bại: Người dùng đã có lời mời pending.');
+            } else {
+                setStatus('Gửi thất bại: ' + (err.response?.data?.message || err.message));
+            }
         } finally {
             setLoading(false);
         }
@@ -56,11 +56,6 @@ function SendClubInvitation({ clubId }) {
                     </option>
                 ))}
             </select>
-            <input
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                placeholder="Lời nhắn (tùy chọn)"
-            />
             <button type="submit" disabled={loading || !userId}>
                 {loading ? 'Đang gửi...' : 'Gửi lời mời'}
             </button>
