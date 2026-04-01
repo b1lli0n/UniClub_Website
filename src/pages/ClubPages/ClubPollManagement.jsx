@@ -110,7 +110,7 @@ const ClubPollManagement = () => {
         sort: sort || undefined,
         page: 1,
         limit: 30,
-      });
+      }, true);
       if (res?.success) {
         const items = Array.isArray(res.items) ? res.items : [];
         setPolls(items);
@@ -168,7 +168,7 @@ const ClubPollManagement = () => {
     }
     setLoadingDetail(true);
     try {
-      const res = await getPollDetail(clubId, selectedPollId);
+      const res = await getPollDetail(clubId, selectedPollId, true);
       if (res?.success && res?.data) {
         setDetail(res.data);
       } else {
