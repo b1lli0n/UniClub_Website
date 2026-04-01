@@ -7,7 +7,7 @@ import {
     markAsRead,
     getNotificationDetail,
 } from "../api/notificationApi";
-import CreateNotificationModal from "../components/CreateNotificationModal";
+import CreateNotificationModal from "../components/modals/CreateNotificationModal";
 import "../styles/NotificationCenter.css";
 
 const NotificationCenter = () => {

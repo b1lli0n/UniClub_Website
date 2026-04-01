@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Button } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import '../../styles/Event.css';
-import RegistrationModal from '../../components/RegistrationModal';
+import RegistrationModal from '../../components/modals/RegistrationModal';
 import eventApi from '../../api/eventApi';
 import { Form } from "react-bootstrap";
 

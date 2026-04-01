@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
-import { createTransaction, updateTransaction } from '../api/transactionApi';
+import { createTransaction, updateTransaction } from '../../api/transactionApi';
 
 // Danh mục gợi ý
 const INCOME_CATEGORIES = ['Phí thành viên', 'Tài trợ', 'Đóng góp sự kiện', 'Bán hàng', 'Khác'];

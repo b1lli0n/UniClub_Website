@@ -10,7 +10,7 @@ import '../styles/ClubAreaLayout.css';
 
 /** Ban quản lý: Leader (1), Sub Leader (2), Secretary (3), Treasurer (4) — giống ClubDetailCard */
 const isManagementRole = (role) =>
-  typeof role === 'number' && role > 0 && role <= 4;
+  typeof role === 'number' && role >= 0 && role <= 4;
 
 async function resolveManagementForClub(clubId, user) {
   const clubRes = await getClubById(clubId);
@@ -88,7 +88,7 @@ const ClubAreaLayout = () => {
   }, [clubId, user]);
 
   const outletContext = {
-    showFloatingNav: isLeader !== true,
+    showFloatingNav: isLeader == true,
     clubAreaIsLeader: isLeader === true,
   };
 
@@ -109,7 +109,6 @@ const ClubAreaLayout = () => {
       <div className="main-layout main-layout-with-header">
         <Header />
         <div className="main-layout-body">
-          <SidebarNav />
           <main className="main-layout-content">
             <Outlet context={outletContext} />
           </main>

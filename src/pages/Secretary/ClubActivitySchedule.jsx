@@ -98,7 +98,7 @@ const ClubActivitySchedule = () => {
                 status: 0, // 0: Coming soon
                 progress_status: 1 // 1: Published
             };
-
+            console.log('Request body:', reqBody);
             if (modalMode === 'create') {
                 await createActivity(clubId, reqBody);
                 toast.success('Đã tạo hoạt động mới!');

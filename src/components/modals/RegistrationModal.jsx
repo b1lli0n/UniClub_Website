@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Spinner } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import eventApi from '../api/eventApi';
-import { getCurrentUser } from '../api/authApi';
-import { updateProfile } from '../api/userApi';
-import '../styles/RegistrationModal.css';
+import eventApi from '../../api/eventApi';
+import { getCurrentUser } from '../../api/authApi';
+import { updateProfile } from '../../api/userApi';
+import '../../styles/RegistrationModal.css';
 
 // Default avatar logic if needed
 const DefaultAvatar = () => (

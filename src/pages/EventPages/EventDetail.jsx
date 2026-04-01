@@ -3,8 +3,8 @@ import { Badge, Button, Container, Spinner, Modal } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../../styles/Event.css";
-import RegistrationModal from "../../components/RegistrationModal";
-import ConfirmModal from "../../components/ConfirmModal";
+import RegistrationModal from "../../components/modals/RegistrationModal";
+import ConfirmModal from "../../components/modals/ConfirmModal";
 import eventApi from "../../api/eventApi";
 import { getCurrentUser } from "../../api/authApi";
 

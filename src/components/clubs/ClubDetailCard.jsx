@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/ClubDetailCard.css';
-import { ASSET_BASE } from '../api/api';
+import '../../styles/ClubDetailCard.css';
+import { ASSET_BASE } from '../../api/api';
 
 const ROLE_DISPLAY = {
   0: { label: 'Member', color: '#e471ed' },
@@ -50,7 +50,7 @@ const ClubDetailCard = ({ club }) => {
     // Management roles (Leader, Sub Leader, Secretary, Treasurer) can access dashboard
     // Role: 1=leader, 2=sub_leader, 3=secretary, 4=treasurer
     if (roleNum > 0) {
-      navigate(`/clubs/${clubId}/dashboard`);
+      navigate(`/clubs/manager/${clubId}/dashboard`);
     } else {
       navigate(`/clubs/${clubId}`);
     }

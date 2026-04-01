@@ -3,7 +3,7 @@ import { useParams, useLocation, useOutletContext } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getMyBadges } from '../../api/pointsApi';
-import ClubDetailNav from '../../components/ClubDetailNav';
+import ClubDetailNav from '../../components/clubs/ClubDetailNav';
 import '../../styles/ClubBadges.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getTransactions, getLeaderTransactions, reviewLeaderTransaction } from '../api/transactionApi';
-import TransactionForm from '../components/TransactionForm';
+import TransactionForm from '../components/modals/TransactionForm';
 import '../styles/admin.css';
 import '../styles/rewards.css';
 

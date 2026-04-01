@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import ClubDetailCard from '../../components/ClubDetailCard';
+import ClubDetailCard from '../../components/clubs/ClubDetailCard';
 import { getUserClubs } from '../../api/userApi';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/Profile.css';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { getClubBadgesForAssign, getMemberBadges, assignBadgeToMember } from '../api/rewardApi';
+import { getClubBadgesForAssign, getMemberBadges, assignBadgeToMember } from '../../api/rewardApi';
 
 /**
  * Modal "Thêm huy hiệu" — Admin gán badge thủ công cho một thành viên

@@ -50,3 +50,21 @@ export const updateActivity = (clubId, activityId, data) =>
  */
 export const deleteActivity = (clubId, activityId) =>
     api.patch(`${BASE(clubId)}/${activityId}/cancel`);
+
+/**
+ * Lấy danh sách hoạt động dành cho thành viên CLB
+ * GET /api/clubs/:clubId/activities/member
+ * @param {string} clubId
+ * @param {object} params - { start_date, end_date, page, limit }
+ */
+export const getMemberActivities = (clubId, params = {}) =>
+    api.get(`${BASE(clubId)}/member`, { params });
+
+/**
+ * Lấy chi tiết hoạt động dành cho thành viên CLB
+ * GET /api/clubs/:clubId/activities/member/:id
+ * @param {string} clubId
+ * @param {string} activityId
+ */
+export const getMemberActivityDetail = (clubId, activityId) =>
+    api.get(`${BASE(clubId)}/member/${activityId}`);

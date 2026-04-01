@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getAllClubs } from '../api/clubApi';
-import { createClubBadge, updateClubBadge } from '../api/clubBadgeApi';
-import '../styles/CreateEvent.css';
+import { getAllClubs } from '../../api/clubApi';
+import { createClubBadge, updateClubBadge } from '../../api/clubBadgeApi';
+import '../../styles/CreateEvent.css';
 
 const ClubBadgeModal = ({ open, onClose, onSuccess, mode = 'create', badgeData }) => {
     const [clubs, setClubs] = useState([]);

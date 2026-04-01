@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import ClubDetailCard from '../../components/ClubDetailCard';
+import ClubDetailCard from '../../components/clubs/ClubDetailCard';
 import { getAllClubs } from '../../api/clubApi';
 import '../../styles/ListOfClubs.css';
 

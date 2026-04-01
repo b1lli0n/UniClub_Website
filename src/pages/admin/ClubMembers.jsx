@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { getClubDetail, getClubMembers, assignManagementRole } from '../../api/adminapi'
-import AssignBadgeModal from '../../components/AssignBadgeModal'
+import AssignBadgeModal from '../../components/modals/AssignBadgeModal'
 
 const ClubMembers = () => {
     const { id } = useParams()

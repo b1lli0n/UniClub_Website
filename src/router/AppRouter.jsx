@@ -3,7 +3,7 @@ import ProtectedRoute from './ProtectedRoute'
 
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
-import LeaderLayout from '../layouts/LeaderLayout'
+import ClubManagerLayout from '../layouts/ClubManagerLayout'
 import ClubAreaLayout from '../layouts/ClubAreaLayout'
 
 import Register from '../pages/Auth/Register'
@@ -21,6 +21,7 @@ import ClubBadges from '../pages/ClubPages/ClubBadges'
 import PointRules from '../pages/ClubPages/PointRules'
 import ListOfMyClubs from '../pages/ClubPages/ListOfMyClubs'
 import DashboardLeaderClub from '../pages/DashboardLeaderClub'
+import WeeklyActivitySchedule from '../pages/ClubPages/WeeklyActivitySchedule'
 
 import EventAttendanceList from '../pages/leader/EventAttendanceList'
 
@@ -60,6 +61,7 @@ import RewardPointLogs from '../pages/admin/RewardPointLogs'
 import AdminNotifications from '../pages/admin/Notifications'
 import FinancialDashboard from '../pages/FinancialDashboard'
 import MembershipsPage from '../pages/Memberships';
+import JoinRequests from '../pages/JoinRequests';
 import EventsPage from '../pages/Events';
 import EventDetailPage from '../pages/EventDetail';
 import CreateEventPage from '../pages/CreateEvent';
@@ -125,23 +127,24 @@ const AppRouter = () => {
         <Route path="/profile/change-password" element={<ChangePassword />} />
       </Route>
 
-      {/* Trang CLB: leader có sidebar + ẩn nav nổi; thành viên chỉ nav nổi */}
+      {/* Trang CLB: thành viên nav nổi */}
       <Route element={<ClubAreaLayout />}>
         <Route path="/clubs/:id" element={<ClubDetail />} />
-        <Route path="/clubs/:id/points-history" element={<PointsHistory />} />
+        <Route path="/clubs/:id/activity-schedule" element={<WeeklyActivitySchedule />} />
         <Route path="/clubs/:id/leaderboard" element={<ClubLeaderboard />} />
-        <Route path="/clubs/:id/badges" element={<ClubBadges />} />
         <Route path="/clubs/:id/point-rules" element={<PointRules />} />
+        <Route path="/clubs/:id/badges" element={<ClubBadges />} />
+        <Route path="/clubs/:id/points-history" element={<PointsHistory />} />
       </Route>
 
       {/* Dashboard/Club Routes with MainLayout (includes Sidebar) */}
-      <Route element={<LeaderLayout />}>
-        <Route path="/clubs/:id/dashboard" element={<DashboardLeaderClub />} />
-        <Route path="/clubs/:id/members" element={<ClubMemberManagement />} />
-        <Route path="/clubs/:id/transactions" element={<TransactionList />} />
-        <Route path='/clubs/:id/point-rules-management' element={<PointRulesManagement />} />
-        <Route path="/clubs/:id/activity-schedule" element={<ClubActivitySchedule />} />
-
+      <Route element={<ClubManagerLayout />}>
+        <Route path="/clubs/manager/:id/dashboard" element={<DashboardLeaderClub />} />
+        <Route path="/clubs/manager/:id/members" element={<ClubMemberManagement />} />
+        <Route path="/clubs/manager/:id/transactions" element={<TransactionList />} />
+        <Route path='/clubs/manager/:id/point-rules-management' element={<PointRulesManagement />} />
+        <Route path="/clubs/manager/:id/activity-schedule" element={<ClubActivitySchedule />} />
+        <Route path="/clubs/manager/:clubId/join-requests" element={<JoinRequests />} />
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/events/:eventId/attendance" element={<EventAttendanceList />} />
         <Route path="/events" element={<EventsPage />} />
@@ -156,7 +159,7 @@ const AppRouter = () => {
         <Route path='/clubEvent/:id/event-timeline-management' element={<EventTimelineManagement />} />
         <Route path="/events" element={<Navigate to="/clubEvent" replace />} />
 
-        <Route path="/clubs/:id/join-requests" element={<MembershipsPage />} />
+        <Route path="/clubs/:id/join-requests" element={<JoinRequests />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route
           path="/clubs/:clubId/finance"

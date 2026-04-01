@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/ClubCard.css';
+import '../../styles/ClubCard.css';
 
 const ClubCard = ({ club }) => {
   const navigate = useNavigate();

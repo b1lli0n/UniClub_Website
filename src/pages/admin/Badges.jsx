@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import ClubBadgeModal from '../../components/ClubBadgeModal';
+import ClubBadgeModal from '../../components/modals/ClubBadgeModal';
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { getClubBadges } from '../../api/clubBadgeApi'

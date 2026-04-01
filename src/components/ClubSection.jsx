@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import ClubCard from './ClubCard';
+import ClubCard from './clubs/ClubCard';
 import { getAllClubs } from '../api/clubApi';
 import '../styles/ClubSection.css';
 

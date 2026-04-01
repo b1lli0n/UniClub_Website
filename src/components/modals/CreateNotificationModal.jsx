@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
-import { searchUsers, createNotification } from "../api/notificationApi";
-import "../styles/CreateNotificationModal.css";
+import { searchUsers, createNotification } from "../../api/notificationApi";
+import "../../styles/CreateNotificationModal.css";
 
 const CreateNotificationModal = ({ isOpen, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { Users, Calendar, Tag, ImageIcon, ArrowRight, Crown, UserCircle2, ShieldCheck, FileBadge2, Wallet } from 'lucide-react';
-import ClubDetailNav from '../../components/ClubDetailNav';
+import ClubDetailNav from '../../components/clubs/ClubDetailNav';
 import { getClubById, getEventsByClub, requestToJoinClub, leaveClub } from '../../api/clubApi';
 import { getRewards } from '../../api/rewardApi';
 import { getUserClubs } from '../../api/userApi';

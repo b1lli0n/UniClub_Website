@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import { AlertTriangle, Info, CheckCircle, XCircle } from "lucide-react";
-import "../styles/Event.css";
+import "../../styles/Event.css";
 
 const ConfirmModal = ({
     show,

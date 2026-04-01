@@ -1,10 +1,11 @@
 import React from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Trophy, CircleStar, BookMarked, ScrollText } from 'lucide-react';
-import '../styles/ClubDetailNav.css';
+import { LayoutDashboard, Trophy, CircleStar, BookMarked, ScrollText, Calendar } from 'lucide-react';
+import '../../styles/ClubDetailNav.css';
 
 const ALL_TABS = [
   { key: 'overview', path: '', label: 'Tổng quan', Icon: LayoutDashboard, membersOnly: false },
+  { key: 'activity-schedule', path: '/activity-schedule', label: 'Lịch hoạt động', Icon: Calendar, membersOnly: true },
   { key: 'leaderboard', path: '/leaderboard', label: 'BXH', Icon: Trophy, membersOnly: false },
   { key: 'point-rules', path: '/point-rules', label: 'Quy tắc điểm', Icon: BookMarked, membersOnly: false },
   { key: 'badges', path: '/badges', label: 'Huy hiệu', Icon: CircleStar, membersOnly: true },
@@ -22,6 +23,7 @@ const ClubDetailNav = ({ clubName, isMember = true }) => {
   const getActiveKey = () => {
     const base = `/clubs/${clubId}`;
     if (pathname === base || pathname === `${base}/`) return 'overview';
+    if (pathname.includes('/activity-schedule')) return 'activity-schedule';
     if (pathname.includes('/leaderboard')) return 'leaderboard';
     if (pathname.includes('/badges')) return 'badges';
     if (pathname.includes('/point-rules')) return 'point-rules';
