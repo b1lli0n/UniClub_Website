@@ -8,7 +8,6 @@ function Memberships() {
     const [memberships, setMemberships] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [showInviteModal, setShowInviteModal] = useState(false);
     const [actionLoadingId, setActionLoadingId] = useState('');
     const navigate = useNavigate();
     const { id } = useParams();
@@ -197,18 +196,10 @@ function Memberships() {
                         <button
                             type="button"
                             className="memberships-invite-list-button"
-                            onClick={() => navigate(`/clubs/${clubId}/invitations`)}
+                            onClick={() => navigate(`/clubs/manager/${clubId}/invitations`)}
                             title="Xem danh sách lời mời"
                         >
                             Danh sách lời mời
-                        </button>
-                        <button
-                            type="button"
-                            className="memberships-invite-button"
-                            onClick={() => setShowInviteModal(true)}
-                            title="Mời thành viên mới"
-                        >
-                            Mời thành viên
                         </button>
                     </div>
                 </header>
@@ -284,37 +275,7 @@ function Memberships() {
                     </div>
                 )}
 
-                {showInviteModal && (
-                    <div
-                        className="memberships-modal-backdrop"
-                        onClick={() => setShowInviteModal(false)}
-                        role="presentation"
-                    >
-                        <div
-                            className="glass-card memberships-invite-modal"
-                            onClick={(event) => event.stopPropagation()}
-                            role="dialog"
-                            aria-modal="true"
-                            aria-label="Mời thành viên"
-                        >
-                            <div className="memberships-invite-modal-header">
-                                <h2 className="memberships-invite-modal-title">Mời thành viên mới</h2>
-                                <button
-                                    type="button"
-                                    className="memberships-modal-close"
-                                    onClick={() => setShowInviteModal(false)}
-                                >
-                                    Đóng
-                                </button>
-                            </div>
-
-                            <SendClubInvitation
-                                clubId={clubId}
-                                onSuccess={() => setShowInviteModal(false)}
-                            />
-                        </div>
-                    </div>
-                )}
+                
             </div>
         </div>
     );

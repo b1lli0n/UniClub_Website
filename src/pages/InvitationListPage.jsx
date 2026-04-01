@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
     cancelInvitation,
@@ -6,6 +7,7 @@ import {
     getInvitationDetail,
     resendInvitation,
 } from '../api/invitationApi';
+import SendClubInvitation from '../components/SendClubInvitation';
 import '../styles/InvitationListPage.css';
 
 const STATUS_OPTIONS = [
@@ -74,7 +76,7 @@ function InvitationListPage() {
     const [invitations, setInvitations] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-
+    const [showInviteModal, setShowInviteModal] = useState(false);
     const [selectedId, setSelectedId] = useState('');
     const [selectedDetail, setSelectedDetail] = useState(null);
     const [detailLoading, setDetailLoading] = useState(false);
@@ -208,10 +210,18 @@ function InvitationListPage() {
                     <button
                         type="button"
                         className="invitation-back-btn"
-                        onClick={() => navigate(`/clubs/${clubId}/members`)}
+                        onClick={() => navigate(`/clubs/manager/${clubId}/join-requests`)}
                     >
                         Quay về duyệt thành viên
                     </button>
+                    <button
+                            type="button"
+                            className="memberships-invite-button"
+                            onClick={() => setShowInviteModal(true)}
+                            title="Mời thành viên mới"
+                        >
+                            Mời thành viên
+                        </button>
                 </header>
 
                 <div className="glass-card invitation-page-card">
@@ -356,6 +366,38 @@ function InvitationListPage() {
                     </div>
                 </div>
             </div>
+            {showInviteModal && typeof document !== 'undefined' && createPortal(
+                <div
+                    className="memberships-modal-backdrop"
+                    onClick={() => setShowInviteModal(false)}
+                    role="presentation"
+                >
+                    <div
+                        className="glass-card memberships-invite-modal"
+                        onClick={(event) => event.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Mời thành viên"
+                    >
+                        <div className="memberships-invite-modal-header">
+                            <h2 className="memberships-invite-modal-title">Mời thành viên mới</h2>
+                            <button
+                                type="button"
+                                className="memberships-modal-close"
+                                onClick={() => setShowInviteModal(false)}
+                            >
+                                Đóng
+                            </button>
+                        </div>
+
+                        <SendClubInvitation
+                            clubId={clubId}
+                            onSuccess={() => setShowInviteModal(false)}
+                        />
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 }

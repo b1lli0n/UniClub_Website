@@ -61,11 +61,8 @@ import BadgeDetailAdmin from '../pages/admin/BadgeDetail'
 import RewardPointLogs from '../pages/admin/RewardPointLogs'
 import AdminNotifications from '../pages/admin/Notifications'
 import FinancialDashboard from '../pages/FinancialDashboard'
-import MembershipsPage from '../pages/Memberships';
-//Tỷ
-import JoinRequests from '../pages/JoinRequests';
-//Tiến
-import JoinRequestsManagement from '../pages/JoinRequestsManagement';
+import RequestsPage from '../pages/RequestsPage';
+
 import EventsPage from '../pages/Events';
 import EventDetailPage from '../pages/EventDetail';
 import CreateEventPage from '../pages/CreateEvent';
@@ -140,10 +137,8 @@ const AppRouter = () => {
         <Route path='/clubs/manager/:id/point-rules-management' element={<PointRulesManagement />} />
         <Route path="/clubs/manager/:id/activity-schedule" element={<ClubActivitySchedule />} />
 
-        {/* <Route path="/clubs/manager/:clubId/join-requests" element={<JoinRequests />} /> */}
-
+        <Route path="/clubs/manager/:id/join-requests" element={<RequestsPage />} />
         <Route path="/clubs/manager/:id/invitations" element={<InvitationListPage />} />
-        <Route path="/clubs/manager/:id/join-requests" element={<JoinRequestsManagement />} />
 
         <Route path="/clubs/manager/:id/polls" element={<ClubPollManagement />} />
 
@@ -161,7 +156,7 @@ const AppRouter = () => {
         <Route path='/clubEvent/:id/event-timeline-management' element={<EventTimelineManagement />} />
         <Route path="/events" element={<Navigate to="/clubEvent" replace />} />
 
-        <Route path="/clubs/:id/members" element={<MembershipsPage />} />
+        
         
         
         <Route path="/notifications" element={<NotificationsPage />} />
