@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getJoinRequests } from '../api/clubApi';
+import { useNavigate, useParams } from 'react-router-dom';
+import { approveJoinRequest, getJoinRequests, rejectJoinRequest } from '../api/clubApi';
+import SendClubInvitation from '../components/SendClubInvitation';
 import '../styles/Memberships.css';
 
 function Memberships() {
     const [memberships, setMemberships] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [actionLoadingId, setActionLoadingId] = useState('');
+    const navigate = useNavigate();
     const { id } = useParams();
     const clubId = id;
+
 
     useEffect(() => {
         const loadMemberships = async () => {
@@ -20,30 +25,39 @@ function Memberships() {
 
             try {
                 setLoading(true);
-                console.log('📄 Loading join requests for club:', clubId);
                 const response = await getJoinRequests(clubId);
-                console.log('✅ Join requests response:', response);
 
                 // Handle different response formats
-                let requests = [];
+                let members = [];
                 if (Array.isArray(response)) {
-                    requests = response;
+                    members = response;
                 } else if (response.data && Array.isArray(response.data)) {
-                    requests = response.data;
+                    members = response.data;
                 } else if (response.memberships && Array.isArray(response.memberships)) {
-                    requests = response.memberships;
+                    members = response.memberships;
+                } else if (response.members && Array.isArray(response.members)) {
+                    members = response.members;
                 }
 
                 // Map to FE format
-                const mapped = requests.map(req => ({
-                    membershipId: req._id || req.id,
+                const mapped = members.map(member => ({
+                    membershipId: member._id || member.id,
                     user: {
-                        userId: req.user_id?._id || req.user_id,
-                        name: req.user_id?.fullName || req.user_id?.email?.split('@')[0] || 'Unknown',
-                        email: req.user_id?.email || 'No email'
+                        userId: member.user_id?._id || member.user_id || member.user?._id || member.user,
+                        name: member.user_id?.fullName || member.user?.fullName || member.user_id?.email?.split('@')[0] || member.user?.email?.split('@')[0] || 'Unknown',
+                        email: member.user_id?.email || member.user?.email || 'No email'
                     },
-                    status: req.status === 0 ? 'pending' : req.status === 1 ? 'approved' : req.status === 2 ? 'rejected' : 'unknown',
-                    requestedAt: req.joined_at || new Date().toISOString()
+                    status: member.status === 0 || member.status === 'pending'
+                        ? 'pending'
+                        : member.status === 1 || member.status === 'approved'
+                            ? 'approved'
+                            : member.status === 2 || member.status === 'rejected'
+                                ? 'rejected'
+                                : member.status === 3 || member.status === 'canceled' || member.status === 'cancelled'
+                                    ? 'cancelled'
+                                    : 'unknown',
+                    role: member.role,
+                    requestedAt: member.createdAt || member.joined_at || new Date().toISOString()
                 }));
 
                 setMemberships(mapped);
@@ -58,6 +72,40 @@ function Memberships() {
         loadMemberships();
     }, [clubId]);
 
+    const handleApprove = async (membershipId) => {
+        if (!membershipId) return;
+        try {
+            setActionLoadingId(`approve-${membershipId}`);
+            await approveJoinRequest(clubId, membershipId, { role: 0 });
+            setMemberships((prev) =>
+                prev.map((item) =>
+                    item.membershipId === membershipId ? { ...item, status: 'approved' } : item
+                )
+            );
+        } catch (err) {
+            alert(err?.message || 'Không thể duyệt thành viên');
+        } finally {
+            setActionLoadingId('');
+        }
+    };
+
+    const handleReject = async (membershipId) => {
+        if (!membershipId) return;
+        try {
+            setActionLoadingId(`reject-${membershipId}`);
+            await rejectJoinRequest(clubId, membershipId);
+            setMemberships((prev) =>
+                prev.map((item) =>
+                    item.membershipId === membershipId ? { ...item, status: 'rejected' } : item
+                )
+            );
+        } catch (err) {
+            alert(err?.message || 'Không thể từ chối thành viên');
+        } finally {
+            setActionLoadingId('');
+        }
+    };
+
     if (loading) {
         return (
             <div className="home-page">
@@ -66,7 +114,7 @@ function Memberships() {
                     <div className="glass-card memberships-loading-card">
                         <div className="memberships-spinner" />
                         <p className="memberships-loading-text">
-                            Đang tải yêu cầu tham gia...
+                            Đang tải danh sách thành viên...
                         </p>
                     </div>
                 </div>
@@ -99,69 +147,6 @@ function Memberships() {
         );
     }
 
-    const handleApprove = async (membershipId) => {
-        try {
-            console.log('📝 Approving membership:', membershipId);
-            const response = await fetch(
-                `http://localhost:5000/api/clubs/${clubId}/memberships/${membershipId}/approve`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ role: 0 }) // Default role: Member
-                }
-            );
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Approve failed');
-            }
-
-            console.log('✅ Approved successfully');
-            // Update UI
-            setMemberships(memberships.map(req =>
-                req.membershipId === membershipId ? { ...req, status: 'approved' } : req
-            ));
-            alert('Đã chấp nhận thành viên!');
-        } catch (err) {
-            console.error('❌ Approve error:', err);
-            alert(err.message || 'Không thể chấp nhận thành viên');
-        }
-    };
-
-    const handleReject = async (membershipId) => {
-        try {
-            console.log('📝 Rejecting membership:', membershipId);
-            const response = await fetch(
-                `http://localhost:5000/api/clubs/${clubId}/memberships/${membershipId}/reject`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Reject failed');
-            }
-
-            console.log('✅ Rejected successfully');
-            // Update UI
-            setMemberships(memberships.map(req =>
-                req.membershipId === membershipId ? { ...req, status: 'rejected' } : req
-            ));
-            alert('Đã từ chối thành viên!');
-        } catch (err) {
-            console.error('❌ Reject error:', err);
-            alert(err.message || 'Không thể từ chối thành viên');
-        }
-    };
-
     const getStatusLabel = (status) => {
         switch (status) {
             case 'pending':
@@ -170,8 +155,35 @@ function Memberships() {
                 return 'Chấp nhận';
             case 'rejected':
                 return 'Từ chối';
+            case 'cancelled':
+                return 'Đã hủy';
             default:
                 return status;
+        }
+    };
+
+    const getRoleLabel = (role) => {
+        if (typeof role === 'string') {
+            const normalizedRole = role.toLowerCase();
+            if (normalizedRole.includes('leader') && normalizedRole.includes('sub')) return 'Sub-leader';
+            if (normalizedRole.includes('leader')) return 'Leader';
+            if (normalizedRole.includes('secret')) return 'Secretary';
+            if (normalizedRole.includes('treasurer')) return 'Treasurer';
+            if (normalizedRole.includes('member')) return 'Member';
+        }
+
+        const roleNumber = Number(role);
+        switch (roleNumber) {
+            case 1:
+                return 'Leader';
+            case 2:
+                return 'Sub-leader';
+            case 3:
+                return 'Secretary';
+            case 4:
+                return 'Treasurer';
+            default:
+                return 'Member';
         }
     };
 
@@ -180,12 +192,33 @@ function Memberships() {
             <div className="home-overlay" />
             <div className="myclub-container">
                 <header className="myclub-header">
-                    <h1 className="myclub-title">Yêu cầu tham gia</h1>
+                    <h1 className="myclub-title">Duyệt thành viên CLB</h1>
+                    <div className="memberships-header-actions">
+                        <button
+                            type="button"
+                            className="memberships-invite-list-button"
+                            onClick={() => navigate(`/clubs/${clubId}/invitations`)}
+                            title="Xem danh sách lời mời"
+                        >
+                            Danh sách lời mời
+                        </button>
+                        <button
+                            type="button"
+                            className="memberships-invite-button"
+                            onClick={() => setShowInviteModal(true)}
+                            title="Mời thành viên mới"
+                        >
+                            Mời thành viên
+                        </button>
+                    </div>
                 </header>
 
                 {memberships.length > 0 ? (
                     <div className="memberships-list">
                         {memberships.map((request) => {
+                            const isPending = request.status === 'pending';
+                            const isApproving = actionLoadingId === `approve-${request.membershipId}`;
+                            const isRejecting = actionLoadingId === `reject-${request.membershipId}`;
                             return (
                                 <div
                                     key={request.membershipId}
@@ -206,7 +239,7 @@ function Memberships() {
                                             </div>
                                         </div>
                                         <p className="memberships-requested-at">
-                                            Gửi lúc: {new Date(request.requestedAt).toLocaleString('vi-VN')}
+                                            Tham gia lúc: {new Date(request.requestedAt).toLocaleString('vi-VN')}
                                         </p>
                                     </div>
 
@@ -214,21 +247,30 @@ function Memberships() {
                                         <span className={`memberships-status-badge status-${request.status}`}>
                                             {getStatusLabel(request.status)}
                                         </span>
-
-                                        <div className="memberships-action-buttons">
-                                            <button
-                                                onClick={() => handleApprove(request.membershipId)}
-                                                className="memberships-approve"
-                                            >
-                                                Chấp nhận
-                                            </button>
-                                            <button
-                                                onClick={() => handleReject(request.membershipId)}
-                                                className="memberships-reject"
-                                            >
-                                                Từ chối
-                                            </button>
-                                        </div>
+                                        {isPending ? (
+                                            <div className="memberships-action-buttons">
+                                                <button
+                                                    type="button"
+                                                    className="memberships-approve"
+                                                    onClick={() => handleApprove(request.membershipId)}
+                                                    disabled={isApproving || isRejecting}
+                                                >
+                                                    {isApproving ? 'Đang duyệt...' : 'Duyệt'}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="memberships-reject"
+                                                    onClick={() => handleReject(request.membershipId)}
+                                                    disabled={isApproving || isRejecting}
+                                                >
+                                                    {isRejecting ? 'Đang xử lý...' : 'Từ chối'}
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <span className="memberships-status-badge">
+                                                {getRoleLabel(request.role)}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             );
@@ -237,8 +279,40 @@ function Memberships() {
                 ) : (
                     <div className="glass-card memberships-empty">
                         <p className="memberships-empty-text">
-                            Không có yêu cầu tham gia nào
+                            Chưa có yêu cầu tham gia nào
                         </p>
+                    </div>
+                )}
+
+                {showInviteModal && (
+                    <div
+                        className="memberships-modal-backdrop"
+                        onClick={() => setShowInviteModal(false)}
+                        role="presentation"
+                    >
+                        <div
+                            className="glass-card memberships-invite-modal"
+                            onClick={(event) => event.stopPropagation()}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label="Mời thành viên"
+                        >
+                            <div className="memberships-invite-modal-header">
+                                <h2 className="memberships-invite-modal-title">Mời thành viên mới</h2>
+                                <button
+                                    type="button"
+                                    className="memberships-modal-close"
+                                    onClick={() => setShowInviteModal(false)}
+                                >
+                                    Đóng
+                                </button>
+                            </div>
+
+                            <SendClubInvitation
+                                clubId={clubId}
+                                onSuccess={() => setShowInviteModal(false)}
+                            />
+                        </div>
                     </div>
                 )}
             </div>

@@ -1,19 +1,20 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { fetchNotifications, markNotificationAsRead } from '../api/notificationApi';
+import { acceptInvitation, rejectInvitation } from '../api/invitationApi';
 import '../styles/Notifications.css';
-import { 
-  Bell, 
-  CheckCircle, 
-  XCircle, 
-  Calendar, 
-  Clock, 
-  Info, 
-  AlertCircle,
-  Filter,
-  Sparkles,
-  Search,
-  Check
+import {
+    Bell,
+    CheckCircle,
+    XCircle,
+    Calendar,
+    Clock,
+    Info,
+    AlertCircle,
+    Filter,
+    Sparkles,
+    Search,
+    Check
 } from 'lucide-react';
 
 const getNotificationConfig = (type) => {
@@ -39,6 +40,53 @@ const NotificationTypeBadge = ({ type }) => {
     );
 };
 
+const getInvitationMeta = (notificationItem) => {
+    const notification = notificationItem?.notification || notificationItem || {};
+    const payload = notification.payload || notification.metadata || notification.data || {};
+
+    const invitationRaw =
+        payload.invitation ||
+        payload.invitationInfo ||
+        payload.data ||
+        null;
+
+    const invitationId =
+        payload.invitationId ||
+        payload.invitation_id ||
+        payload.inviteId ||
+        payload.referenceId ||
+        payload.reference_id ||
+        invitationRaw?._id ||
+        invitationRaw?.id ||
+        notification.invitationId ||
+        notification.invitation_id ||
+        null;
+
+    const clubId =
+        payload.clubId ||
+        payload.club_id ||
+        invitationRaw?.clubId ||
+        invitationRaw?.club_id ||
+        localStorage.getItem('clubId') ||
+        null;
+
+    const status =
+        payload.status ||
+        payload.invitationStatus ||
+        invitationRaw?.status ||
+        null;
+
+    const typeText = String(notification.type || '').toLowerCase();
+    const isInvitation = typeText.includes('invitation') || Boolean(invitationId);
+
+    return { isInvitation, invitationId, clubId, status };
+};
+
+const isFinalInvitationStatus = (status) => {
+    const normalized = String(status || '').toLowerCase();
+    return ['approved', 'accepted', 'rejected', 'declined', 'canceled', 'cancelled'].includes(normalized);
+};
+
 export default function NotificationsPage() {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -47,6 +95,7 @@ export default function NotificationsPage() {
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [limit] = useState(20);
+    const [invitationActionLoading, setInvitationActionLoading] = useState({});
 
     // TODO: lấy từ auth/context
     const clubId = localStorage.getItem('clubId') || 'default';
@@ -114,6 +163,38 @@ export default function NotificationsPage() {
         } catch (err) {
             console.error('Failed to mark as read:', err);
             toast.error(err.message || 'Không thể đánh dấu đã đọc');
+        }
+    };
+
+    const handleInvitationAction = async (notificationItem, action) => {
+        const meta = getInvitationMeta(notificationItem);
+        if (!meta.invitationId) {
+            toast.error('Không tìm thấy mã lời mời để xử lý');
+            return;
+        }
+
+        const notificationId = notificationItem._id || notificationItem?.notification?._id || meta.invitationId;
+        setInvitationActionLoading((prev) => ({ ...prev, [notificationId]: action }));
+
+        try {
+            if (action === 'accept') {
+                await acceptInvitation(meta.invitationId, meta.clubId);
+                toast.success('Đã đồng ý tham gia câu lạc bộ');
+            } else {
+                await rejectInvitation(meta.invitationId, meta.clubId);
+                toast.success('Đã từ chối lời mời');
+            }
+
+            await handleMarkAsRead(notificationItem);
+            await loadNotifications();
+        } catch (err) {
+            toast.error(err?.message || 'Xử lý lời mời thất bại');
+        } finally {
+            setInvitationActionLoading((prev) => {
+                const next = { ...prev };
+                delete next[notificationId];
+                return next;
+            });
         }
     };
 
@@ -244,6 +325,12 @@ export default function NotificationsPage() {
                                 const createdAt = notificationItem.created_at || notification.created_at || notification.createdAt;
                                 const config = getNotificationConfig(notification.type);
                                 const Icon = config.icon;
+                                const inviteMeta = getInvitationMeta(notificationItem);
+                                const showInvitationActions =
+                                    inviteMeta.isInvitation &&
+                                    inviteMeta.invitationId &&
+                                    !isFinalInvitationStatus(inviteMeta.status);
+                                const actionLoading = invitationActionLoading[notificationItem._id || notification._id];
 
                                 return (
                                     <div
@@ -274,6 +361,27 @@ export default function NotificationsPage() {
                                                 <p className="noti-body-modern">
                                                     {notification.description || notification.body}
                                                 </p>
+
+                                                {showInvitationActions && (
+                                                    <div className="noti-invite-actions" onClick={(e) => e.stopPropagation()}>
+                                                        <button
+                                                            type="button"
+                                                            className="noti-invite-btn noti-invite-btn-accept"
+                                                            disabled={Boolean(actionLoading)}
+                                                            onClick={() => handleInvitationAction(notificationItem, 'accept')}
+                                                        >
+                                                            {actionLoading === 'accept' ? 'Đang xử lý...' : 'Đồng ý tham gia'}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="noti-invite-btn noti-invite-btn-reject"
+                                                            disabled={Boolean(actionLoading)}
+                                                            onClick={() => handleInvitationAction(notificationItem, 'reject')}
+                                                        >
+                                                            {actionLoading === 'reject' ? 'Đang xử lý...' : 'Từ chối'}
+                                                        </button>
+                                                    </div>
+                                                )}
 
                                                 {notification.payload?.eventTitle && (
                                                     <div className="noti-event-box-premium">

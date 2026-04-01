@@ -4,14 +4,16 @@ import axiosInstance from './adminapi'
 // ==================== PUBLIC REWARD APIS (User) ====================
 
 export const getRewards = async (clubId, params = {}) => {
+    if (!clubId) throw new Error('clubId is required')
     const response = await api.get(`/rewards/${clubId}`, { params })
     return response.data
 }
 
 export const getRewardDetail = async (clubId, rewardId) => {
+    if (!clubId || !rewardId) throw new Error('clubId and rewardId are required')
     const response = await api.get(`/rewards/${clubId}/${rewardId}`)
-    // console.log('getRewardDetail response:', response)
-    // console.log('getRewardDetail response.data:', response.data)
+    console.log('getRewardDetail response:', response)
+    console.log('getRewardDetail response.data:', response.data)
     return response.data
 }
 
@@ -23,7 +25,26 @@ export const getContributionScore = async (clubId) => {
 }
 
 export const redeemReward = async (clubId, rewardId) => {
+    if (!clubId || !rewardId) throw new Error('clubId and rewardId are required')
     const response = await api.post(`/rewards/${clubId}/redeem/${rewardId}`)
+    return response.data
+}
+
+/**
+ * Lấy lịch sử redeem của user theo CLB
+ * GET /api/rewards/:clubId/history?page&limit&status
+ */
+export const getUserRedemptionHistory = async (clubId, params = {}) => {
+    if (!clubId) throw new Error('clubId is required')
+
+    const { page = 1, limit = 10, status } = params
+    const query = { page, limit }
+
+    if (status !== undefined && status !== '' && status !== 'all') {
+        query.status = Number(status)
+    }
+
+    const response = await api.get(`/rewards/${clubId}/history`, { params: query })
     return response.data
 }
 
@@ -57,7 +78,7 @@ export const createReward = async (clubId, data) => {
  * body: { name?, description?, points_required?, quantity?, is_active? }
  */
 export const updateReward = async (id, data) => {
-  return axiosInstance.put(`/rewards/${id}`, data);
+    return axiosInstance.put(`/rewards/${id}`, data);
 };
 
 /**
@@ -75,12 +96,17 @@ export const getAdminRewardDetail = async (rewardId) => {
  * GET /api/admin/clubs/:clubId/reward-transactions?page&limit&status
  */
 export const getRedemptionHistory = async (clubId, params = {}) => {
-  const { page = 1, limit = 10, status } = params;
-  const query = { page, limit };
-  if (status !== undefined && status !== '' && status !== 'all') {
-    query.status = status;
-  }
-  return axiosInstance.get(`/clubs/${clubId}/reward-transactions`, { params: query });
+    if (!clubId) throw new Error('clubId is required');
+    const { page = 1, limit = 10, status } = params;
+    const query = { page, limit };
+    if (status !== undefined && status !== '' && status !== 'all') {
+        const normalizedStatus = Number(status);
+        if (![0, 1, 2].includes(normalizedStatus)) {
+            throw new Error('status must be 0, 1 or 2');
+        }
+        query.status = normalizedStatus;
+    }
+    return axiosInstance.get(`/clubs/${clubId}/reward-transactions`, { params: query });
 };
 
 /**
@@ -91,7 +117,7 @@ export const getRedemptionHistory = async (clubId, params = {}) => {
  * @param {number} status - 1 (approved) hoặc 2 (rejected)
  */
 export const updateRedemptionStatus = async (clubId, transactionId, status) => {
-  return axiosInstance.put(`/clubs/${clubId}/reward-transactions/${transactionId}/status`, { status });
+    return axiosInstance.put(`/clubs/${clubId}/reward-transactions/${transactionId}/status`, { status });
 };
 
 // ==================== MANUAL ASSIGN BADGE APIS ====================
@@ -102,7 +128,7 @@ export const updateRedemptionStatus = async (clubId, transactionId, status) => {
  * @param {string} clubId - ID của CLB
  */
 export const getClubBadgesForAssign = async (clubId) => {
-  return axiosInstance.get(`/clubs/${clubId}/badges-for-assign`);
+    return axiosInstance.get(`/clubs/${clubId}/badges-for-assign`);
 };
 
 /**
@@ -113,7 +139,7 @@ export const getClubBadgesForAssign = async (clubId) => {
  * @param {string} badgeId - ID của BadgeTemplate
  */
 export const assignBadgeToMember = async (clubId, membershipId, badgeId) => {
-  return axiosInstance.post(`/clubs/${clubId}/members/${membershipId}/assign-badge`, { badge_id: badgeId });
+    return axiosInstance.post(`/clubs/${clubId}/members/${membershipId}/assign-badge`, { badge_id: badgeId });
 };
 
 /**
@@ -123,7 +149,7 @@ export const assignBadgeToMember = async (clubId, membershipId, badgeId) => {
  * @param {string} membershipId - ID của membership
  */
 export const getMemberBadges = async (clubId, membershipId) => {
-  return axiosInstance.get(`/clubs/${clubId}/members/${membershipId}/badges`);
+    return axiosInstance.get(`/clubs/${clubId}/members/${membershipId}/badges`);
 };
 
 // ==================== BADGE APIS ====================
@@ -223,6 +249,7 @@ const rewardApi = {
     // Public APIs
     getRewards,
     getRewardDetail,
+    getUserRedemptionHistory,
     getRedemptionHistory,
     getContributionScore,
     redeemReward,

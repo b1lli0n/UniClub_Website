@@ -251,7 +251,8 @@
   flex-direction: column;
 }
 
-.loading-state, .empty-state {
+.loading-state,
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -271,7 +272,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-state .empty-icon {
@@ -620,6 +623,42 @@
   background-color: rgba(255, 255, 255, 0.4);
 }
 
+.notification-invite-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.invite-action-btn {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+.invite-action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.invite-action-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.invite-action-btn-accept {
+  color: #065f46;
+  background: #d1fae5;
+}
+
+.invite-action-btn-reject {
+  color: #9f1239;
+  background: #ffe4e6;
+}
+
 .delete-action-btn {
   width: 100%;
   padding: 12px 24px;
@@ -793,7 +832,7 @@
     align-items: center;
     justify-content: center;
   }
-  
+
   .notification-detail-panel:has(.detail-card) {
     display: flex;
   }
@@ -814,7 +853,7 @@
   .notification-center-header {
     padding: 24px 0;
   }
-  
+
   .notification-center-header .header-content {
     flex-direction: column;
     text-align: center;
@@ -831,7 +870,8 @@
     flex-direction: column;
   }
 
-  .search-box input, .filter-box select {
+  .search-box input,
+  .filter-box select {
     width: 100%;
   }
 

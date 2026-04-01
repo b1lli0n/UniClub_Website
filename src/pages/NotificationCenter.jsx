@@ -7,6 +7,7 @@ import {
     markAsRead,
     getNotificationDetail,
 } from "../api/notificationApi";
+import { acceptInvitation, rejectInvitation } from "../api/invitationApi";
 import CreateNotificationModal from "../components/modals/CreateNotificationModal";
 import "../styles/NotificationCenter.css";
 
@@ -30,6 +31,7 @@ const NotificationCenter = () => {
     const [isComposeOpen, setIsComposeOpen] = useState(false);
     const [selectedNotification, setSelectedNotification] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
+    const [invitationActionLoading, setInvitationActionLoading] = useState("");
 
     // ✅ NEW: Delete confirmation modal state
     const [deleteModal, setDeleteModal] = useState({
@@ -56,6 +58,47 @@ const NotificationCenter = () => {
         return data?.display_sender_name || data?.displayName || data?.senderName || "Hệ thống";
     };
     const getType = (item) => getNotificationData(item)?.type || "general";
+    const getInvitationMeta = (item) => {
+        const data = getNotificationData(item) || {};
+        const payload = data.payload || data.metadata || data.data || {};
+        const invitationObj = payload.invitation || payload.invitationInfo || null;
+
+        const invitationId =
+            payload.invitationId ||
+            payload.invitation_id ||
+            payload.inviteId ||
+            payload.referenceId ||
+            payload.reference_id ||
+            invitationObj?._id ||
+            invitationObj?.id ||
+            data.invitationId ||
+            data.invitation_id ||
+            null;
+
+        const clubId =
+            payload.clubId ||
+            payload.club_id ||
+            invitationObj?.clubId ||
+            invitationObj?.club_id ||
+            localStorage.getItem("clubId") ||
+            null;
+
+        const status =
+            payload.status ||
+            payload.invitationStatus ||
+            invitationObj?.status ||
+            null;
+
+        const type = String(data.type || "").toLowerCase();
+        const isInvitation = type.includes("invitation") || Boolean(invitationId);
+
+        return { isInvitation, invitationId, clubId, status };
+    };
+
+    const isFinalInvitationStatus = (status) => {
+        const normalized = String(status || "").toLowerCase();
+        return ["approved", "accepted", "rejected", "declined", "canceled", "cancelled"].includes(normalized);
+    };
 
     // Fetch notifications
     const fetchNotifications = useCallback(async () => {
@@ -150,6 +193,39 @@ const NotificationCenter = () => {
             // Không cần gọi handleViewDetail nữa vì đã có đủ data
         } catch (error) {
             console.error("Error:", error);
+        }
+    };
+
+    const handleInvitationAction = async (notification, action) => {
+        const inviteMeta = getInvitationMeta(notification);
+        if (!inviteMeta.invitationId) {
+            toast.error("Không tìm thấy mã lời mời");
+            return;
+        }
+
+        const actionKey = `${notification._id || notification.id || inviteMeta.invitationId}-${action}`;
+        setInvitationActionLoading(actionKey);
+
+        try {
+            if (action === "accept") {
+                await acceptInvitation(inviteMeta.invitationId, inviteMeta.clubId);
+                toast.success("Đã đồng ý tham gia câu lạc bộ");
+            } else {
+                await rejectInvitation(inviteMeta.invitationId, inviteMeta.clubId);
+                toast.success("Đã từ chối lời mời");
+            }
+
+            const id = notification._id || notification.id;
+            if (id && !isRead(notification)) {
+                await markAsRead(id);
+            }
+
+            await fetchNotifications();
+            setSelectedNotification(null);
+        } catch (error) {
+            toast.error(error?.message || "Xử lý lời mời thất bại");
+        } finally {
+            setInvitationActionLoading("");
         }
     };
 
@@ -291,6 +367,19 @@ const NotificationCenter = () => {
                 return { label: "Cá nhân", color: "#8b5cf6" };
         }
     };
+
+    const selectedInviteMeta = selectedNotification ? getInvitationMeta(selectedNotification) : null;
+    const showInvitationActions =
+        Boolean(selectedInviteMeta?.isInvitation) &&
+        Boolean(selectedInviteMeta?.invitationId) &&
+        !isFinalInvitationStatus(selectedInviteMeta?.status);
+    const selectedNotiId =
+        selectedNotification?._id ||
+        selectedNotification?.id ||
+        selectedInviteMeta?.invitationId ||
+        "";
+    const acceptLoading = invitationActionLoading === `${selectedNotiId}-accept`;
+    const rejectLoading = invitationActionLoading === `${selectedNotiId}-reject`;
 
     return (
         <div className="notification-center">
@@ -516,6 +605,26 @@ const NotificationCenter = () => {
                                 </div>
                                 <div className="detail-body">{getContent(selectedNotification)}</div>
                                 <div className="detail-actions">
+                                    {showInvitationActions && (
+                                        <div className="notification-invite-actions">
+                                            <button
+                                                type="button"
+                                                className="invite-action-btn invite-action-btn-accept"
+                                                disabled={acceptLoading || rejectLoading}
+                                                onClick={() => handleInvitationAction(selectedNotification, "accept")}
+                                            >
+                                                {acceptLoading ? "Đang xử lý..." : "Đồng ý tham gia"}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="invite-action-btn invite-action-btn-reject"
+                                                disabled={acceptLoading || rejectLoading}
+                                                onClick={() => handleInvitationAction(selectedNotification, "reject")}
+                                            >
+                                                {rejectLoading ? "Đang xử lý..." : "Từ chối"}
+                                            </button>
+                                        </div>
+                                    )}
                                     <button
                                         className="delete-action-btn"
                                         onClick={(e) => openDeleteModal(selectedNotification._id || selectedNotification.id, e)}

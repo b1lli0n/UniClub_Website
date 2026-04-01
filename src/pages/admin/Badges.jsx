@@ -21,7 +21,7 @@ const Badges = () => {
     const [error, setError] = useState(null)
     // Sort state
     const [sortBy, setSortBy] = useState('created_at')
-    const [sortOrder, setSortOrder] = useState('desc')
+    const [sortOrder, setSortOrder] = useState('-1')
     // Club filter state
     const [clubFilter, setClubFilter] = useState('all')
     const [clubs, setClubs] = useState([])
@@ -52,27 +52,27 @@ const Badges = () => {
     useEffect(() => {
         fetchBadges()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, isActiveFilter, appliedSearch, sortBy, clubFilter])
+    }, [page, isActiveFilter, appliedSearch, sortBy, sortOrder, clubFilter])
 
     const fetchBadges = async () => {
         setLoading(true)
         setError(null)
         console.log('Fetching badges with params:',clubFilter )
         try {
-            let is_active;
-            if (isActiveFilter === 'true') is_active = true;
-            else if (isActiveFilter === 'false') is_active = false;
+            let isActive;
+            if (isActiveFilter === 'true') isActive = 'true';
+            else if (isActiveFilter === 'false') isActive = 'false';
             const params = {
                 page,
                 limit: 12,
                 search: appliedSearch || undefined,
-                club_id: clubFilter !== 'all' ? clubFilter : undefined,
-                sort_by: sortBy,
+                sortBy,
+                sortOrder: Number(sortOrder),
+                isActive,
             };
             console.log('Final params for API call:', params)
 
-            if (typeof is_active === 'boolean') params.is_active = is_active;
-            const res = await getClubBadges(params);
+            const res = await getClubBadges(clubFilter !== 'all' ? clubFilter : null, params);
             setBadges(res?.badges || res?.data || [])
             setPagination(res?.pagination || { total: 0, page: 1, totalPages: 1 })
         } catch (err) {
@@ -170,10 +170,20 @@ const Badges = () => {
                         }}
                         style={{ padding: '4px 8px', borderRadius: 4 }}
                     >
-                        <option value="az">Tên A-Z</option>
-                        <option value="za">Tên Z-A</option>
-                        <option value="newest">Mới nhất</option>
-                        <option value="oldest">Cũ nhất</option>
+                        <option value="created_at">Ngày tạo</option>
+                        <option value="points_required">Điểm yêu cầu</option>
+                        <option value="is_active">Trạng thái</option>
+                    </select>
+                    <select
+                        value={sortOrder}
+                        onChange={e => {
+                            setSortOrder(e.target.value)
+                            setPage(1)
+                        }}
+                        style={{ padding: '4px 8px', borderRadius: 4 }}
+                    >
+                        <option value="-1">Giảm dần</option>
+                        <option value="1">Tăng dần</option>
                     </select>
                 </div>
             </div>

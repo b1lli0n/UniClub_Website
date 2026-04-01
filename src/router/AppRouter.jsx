@@ -62,17 +62,20 @@ import RewardPointLogs from '../pages/admin/RewardPointLogs'
 import AdminNotifications from '../pages/admin/Notifications'
 import FinancialDashboard from '../pages/FinancialDashboard'
 import MembershipsPage from '../pages/Memberships';
+//Tỷ
 import JoinRequests from '../pages/JoinRequests';
+//Tiến
+import JoinRequestsManagement from '../pages/JoinRequestsManagement';
 import EventsPage from '../pages/Events';
 import EventDetailPage from '../pages/EventDetail';
 import CreateEventPage from '../pages/CreateEvent';
 import UpdateEventPage from '../pages/UpdateEvent';
 import NotificationsPage from '../pages/Notifications';
+import InvitationListPage from '../pages/InvitationListPage';
 import Home from '../pages/Home';
 import ViewRewards from '../pages/RewardPages/ViewRewards';
 import ViewRewardDetail from '../pages/RewardPages/ViewRewardDetail';
 import ViewRedemptionHistory from '../pages/RewardPages/ViewRedemptionHistory';
-import RedeemReward from '../pages/RewardPages/RedeemReward';
 import { List } from 'lucide-react'
 import MyMembershipFees from '../pages/MyMembershipFees'
 import ViewJoinRequests from '../pages/ViewJoinRequests'
@@ -112,15 +115,6 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/club/:clubId/rewards/:rewardId/redeem"
-          element={
-            <ProtectedRoute>
-              <RedeemReward />
-            </ProtectedRoute>
-          }
-        />
-
         <Route path="/my-events" element={<MyEvent />} />
         {/* <Route path="/my-requests" element={<ViewJoinRequests />} /> */}
 
@@ -145,7 +139,12 @@ const AppRouter = () => {
         <Route path="/clubs/manager/:id/transactions" element={<TransactionList />} />
         <Route path='/clubs/manager/:id/point-rules-management' element={<PointRulesManagement />} />
         <Route path="/clubs/manager/:id/activity-schedule" element={<ClubActivitySchedule />} />
-        <Route path="/clubs/manager/:clubId/join-requests" element={<JoinRequests />} />
+
+        {/* <Route path="/clubs/manager/:clubId/join-requests" element={<JoinRequests />} /> */}
+
+        <Route path="/clubs/manager/:id/invitations" element={<InvitationListPage />} />
+        <Route path="/clubs/manager/:id/join-requests" element={<JoinRequestsManagement />} />
+
         <Route path="/clubs/manager/:id/polls" element={<ClubPollManagement />} />
 
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
@@ -162,7 +161,9 @@ const AppRouter = () => {
         <Route path='/clubEvent/:id/event-timeline-management' element={<EventTimelineManagement />} />
         <Route path="/events" element={<Navigate to="/clubEvent" replace />} />
 
-        <Route path="/clubs/:id/join-requests" element={<JoinRequests />} />
+        <Route path="/clubs/:id/members" element={<MembershipsPage />} />
+        
+        
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route
           path="/clubs/:clubId/finance"

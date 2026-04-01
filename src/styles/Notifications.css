@@ -179,11 +179,30 @@
   transition: all 0.3s;
 }
 
-.noti-icon-wrapper-premium.color-error { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
-.noti-icon-wrapper-premium.color-success { background: rgba(34, 197, 94, 0.1); color: #22C55E; }
-.noti-icon-wrapper-premium.color-danger { background: rgba(249, 115, 22, 0.1); color: #F97316; }
-.noti-icon-wrapper-premium.color-info { background: rgba(162, 210, 255, 0.2); color: #1e3a8a; }
-.noti-icon-wrapper-premium.color-general { background: rgba(255, 255, 255, 0.5); color: #2D1B3D; }
+.noti-icon-wrapper-premium.color-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.noti-icon-wrapper-premium.color-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22C55E;
+}
+
+.noti-icon-wrapper-premium.color-danger {
+  background: rgba(249, 115, 22, 0.1);
+  color: #F97316;
+}
+
+.noti-icon-wrapper-premium.color-info {
+  background: rgba(162, 210, 255, 0.2);
+  color: #1e3a8a;
+}
+
+.noti-icon-wrapper-premium.color-general {
+  background: rgba(255, 255, 255, 0.5);
+  color: #2D1B3D;
+}
 
 .noti-unread-glow {
   position: absolute;
@@ -199,9 +218,20 @@
 }
 
 @keyframes pulse-glow {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.3); opacity: 0.8; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.3);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .noti-content-column {
@@ -240,10 +270,25 @@
   text-transform: uppercase;
 }
 
-.noti-badge-error { background: #fee2e2; color: #ef4444; }
-.noti-badge-success { background: #dcfce7; color: #16a34a; }
-.noti-badge-info { background: #e0f2fe; color: #0369a1; }
-.noti-badge-general { background: #f3f4f6; color: #4b5563; }
+.noti-badge-error {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.noti-badge-success {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.noti-badge-info {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.noti-badge-general {
+  background: #f3f4f6;
+  color: #4b5563;
+}
 
 .noti-time-modern {
   font-size: 0.75rem;
@@ -260,6 +305,43 @@
   line-height: 1.6;
   color: #4A4A6A;
   margin: 0 0 1.25rem 0;
+}
+
+.noti-invite-actions {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 1.1rem;
+}
+
+.noti-invite-btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.noti-invite-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.noti-invite-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.noti-invite-btn-accept {
+  color: #0f5132;
+  background: #d1fae5;
+  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.18);
+}
+
+.noti-invite-btn-reject {
+  color: #9f1239;
+  background: #ffe4e6;
+  box-shadow: 0 8px 18px rgba(244, 63, 94, 0.16);
 }
 
 /* Event Context Box */
@@ -358,21 +440,58 @@
   margin-top: 1rem;
 }
 
-.icon-error-red { color: #EF4444; }
+.icon-error-red {
+  color: #EF4444;
+}
 
 @media (max-width: 768px) {
-  .noti-page-wrapper { padding: 1.5rem; }
-  .noti-header-left { flex-direction: column; align-items: flex-start; }
-  .filter-group-modern { width: 100%; justify-content: space-between; gap: 1rem; }
-  .filter-pills-wrap { display: none; }
-  .mobile-only-filter { display: block; flex: 1; }
+  .noti-page-wrapper {
+    padding: 1.5rem;
+  }
+
+  .noti-header-left {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-group-modern {
+    width: 100%;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .filter-pills-wrap {
+    display: none;
+  }
+
+  .mobile-only-filter {
+    display: block;
+    flex: 1;
+  }
+
   .noti-filter-select-mobile {
     width: 100%;
     padding: 8px;
     border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
   }
-  .noti-card-inner { flex-direction: column; gap: 1.25rem; }
-  .noti-top-row { flex-direction: column; gap: 0.75rem; }
-  .noti-meta-right { width: 100%; justify-content: space-between; }
+
+  .noti-card-inner {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .noti-top-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .noti-meta-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .noti-invite-actions {
+    flex-direction: column;
+  }
 }

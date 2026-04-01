@@ -8,7 +8,10 @@ export const updateClubBadge = async (id, data) => {
     return axiosInstance.put(`/club-badges/${id}`, data);
 };
 
-export const getClubBadges = async (params = {}) => {
+export const getClubBadges = async (clubId, params = {}) => {
+    if (clubId) {
+        return axiosInstance.get(`/badges/${clubId}`, { params });
+    }
     return axiosInstance.get('/club-badges', { params });
 };
 
