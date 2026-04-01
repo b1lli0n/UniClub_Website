@@ -12,7 +12,7 @@ const ALL_TABS = [
   { key: 'points-history', path: '/points-history', label: 'Lịch sử điểm', Icon: ScrollText, membersOnly: true },
 ];
 
-const ClubDetailNav = ({ clubName, isMember = true }) => {
+const ClubDetailNav = ({ clubName, isMember = false }) => {
   const { id: clubId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();

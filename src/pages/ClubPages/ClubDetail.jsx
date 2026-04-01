@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { Users, Calendar, Tag, ImageIcon, ArrowRight, Crown, UserCircle2, ShieldCheck, FileBadge2, Wallet } from 'lucide-react';
+import { Users, Calendar, Tag, ImageIcon, ArrowRight, Crown, UserCircle2, ShieldCheck, FileBadge2, Wallet, ChevronLeft, ChevronRight  } from 'lucide-react';
 import ClubDetailNav from '../../components/clubs/ClubDetailNav';
-import { getClubById, getEventsByClub, requestToJoinClub, leaveClub } from '../../api/clubApi';
+import { getClubById, getEventsByClub, requestToJoinClub, leaveClub, getMyJoinRequests } from '../../api/clubApi';
 import { getRewards } from '../../api/rewardApi';
 import { getUserClubs } from '../../api/userApi';
+import { getPollDetail, listPolls } from '../../api/pollApi';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/ClubDetail.css';
 import { ASSET_BASE } from '../../api/api';
+import ClubPollStrip from '../../components/ClubPollStrip';
+import PollVoteModal from '../../components/PollVoteModal';
 
 const buildImageSrc = (raw) => {
   const cleaned = (raw || '').trim().replace(/"/g, '');
@@ -69,6 +72,27 @@ const getRoleIcon = (role) => {
   return UserCircle2;
 };
 
+const isPendingJoinRequestForClub = (requests, clubId) => {
+  if (!Array.isArray(requests)) return false;
+
+  return requests.some((req) => {
+    const statusRaw = req?.status;
+    const statusText = typeof statusRaw === 'string' ? statusRaw.trim().toLowerCase() : '';
+    const isPending = statusRaw === 0 || statusText === 'pending' || statusText === '0';
+    if (!isPending) return false;
+
+    const reqClubId =
+      req?.club_id?._id ||
+      req?.club_id?.id ||
+      req?.club_id ||
+      req?.club?._id ||
+      req?.club?.id ||
+      req?.club;
+
+    return String(reqClubId) === String(clubId);
+  });
+};
+
 const ClubDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -84,6 +108,13 @@ const ClubDetail = () => {
   const [rewardsLoading, setRewardsLoading] = useState(true);
   const [heroImgError, setHeroImgError] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [pollItems, setPollItems] = useState([]);
+  const [featuredPollDetail, setFeaturedPollDetail] = useState(null);
+  const [pollModalId, setPollModalId] = useState('');
+  const [activePollIndex, setActivePollIndex] = useState(0);
+  const [pollSearchText, setPollSearchText] = useState('');
+  const [pollFilterStatus, setPollFilterStatus] = useState('all');
+  const [pollSortBy, setPollSortBy] = useState('ending_soon');
 
 
   // Scroll to top on mount
@@ -133,6 +164,7 @@ const ClubDetail = () => {
 
         const clubData = clubRes?.success ? clubRes.data : null;
         const fromApi = clubData?.isMember ?? clubData?.is_member;
+        let resolvedIsMember = typeof fromApi === 'boolean' ? fromApi : false;
         if (typeof fromApi !== 'boolean' && user) {
           const userId = user._id || user.id;
           if (userId) {
@@ -155,12 +187,31 @@ const ClubDetail = () => {
               });
               setIsMember(joined);
               setIsJoined(joined);
+              resolvedIsMember = joined;
               if (membership) {
                 setUserRole(membership.role ?? membership.membershipRole ?? membership.membership_role ?? null);
               }
             } catch {
 
             }
+          }
+        }
+
+        if (!resolvedIsMember && user) {
+          try {
+            const myReqRes = await getMyJoinRequests();
+            const requests = Array.isArray(myReqRes)
+              ? myReqRes
+              : Array.isArray(myReqRes?.data)
+                ? myReqRes.data
+                : Array.isArray(myReqRes?.data?.requests)
+                  ? myReqRes.data.requests
+                  : Array.isArray(myReqRes?.requests)
+                    ? myReqRes.requests
+                    : [];
+            setIsJoined(isPendingJoinRequestForClub(requests, id));
+          } catch {
+
           }
         }
       } catch (error) {
@@ -218,19 +269,19 @@ const ClubDetail = () => {
       navigate('/login');
       return;
     }
-    
+
     setJoinLoading(true);
     try {
       const response = await requestToJoinClub(id);
       console.log('✅ Join response:', response);
-      
+
       // Success response
       setIsJoined(true);
       const successMessage = 'Gửi yêu cầu tham gia thành công! Hãy chờ phê duyệt từ ban quản trị.';
       toast.success(successMessage);
     } catch (error) {
       console.error('❌ Join club error:', error);
-      
+
       // Check if error message indicates success
       const errorMsg = error?.message || error?.data?.message || error || '';
       if (errorMsg.toLowerCase().includes('success') || errorMsg.toLowerCase().includes('thành công')) {
@@ -245,19 +296,29 @@ const ClubDetail = () => {
     }
   };
 
-  const handleLeaveClub = async () => {
-    if (!id) return;
-    if (!window.confirm('Bạn chắc chắn muốn rời khỏi câu lạc bộ này?')) return;
+const handleLeaveClub = async () => {
+    if (!id || joinLoading) return;
+
+    setJoinLoading(true);
     try {
-      await leaveClub(id);
-      toast.success('Bạn đã rời khỏi câu lạc bộ!');
+      await toast.promise(leaveClub(id), {
+        pending: 'Đang rời câu lạc bộ...',
+        success: 'Bạn đã rời khỏi câu lạc bộ!',
+        error: {
+          render({ data }) {
+            return data?.message || data?.data?.message || 'Không thể rời câu lạc bộ';
+          },
+        },
+      });
+
       setIsMember(false);
       setIsJoined(false);
-      // Optionally: navigate('/clubs')
-    } catch (error) {
-      toast.error(error?.message || 'Không thể rời câu lạc bộ');
+      setUserRole(null);
+    } finally {
+      setJoinLoading(false);
     }
   };
+
 
   const normalizeRewardStatus = (status) => {
     if (status === 1 || status === 'active' || status === 'approved') return 'active';
@@ -333,6 +394,118 @@ const ClubDetail = () => {
     fetchRewards();
   }, [id]);
 
+  const loadClubPolls = async () => {
+    if (!id || !isMember) {
+      setPollItems([]);
+      setFeaturedPollDetail(null);
+      return;
+    }
+    try {
+      const res = await listPolls(id, {
+        sort: pollSortBy === 'all' ? undefined : pollSortBy,
+        page: 1,
+        limit: 20,
+      });
+      if (res?.success) {
+        const items = Array.isArray(res.items) ? res.items : [];
+        setPollItems(items);
+        const openIndex = items.findIndex((p) => p.status === 'open');
+        setActivePollIndex(openIndex >= 0 ? openIndex : 0);
+      } else {
+        setPollItems([]);
+        setFeaturedPollDetail(null);
+      }
+    } catch (e) {
+      if (e?.response?.status !== 403) {
+        toast.error(e?.message || 'Không tải được danh sách poll');
+      }
+      setPollItems([]);
+      setFeaturedPollDetail(null);
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    loadClubPolls();
+  }, [id, isMember, pollSortBy]);
+
+  const visiblePollItems = useMemo(() => {
+    const q = pollSearchText.trim().toLowerCase();
+    const now = Date.now();
+    let items = [...pollItems];
+
+    if (q) {
+      items = items.filter((p) => String(p?.title || '').toLowerCase().includes(q));
+    }
+    if (pollFilterStatus !== 'all') {
+      items = items.filter((p) => String(p?.status || '').toLowerCase() === pollFilterStatus);
+    }
+
+    const toMs = (v) => {
+      const ms = new Date(v).getTime();
+      return Number.isNaN(ms) ? 0 : ms;
+    };
+    const nearNowScore = (v) => {
+      const ms = toMs(v);
+      if (!ms) return Number.POSITIVE_INFINITY;
+      return Math.abs(ms - now);
+    };
+
+    if (pollSortBy !== 'all') {
+      items.sort((a, b) => {
+        if (pollSortBy === 'newest') {
+          return nearNowScore(a?.start_date) - nearNowScore(b?.start_date);
+        }
+        if (pollSortBy === 'ending_soon') {
+          return nearNowScore(a?.end_date) - nearNowScore(b?.end_date);
+        }
+        return 0;
+      });
+    }
+
+    return items;
+  }, [pollItems, pollSearchText, pollFilterStatus, pollSortBy]);
+
+  useEffect(() => {
+    if (activePollIndex >= visiblePollItems.length) {
+      setActivePollIndex(0);
+    }
+  }, [activePollIndex, visiblePollItems.length]);
+
+  useEffect(() => {
+    setActivePollIndex(0);
+  }, [pollSearchText, pollFilterStatus, pollSortBy]);
+
+  useEffect(() => {
+    const loadActivePollDetail = async () => {
+      if (!id || !isMember || visiblePollItems.length === 0) {
+        setFeaturedPollDetail(null);
+        return;
+      }
+      const safeIndex = Math.max(0, Math.min(activePollIndex, visiblePollItems.length - 1));
+      if (safeIndex !== activePollIndex) {
+        setActivePollIndex(safeIndex);
+        return;
+      }
+      const poll = visiblePollItems[safeIndex];
+      if (!poll?._id) {
+        setFeaturedPollDetail(null);
+        return;
+      }
+      try {
+        const detailRes = await getPollDetail(id, poll._id);
+        if (detailRes?.success && detailRes?.data) {
+          setFeaturedPollDetail(detailRes.data);
+        } else {
+          setFeaturedPollDetail(null);
+        }
+      } catch {
+        setFeaturedPollDetail(null);
+      }
+    };
+    loadActivePollDetail();
+  }, [id, isMember, visiblePollItems, activePollIndex]);
+
   // Chuẩn hoá dữ liệu thư viện ảnh từ BE
   // Hỗ trợ cả:
   // - club.libraryImages: [{ imageUrl, isLarge }, ...]
@@ -376,6 +549,92 @@ const ClubDetail = () => {
   const librarySlots = [0, 1, 2, 3];
 
   const showcaseEvents = organizedEvents.slice(0, 5);
+  const hasOpenPollInClub = pollItems.some(
+    (p) => String(p?.status || '').toLowerCase() === 'open'
+  );
+  const selectedPoll = visiblePollItems[activePollIndex] || null;
+  const selectedPollData = featuredPollDetail?.poll || null;
+  const selectedPollEndMs = selectedPollData?.end_date ? new Date(selectedPollData.end_date).getTime() : null;
+  const selectedPollNotExpired =
+    selectedPollEndMs == null || Number.isNaN(selectedPollEndMs) || selectedPollEndMs > Date.now();
+  const canOpenSelectedPoll = selectedPollData?.status === 'open' && selectedPollNotExpired;
+  const userPointRaw = club?.my_points ?? club?.points ?? club?.member_points;
+  const userPoints = userPointRaw != null && !Number.isNaN(Number(userPointRaw))
+    ? Number(userPointRaw)
+    : null;
+
+  const pollToolbar = (
+    <div className="clubdetail-poll-toolbar">
+      <input
+        className="clubdetail-poll-search"
+        placeholder="Tìm bình chọn theo tiêu đề..."
+        value={pollSearchText}
+        onChange={(e) => setPollSearchText(e.target.value)}
+      />
+      <select
+        className="clubdetail-poll-select"
+        value={pollFilterStatus}
+        onChange={(e) => setPollFilterStatus(e.target.value)}
+      >
+        <option value="all">Tất cả trạng thái</option>
+        <option value="open">Đang mở</option>
+        <option value="closed">Đã đóng</option>
+      </select>
+      <select
+        className="clubdetail-poll-select"
+        value={pollSortBy}
+        onChange={(e) => setPollSortBy(e.target.value)}
+      >
+        <option value="all">Tất cả</option>
+        <option value="ending_soon">Sắp hết hạn</option>
+        <option value="newest">Mới nhất</option>
+      </select>
+    </div>
+  );
+
+  let pollSectionEl = null;
+  if (isMember && visiblePollItems.length === 0) {
+    pollSectionEl = (
+      <div className="clubdetail-cell clubdetail-cell-polls">
+        {pollToolbar}
+        <div className="clubdetail-poll-empty-note">Không có bảng vote phù hợp.</div>
+      </div>
+    );
+  } else if (isMember && visiblePollItems.length > 0 && selectedPoll && featuredPollDetail) {
+    pollSectionEl = (
+      <div className="clubdetail-cell clubdetail-cell-polls">
+        {pollToolbar}
+        <div className="clubdetail-poll-focus-wrap">
+          <button
+            type="button"
+            className="clubdetail-poll-nav clubdetail-poll-nav--left"
+            onClick={() => setActivePollIndex((prev) => Math.max(0, prev - 1))}
+            disabled={activePollIndex <= 0}
+            aria-label="Poll trước"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <div className="clubdetail-poll-focus-card">
+            <ClubPollStrip
+              detail={featuredPollDetail}
+              onOpen={canOpenSelectedPoll ? () => setPollModalId(selectedPoll._id) : undefined}
+            />
+          </div>
+          <button
+            type="button"
+            className="clubdetail-poll-nav clubdetail-poll-nav--right"
+            onClick={() =>
+              setActivePollIndex((prev) => Math.min(visiblePollItems.length - 1, prev + 1))
+            }
+            disabled={activePollIndex >= visiblePollItems.length - 1}
+            aria-label="Poll tiếp"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="clubdetail-container">
@@ -455,7 +714,7 @@ const ClubDetail = () => {
                           onClick={handleJoin}
                           disabled={joinLoading || isJoined || !canRequestJoin}
                         >
-                          <span>{joinLoading ? 'Đang gửi...' : isJoined ? 'Đã gửi yêu cầu' : 'Tham gia ngay'}</span>
+                          <span>{joinLoading ? 'Đang gửi...' : isJoined ? 'Đang gửi yêu cầu' : 'Tham gia ngay'}</span>
                           <ArrowRight size={16} strokeWidth={2.6} aria-hidden />
                         </button>
                       )}
@@ -470,8 +729,9 @@ const ClubDetail = () => {
                           className="clubdetail-leave-btn"
                           style={{ marginTop: 12, background: '#f44336', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 6, fontWeight: 500, cursor: 'pointer' }}
                           onClick={handleLeaveClub}
+                          disabled={joinLoading}
                         >
-                          Rời CLB
+                          {joinLoading ? 'Đang rời...' : 'Rời CLB'}
                         </button>
                       )}
                     </div>
@@ -511,6 +771,8 @@ const ClubDetail = () => {
                   </div>
                 </div>
               </div>
+
+              {hasOpenPollInClub && pollSectionEl}
 
               <div className="clubdetail-cell clubdetail-cell-events">
                 <section className="clubdetail-events-showcase">
@@ -710,9 +972,24 @@ const ClubDetail = () => {
               </div>
             </div>
 
+            {!hasOpenPollInClub && pollSectionEl && (
+              <section className="clubdetail-polls-bottom" aria-label="Bình chọn">
+                {pollSectionEl}
+              </section>
+            )}
+
             {showFloatingNav !== false && (
               <ClubDetailNav clubName={club?.name} isMember={isMember} />
             )}
+
+            <PollVoteModal
+              open={!!pollModalId}
+              clubId={id}
+              pollId={pollModalId}
+              onClose={() => setPollModalId('')}
+              onUpdated={loadClubPolls}
+              userPoints={userPoints}
+            />
           </>
         )}
       </Container>

@@ -219,7 +219,7 @@ export default function EventDetailPage() {
                 <EventHeader
                     title={event.title}
                     status={event.status}
-                    onBack={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/events')}
+                    onBack={() => navigate(clubId ? `/clubs/manager/${clubId}/dashboard` : '/events')}
                     onEdit={() => navigate(`/events/${eventId}/update`)}
                     canEdit={event.status !== 'canceled'}
                 />

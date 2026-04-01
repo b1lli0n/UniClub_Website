@@ -8,14 +8,24 @@ import { getUserClubs } from '../api/userApi';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ClubAreaLayout.css';
 
-/** Ban quản lý: Leader (1), Sub Leader (2), Secretary (3), Treasurer (4) — giống ClubDetailCard */
+/** Role mapping: Member (0), Leader (1), Sub Leader (2), Secretary (3), Treasurer (4). */
+/** Ban quản lý chỉ gồm role 1..4. */
 const isManagementRole = (role) =>
+  typeof role === 'number' && role >= 1 && role <= 4;
+
+const isMemberRole = (role) =>
   typeof role === 'number' && role >= 0 && role <= 4;
 
 async function resolveManagementForClub(clubId, user) {
   const clubRes = await getClubById(clubId);
   const club = clubRes?.success ? clubRes.data : clubRes?.data;
   let role = club?.membershipRole ?? club?.role ?? club?.my_role;
+  let isMember = false;
+
+  const fromApiMember = club?.isMember ?? club?.is_member;
+  if (typeof fromApiMember === 'boolean') {
+    isMember = fromApiMember;
+  }
 
   if (typeof role !== 'number' && user) {
     const userId = user._id || user.id;
@@ -39,6 +49,7 @@ async function resolveManagementForClub(clubId, user) {
         });
         if (m) {
           role = m.role ?? m.membershipRole ?? m.membership_role;
+          isMember = true;
         }
       } catch {
         /* ignore */
@@ -46,7 +57,14 @@ async function resolveManagementForClub(clubId, user) {
     }
   }
 
-  return isManagementRole(role);
+  if (!isMember && isMemberRole(role)) {
+    isMember = true;
+  }
+
+  return {
+    isLeader: isManagementRole(role),
+    isMember,
+  };
 }
 
 /**
@@ -62,22 +80,34 @@ const ClubAreaLayout = () => {
     params.clubId ??
     (location.pathname.match(/^\/clubs\/([^/]+)/)?.[1] ?? null);
   const { user } = useAuth();
-  const [isLeader, setIsLeader] = useState(null);
+  const [clubAccess, setClubAccess] = useState({
+    loading: true,
+    isLeader: false,
+    isMember: false,
+  });
 
   useEffect(() => {
     let cancelled = false;
 
     const run = async () => {
       if (!clubId) {
-        setIsLeader(false);
+        setClubAccess({ loading: false, isLeader: false, isMember: false });
         return;
       }
-      setIsLeader(null);
+      setClubAccess((prev) => ({ ...prev, loading: true }));
       try {
-        const leader = await resolveManagementForClub(clubId, user);
-        if (!cancelled) setIsLeader(leader);
+        const access = await resolveManagementForClub(clubId, user);
+        if (!cancelled) {
+          setClubAccess({
+            loading: false,
+            isLeader: access?.isLeader === true,
+            isMember: access?.isMember === true,
+          });
+        }
       } catch {
-        if (!cancelled) setIsLeader(false);
+        if (!cancelled) {
+          setClubAccess({ loading: false, isLeader: false, isMember: false });
+        }
       }
     };
 
@@ -87,12 +117,15 @@ const ClubAreaLayout = () => {
     };
   }, [clubId, user]);
 
+  const { loading, isLeader, isMember } = clubAccess;
+
   const outletContext = {
-    showFloatingNav: isLeader == true,
+    showFloatingNav: isLeader !== true,
     clubAreaIsLeader: isLeader === true,
+    clubAreaIsMember: isMember === true,
   };
 
-  if (isLeader === null) {
+  if (loading) {
     return (
       <>
         <Header />

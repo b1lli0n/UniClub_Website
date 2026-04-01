@@ -4,17 +4,12 @@ import {
     Home,
     LayoutGrid,
     Users,
+    Vote,
     Bell,
-    Info,
     Calendar,
     Wallet,
-    Gift,
     Banknote,
-    LayoutDashboard,
-    Trophy,
     BookMarked,
-    CircleStar,
-    ScrollText,
 } from 'lucide-react';
 import '../../styles/SidebarNav.css';
 
@@ -30,13 +25,14 @@ const getNavItems = (clubId, isSecretary, isSubLeader, isTreasurer, isLeader) =>
 
     if (isLeader && hasClubId) {
         items.push(
-            { icon: Users, label: 'Duyệt Tham gia', path: `/clubs/manager/${clubId}/join-requests` },
+            { icon: Users, label: 'Duyệt Tham gia', path: hasClubId ? `/clubs/manager/${clubId}/join-requests` : '/clubs' },
             { icon: Users, label: 'Thành viên', path: hasClubId ? `/clubs/manager/${clubId}/members` : '/clubs' },
+            { icon: Vote, label: 'Bình chọn', path: hasClubId ? `/clubs/manager/${clubId}/polls` : '/clubs' },
             { icon: LayoutGrid, label: 'Sự kiện CLB', path: '/clubEvent' },
-            { icon: Banknote, label: 'Tài chính', path: `/clubs/manager/${clubId}/finance` },
+            { icon: Banknote, label: 'Tài chính', path: hasClubId ? `/clubs/manager/${clubId}/finance` : '/clubs' },
             { icon: Wallet, label: 'Giao dịch', path: hasClubId ? `/clubs/manager/${clubId}/transactions` : '/dashboard' },
             { icon: BookMarked, label: 'Quy tắc điểm', path: hasClubId ? `/clubs/manager/${clubId}/point-rules-management` : '/clubs' },
-            { icon: Calendar, label: 'Lịch', path: `/clubs/manager/${clubId}/activity-schedule`, end: false },
+            { icon: Calendar, label: 'Lịch', path: hasClubId ? `/clubs/manager/${clubId}/activity-schedule` : '/clubs', end: false },
         );
     }
     if (isSubLeader && hasClubId) {
@@ -46,12 +42,12 @@ const getNavItems = (clubId, isSecretary, isSubLeader, isTreasurer, isLeader) =>
     }
     if (isSecretary && hasClubId) {
         items.push(        
-            { icon: Calendar, label: 'Lịch', path: `/clubs/manager/${clubId}/activity-schedule`, end: false },
+            { icon: Calendar, label: 'Lịch', path: hasClubId ? `/clubs/manager/${clubId}/activity-schedule` : '/clubs', end: false },
         );
     }
     if (isTreasurer && hasClubId) {
         items.push(
-            { icon: Banknote, label: 'Tài chính', path: `/clubs/manager/${clubId}/finance` },
+            { icon: Banknote, label: 'Tài chính', path: hasClubId ? `/clubs/manager/${clubId}/finance` : '/clubs' },
             { icon: Wallet, label: 'Giao dịch', path: hasClubId ? `/clubs/manager/${clubId}/transactions` : '/dashboard' },
         );
     }
