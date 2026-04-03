@@ -85,6 +85,16 @@ export const getUserClubs = async (userId) => {
   }
 };
 
+// Xem trạng thái membership + request theo từng club của user hiện tại
+export const getMyClubStatuses = async (clubId) => {
+  try {
+    const response = await userAPI.get(`/users/my-club-statuses/clubs/${clubId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
 // Xem danh sách yêu cầu tham gia của user hiện tại
 export const getUserJoinRequests = async () => {
   try {

@@ -115,7 +115,7 @@ const CreateClub = () => {
       });
       setMemberEmail('');
       toast.success(`✅ Thêm thành viên thành công!`);
-    } catch (error) {
+    } catch {
       toast.error('Lỗi khi thêm thành viên');
     }
   };
@@ -131,15 +131,12 @@ const CreateClub = () => {
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result);
-        setFormData({
-          ...formData,
-          logo_url: reader.result
-        });
-      };
-      reader.readAsDataURL(file);
+      setLogoPreview(URL.createObjectURL(file));
+      setFormData({
+        ...formData,
+        logo_url: file
+      });
+      // console.log('Selected logo file:', file);
     }
   };
 
@@ -149,7 +146,7 @@ const CreateClub = () => {
     // Kiểm tra tên club
     if (!formData.name.trim()) {
       setValidated(true);
-      toast.error('Vui lòng nhập tên club');
+      toast.error('Vui lòng nhập tên câu lạc bộ');
       return;
     }
 
@@ -167,7 +164,7 @@ const CreateClub = () => {
     }
 
     if (formData.members.length < 1) {
-      toast.error('Club phải có ít nhất 1 thành viên');
+      toast.error('Câu lạc bộ phải có ít nhất 1 thành viên');
       return;
     }
 
@@ -178,15 +175,27 @@ const CreateClub = () => {
           ? JSON.parse(member) 
           : member;
         return memberObj.userId;
-      });
+      }); 
       
-      const dataToSubmit = {
-        ...formData,
-        members: memberIds,
-      };
+    const formDataToSend = new FormData();
+
+    formDataToSend.append("name", formData.name);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("category", formData.category);
+
+    // gửi members
+    memberIds.forEach(id => {
+      formDataToSend.append("members", id);
+    });
+
+    // gửi file
+    if (formData.logo_url) {
+      formDataToSend.append("logo", formData.logo_url); // 👈 KEY PHẢI LÀ 'logo'
+    }
+
       // console.log('Dữ liệu gửi đi:', dataToSubmit);
-      await createClub(dataToSubmit);
-      toast.success('✅ Club được tạo thành công!');
+      await createClub(formDataToSend);
+      toast.success('✅ Câu lạc bộ được tạo thành công!');
       
       // Reset form
       setFormData({ name: '', description: '', logo_url: '', category: null, members: [] });
@@ -197,7 +206,7 @@ const CreateClub = () => {
       setTimeout(() => navigate('/clubs'), 1000);
     } catch (error) {
       console.error('Lỗi tạo club:', error);
-      toast.error('❌ ' + (error.message || 'Có lỗi xảy ra khi tạo club'));
+      toast.error('❌ ' + (error.message || 'Có lỗi xảy ra khi tạo câu lạc bộ'));
     } finally {
       setLoading(false);
     }
@@ -324,7 +333,7 @@ const CreateClub = () => {
 
           {/* Logo Section */}
           <div className="form-section">
-            <h3 className="form-section-title">🖼️ Logo Club</h3>
+            <h3 className="form-section-title">🖼️ Logo Câu lạc bộ</h3>
             <Form.Group className="mb-0">
               <Form.Control
                 type="file"
@@ -335,7 +344,7 @@ const CreateClub = () => {
 
             {logoPreview && (
               <Form.Group className="mt-3 mb-0">
-                <Form.Label className="mb-2" style={{ fontWeight: 700 }}>Preview</Form.Label>
+                <Form.Label className="mb-2" style={{ fontWeight: 700 }}>Xem Trước Logo</Form.Label>
                 <div className="logo-preview-container">
                   <img 
                     src={logoPreview} 
@@ -362,7 +371,7 @@ const CreateClub = () => {
               disabled={loading}
               className="px-4"
             >
-              {loading ? 'Đang tạo...' : 'Tạo Club'}
+              {loading ? 'Đang tạo...' : 'Tạo Câu lạc bộ'}
             </Button>
           </div>
         </Form>

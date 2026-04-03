@@ -122,11 +122,12 @@ export default function Dashboard() {
 
     try {
       setIsUpdatingClubStatus(true);
+      console.log('🔄 Updating club status:', { clubId, currentStatus: club.status, nextStatus });
       const response = await updateClubStatus(clubId, nextStatus);
       const updatedClub = normalizeClubFromResponse(response);
       setClub((prev) => ({ ...prev, ...updatedClub }));
 
-      toast.success(nextStatus === 1 ? 'Đã chuyển trạng thái sang Active' : 'Đã chuyển trạng thái sang Paused');
+      toast.success(nextStatus === 1 ? 'Đã chuyển trạng thái sang Hoạt động' : 'Đã chuyển trạng thái sang Tạm dừng');
     } catch (error) {
       const errorMessage =
         error?.message ||
@@ -264,7 +265,7 @@ export default function Dashboard() {
             title="Thêm thành viên"
             subtitle="Duyệt thành viên vào nhóm"
             icon="👥"
-            onClick={() => navigate(clubId ? `/clubs/${clubId}/members` : '/clubs')}
+            onClick={() => navigate(clubId ? `/clubs/manager/${clubId}/invitations` : '/clubs')}
           />
           <QuickActionCard
             title="Quản lý tài chính"
@@ -290,7 +291,8 @@ export default function Dashboard() {
 
           <MemberListCard
             members={previewMembers}
-            onManage={() => navigate(clubId ? `/clubs/${clubId}/members` : '/clubs')}
+            onInvite={() => navigate(clubId ? `/clubs/manager/${clubId}/invitations` : '/clubs')}
+            onManage={() => navigate(clubId ? `/clubs/manager/${clubId}/members` : '/clubs')}
           />
         </div>
       </div>

@@ -20,6 +20,20 @@ const TYPE_MAP = {
 const formatVND = (amount) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 
+const getTransactionDisplayDate = (txn) => {
+    const rawDate =
+        txn?.updatedAt ||
+        txn?.updated_at ||
+        txn?.transaction_date ||
+        txn?.createdAt ||
+        txn?.created_at;
+
+    if (!rawDate) return 'N/A';
+    const date = new Date(rawDate);
+    if (Number.isNaN(date.getTime())) return 'N/A';
+    return date.toLocaleDateString('vi-VN');
+};
+
 const creatorDisplayName = (txn) => {
     const u = txn?.created_by;
     if (!u) return 'N/A';
@@ -74,6 +88,7 @@ const TransactionList = () => {
             const res = isLeader
                 ? await getLeaderTransactions(clubId, params)
                 : await getTransactions(clubId, params);
+            console.log('Transactions API response:', res);
             const body = res?.data ?? res;
             const list = body?.data ?? body?.transactions ?? [];
             const pag = body?.pagination ?? {};
@@ -245,7 +260,7 @@ const TransactionList = () => {
                                     </div>
                                     {/* Ngày GD */}
                                     <div className="admin-col" style={{ flex: 1.5, color: '#6b7280', fontSize: 13 }}>
-                                        {new Date(txn.transaction_date).toLocaleDateString('vi-VN')}
+                                        {getTransactionDisplayDate(txn)}
                                     </div>
                                     {/* Trạng thái */}
                                     <div className="admin-col" style={{ flex: 1 }}>
@@ -311,8 +326,8 @@ const TransactionList = () => {
                                                 <span style={{ fontSize: 14, color: '#111827' }}>{creatorName}</span>
                                             </div>
                                             <div>
-                                                <span style={{ fontSize: 12, color: '#6b7280', display: 'block' }}>Ngày tạo</span>
-                                                <span style={{ fontSize: 14, color: '#111827' }}>{new Date(txn.created_at).toLocaleDateString('vi-VN')}</span>
+                                                <span style={{ fontSize: 12, color: '#6b7280', display: 'block' }}>Ngày cập nhật</span>
+                                                <span style={{ fontSize: 14, color: '#111827' }}>{getTransactionDisplayDate(txn)}</span>
                                             </div>
                                             {txn.approved_by && (
                                                 <div>

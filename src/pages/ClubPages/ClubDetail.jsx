@@ -1,12 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { Users, Calendar, Tag, ImageIcon, ArrowRight, Crown, UserCircle2, ShieldCheck, FileBadge2, Wallet, ChevronLeft, ChevronRight  } from 'lucide-react';
 import ClubDetailNav from '../../components/clubs/ClubDetailNav';
-import { getClubById, getEventsByClub, requestToJoinClub, leaveClub, getMyJoinRequests } from '../../api/clubApi';
-import { getRewards } from '../../api/rewardApi';
-import { getUserClubs } from '../../api/userApi';
+import { getClubById, getClubMembersList, getEventsByClub, requestToJoinClub, leaveClub } from '../../api/clubApi';
+import { getMyClubStatuses } from '../../api/userApi';
 import { getPollDetail, listPolls } from '../../api/pollApi';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/ClubDetail.css';
@@ -72,25 +71,14 @@ const getRoleIcon = (role) => {
   return UserCircle2;
 };
 
-const isPendingJoinRequestForClub = (requests, clubId) => {
-  if (!Array.isArray(requests)) return false;
-
-  return requests.some((req) => {
-    const statusRaw = req?.status;
-    const statusText = typeof statusRaw === 'string' ? statusRaw.trim().toLowerCase() : '';
-    const isPending = statusRaw === 0 || statusText === 'pending' || statusText === '0';
-    if (!isPending) return false;
-
-    const reqClubId =
-      req?.club_id?._id ||
-      req?.club_id?.id ||
-      req?.club_id ||
-      req?.club?._id ||
-      req?.club?.id ||
-      req?.club;
-
-    return String(reqClubId) === String(clubId);
-  });
+const normalizeStatusCode = (value, map = {}) => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const s = value.trim().toLowerCase();
+    if (s !== '' && !Number.isNaN(Number(s))) return Number(s);
+    if (Object.prototype.hasOwnProperty.call(map, s)) return map[s];
+  }
+  return null;
 };
 
 const ClubDetail = () => {
@@ -101,11 +89,11 @@ const ClubDetail = () => {
   const [isJoined, setIsJoined] = useState(false);
   const [isMember, setIsMember] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
+  const [hasJoinRequest, setHasJoinRequest] = useState(false);
+  const [joinRequestLoading, setJoinRequestLoading] = useState(true);
   const [club, setClub] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
   const [events, setEvents] = useState([]);
-  const [rewards, setRewards] = useState([]);
-  const [rewardsLoading, setRewardsLoading] = useState(true);
   const [heroImgError, setHeroImgError] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [pollItems, setPollItems] = useState([]);
@@ -115,6 +103,9 @@ const ClubDetail = () => {
   const [pollSearchText, setPollSearchText] = useState('');
   const [pollFilterStatus, setPollFilterStatus] = useState('all');
   const [pollSortBy, setPollSortBy] = useState('ending_soon');
+  const [membersPopupOpen, setMembersPopupOpen] = useState(false);
+  const [membersPopupLoading, setMembersPopupLoading] = useState(false);
+  const [membersPopupList, setMembersPopupList] = useState([]);
 
 
   // Scroll to top on mount
@@ -140,6 +131,7 @@ const ClubDetail = () => {
       if (!id) return;
       setLoading(true);
       try {
+        // console.log('Fetching club detail for ID:', id);
         const clubRes = await getClubById(id);
         if (clubRes.success) {
           const clubData = clubRes.data;
@@ -162,58 +154,6 @@ const ClubDetail = () => {
           setEvents([]);
         }
 
-        const clubData = clubRes?.success ? clubRes.data : null;
-        const fromApi = clubData?.isMember ?? clubData?.is_member;
-        let resolvedIsMember = typeof fromApi === 'boolean' ? fromApi : false;
-        if (typeof fromApi !== 'boolean' && user) {
-          const userId = user._id || user.id;
-          if (userId) {
-            try {
-              const userClubsRes = await getUserClubs(userId);
-              const memberships =
-                userClubsRes?.data?.clubs ||
-                userClubsRes?.data ||
-                userClubsRes?.clubs ||
-                userClubsRes ||
-                [];
-              const arr = Array.isArray(memberships) ? memberships : [];
-              const joined = arr.some((m) => {
-                const cid = m?.club_id?._id || m?.club_id?.id || m?.club?._id || m?.club?.id;
-                return String(cid) === String(id);
-              });
-              const membership = arr.find((m) => {
-                const cid = m?.club_id?._id || m?.club_id?.id || m?.club?._id || m?.club?.id;
-                return String(cid) === String(id);
-              });
-              setIsMember(joined);
-              setIsJoined(joined);
-              resolvedIsMember = joined;
-              if (membership) {
-                setUserRole(membership.role ?? membership.membershipRole ?? membership.membership_role ?? null);
-              }
-            } catch {
-
-            }
-          }
-        }
-
-        if (!resolvedIsMember && user) {
-          try {
-            const myReqRes = await getMyJoinRequests();
-            const requests = Array.isArray(myReqRes)
-              ? myReqRes
-              : Array.isArray(myReqRes?.data)
-                ? myReqRes.data
-                : Array.isArray(myReqRes?.data?.requests)
-                  ? myReqRes.data.requests
-                  : Array.isArray(myReqRes?.requests)
-                    ? myReqRes.requests
-                    : [];
-            setIsJoined(isPendingJoinRequestForClub(requests, id));
-          } catch {
-
-          }
-        }
       } catch (error) {
         console.error('Error fetching club detail:', error);
         const message =
@@ -231,8 +171,63 @@ const ClubDetail = () => {
     fetchClubDetail();
   }, [id, user]);
 
+  useEffect(() => {
+    const fetchMyClubStatuses = async () => {
+      if (!id || !user) {
+        setHasJoinRequest(false);
+        setJoinRequestLoading(false);
+        return;
+      }
+
+      setJoinRequestLoading(true);
+      try {
+        // console.log('Fetching my club statuses for club ID:', id);
+        const response = await getMyClubStatuses(id);
+        const payload = response?.data && typeof response.data === 'object' ? response.data : response;
+
+        const membershipStatus = normalizeStatusCode(payload?.membershipStatus, {
+          active: 0,
+          left: 1,
+        });
+        const requestStatus = normalizeStatusCode(payload?.requestStatus, {
+          pending: 0,
+          rejected: 2,
+          canceled: 3,
+          cancelled: 3,
+        });
+
+        // membership status is source of truth for Join/Leave UI
+        if (membershipStatus === 0) {
+          setIsMember(true);
+          setIsJoined(true);
+          setHasJoinRequest(false);
+          return;
+        }
+
+        if (membershipStatus === 1) {
+          setIsMember(false);
+          setIsJoined(false);
+        }
+
+        if (requestStatus === 0) {
+          setHasJoinRequest(true);
+          return;
+        }
+
+        setHasJoinRequest(false);
+      } catch (error) {
+        console.error('Error fetching my club statuses:', error);
+        setHasJoinRequest(false);
+      } finally {
+        setJoinRequestLoading(false);
+      }
+    };
+
+    fetchMyClubStatuses();
+  }, [id, user]);
+
   const handleJoin = async () => {
-    if (!id || joinLoading || isJoined) return;
+    if (!id || joinLoading || isJoined || hasJoinRequest) return;
 
     const normalizeClubStatus = (c) => {
       const raw = c?.status ?? c?.club_status ?? c?.clubStatus;
@@ -277,6 +272,7 @@ const ClubDetail = () => {
 
       // Success response
       setIsJoined(true);
+      setHasJoinRequest(true);
       const successMessage = 'Gửi yêu cầu tham gia thành công! Hãy chờ phê duyệt từ ban quản trị.';
       toast.success(successMessage);
     } catch (error) {
@@ -286,6 +282,7 @@ const ClubDetail = () => {
       const errorMsg = error?.message || error?.data?.message || error || '';
       if (errorMsg.toLowerCase().includes('success') || errorMsg.toLowerCase().includes('thành công')) {
         setIsJoined(true);
+        setHasJoinRequest(true);
         toast.success(errorMsg);
       } else {
         const errorMessage = error?.message || error?.data?.message || 'Không thể gửi yêu cầu tham gia';
@@ -313,18 +310,13 @@ const handleLeaveClub = async () => {
 
       setIsMember(false);
       setIsJoined(false);
+      setHasJoinRequest(false);
       setUserRole(null);
     } finally {
       setJoinLoading(false);
     }
   };
 
-
-  const normalizeRewardStatus = (status) => {
-    if (status === 1 || status === 'active' || status === 'approved') return 'active';
-    if (status === 0 || status === 'pending') return 'pending';
-    return 'inactive';
-  };
 
   // Derived data từ club
   // Map events từ BE sang shape FE đang dùng
@@ -341,6 +333,52 @@ const handleLeaveClub = async () => {
     };
   });
   const adminBoard = club?.adminBoard || [];
+
+  const openMembersPopup = async () => {
+    if (!id) return;
+
+    setMembersPopupOpen(true);
+    setMembersPopupLoading(true);
+
+    try {
+      const response = await getClubMembersList(id);
+      const rawMembers = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response?.members)
+            ? response.members
+            : Array.isArray(response?.data?.members)
+              ? response.data.members
+              : Array.isArray(response?.items)
+                ? response.items
+                : [];
+
+      const normalized = rawMembers.map((member) => {
+        const userInfo = member?.user_id || member?.user || member;
+        const memberId =
+          member?._id ||
+          member?.membership_id ||
+          userInfo?._id ||
+          userInfo?.id;
+
+        return {
+          id: String(memberId || Math.random()),
+          name: userInfo?.fullName || userInfo?.name || userInfo?.email || 'Thành viên',
+          avatar: userInfo?.avatar_url || userInfo?.avatar || '',
+          roleLabel: formatRoleLabel(member?.role ?? member?.membershipRole ?? member?.membership_role ?? 0),
+        };
+      });
+
+      setMembersPopupList(normalized);
+    } catch (error) {
+      console.error('Error loading club members list:', error);
+      toast.error(error?.message || 'Không thể tải danh sách thành viên');
+      setMembersPopupList([]);
+    } finally {
+      setMembersPopupLoading(false);
+    }
+  };
 
   const normalizeClubStatus = (c) => {
     const raw = c?.status ?? c?.club_status ?? c?.clubStatus;
@@ -359,8 +397,16 @@ const handleLeaveClub = async () => {
 
   const clubStatus = normalizeClubStatus(club);
   const canRequestJoin = clubStatus == null ? true : clubStatus === 1;
+  const shouldShowLeaveButton = isMember;
+  const joinRequestLocked = hasJoinRequest && !isMember;
+  const joinButtonClassName = `clubdetail-join-btn clubdetail-join-btn--primary${clubStatus === 2 ? ' clubdetail-join-btn--inactive' : ''}${joinRequestLocked || joinRequestLoading ? ' is-locked' : ''}`;
   const joinDisabledMessage =
-    clubStatus === 2
+    joinRequestLoading
+      ? 'Đang kiểm tra yêu cầu...'
+      :
+    joinRequestLocked
+      ? 'Bạn đã gửi yêu cầu rồi. Vui lòng chờ xử lý.'
+      : clubStatus === 2
       ? 'Câu lạc bộ đang ngưng hoạt động.'
       : clubStatus === 3
         ? 'Câu lạc bộ không còn tiếp nhận thành viên.'
@@ -368,33 +414,7 @@ const handleLeaveClub = async () => {
           ? 'Câu lạc bộ đang chờ duyệt.'
           : '';
 
-  useEffect(() => {
-    const fetchRewards = async () => {
-      if (!id) return;
-      setRewardsLoading(true);
-      try {
-        const payload = await getRewards(id);
-        const list = Array.isArray(payload)
-          ? payload
-          : Array.isArray(payload?.rewards)
-            ? payload.rewards
-            : Array.isArray(payload?.data?.rewards)
-              ? payload.data.rewards
-              : Array.isArray(payload?.data)
-                ? payload.data
-                : [];
-        setRewards(list);
-      } catch (error) {
-        setRewards([]);
-      } finally {
-        setRewardsLoading(false);
-      }
-    };
-
-    fetchRewards();
-  }, [id]);
-
-  const loadClubPolls = async () => {
+  const loadClubPolls = useCallback(async () => {
     if (!id || !isMember) {
       setPollItems([]);
       setFeaturedPollDetail(null);
@@ -417,17 +437,16 @@ const handleLeaveClub = async () => {
       }
     } catch (e) {
       if (e?.response?.status !== 403) {
-        toast.error(e?.message || 'Không tải được danh sách poll');
+        toast.error(e?.message || 'Không tải được danh sách bình chọn');
       }
       setPollItems([]);
       setFeaturedPollDetail(null);
-    } finally {
     }
-  };
+  }, [id, isMember, pollSortBy]);
 
   useEffect(() => {
     loadClubPolls();
-  }, [id, isMember, pollSortBy]);
+  }, [loadClubPolls]);
 
   const visiblePollItems = useMemo(() => {
     const q = pollSearchText.trim().toLowerCase();
@@ -707,23 +726,37 @@ const handleLeaveClub = async () => {
                         </h1>
                         <p className="clubdetail-hero-lead">{club.description}</p>
                       </div>
-                      {!isMember && (
+                      {!shouldShowLeaveButton && (
                         <button
                           type="button"
-                          className={`clubdetail-join-btn clubdetail-join-btn--primary${clubStatus === 2 ? ' clubdetail-join-btn--inactive' : ''}`}
+                          className={joinButtonClassName}
                           onClick={handleJoin}
-                          disabled={joinLoading || isJoined || !canRequestJoin}
+                          disabled={joinLoading || isJoined || !canRequestJoin || joinRequestLocked || joinRequestLoading}
                         >
-                          <span>{joinLoading ? 'Đang gửi...' : isJoined ? 'Đang gửi yêu cầu' : 'Tham gia ngay'}</span>
+                          <span>
+                            {joinRequestLoading
+                              ? 'Đang kiểm tra...'
+                              : joinLoading
+                              ? 'Đang gửi...'
+                              : isJoined
+                                ? 'Đang tham gia'
+                                : joinRequestLocked
+                                  ? 'Đang xử lý'
+                                  : 'Tham gia ngay'}
+                          </span>
                           <ArrowRight size={16} strokeWidth={2.6} aria-hidden />
                         </button>
                       )}
 
-                      {!isMember && !canRequestJoin && clubStatus != null && (
+                      {!shouldShowLeaveButton && !joinRequestLoading && !joinRequestLocked && !canRequestJoin && clubStatus != null && (
                         <p className="clubdetail-join-hint">{joinDisabledMessage}</p>
                       )}
 
-                      {isMember && (
+                      {!shouldShowLeaveButton && !joinRequestLoading && joinRequestLocked && (
+                        <p className="clubdetail-join-hint">{joinDisabledMessage}</p>
+                      )}
+
+                      {shouldShowLeaveButton && (
                         <button
                           type="button"
                           className="clubdetail-leave-btn"
@@ -875,7 +908,16 @@ const handleLeaveClub = async () => {
 
               <div className="clubdetail-cell clubdetail-cell-admin">
                 <div className="clubdetail-card clubdetail-card--members clubdetail-card--dash">
-                  <h2 className="clubdetail-section-title clubdetail-section-title--in-card">Thành viên</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <h2 className="clubdetail-section-title clubdetail-section-title--in-card" style={{ marginBottom: 0 }}>Thành viên</h2>
+                    <button
+                      type="button"
+                      className="clubdetail-members-open-btn"
+                      onClick={openMembersPopup}
+                    >
+                      Xem tất cả thành viên
+                    </button>
+                  </div>
                   {adminBoard.length > 0 ? (
                     <div
                       className={`clubdetail-member-grid${adminBoard.length < 3 ? ' clubdetail-member-grid--few' : ''}`}
@@ -990,6 +1032,55 @@ const handleLeaveClub = async () => {
               onUpdated={loadClubPolls}
               userPoints={userPoints}
             />
+
+            {membersPopupOpen && (
+              <div className="clubdetail-members-popup-backdrop" onClick={() => setMembersPopupOpen(false)}>
+                <div className="clubdetail-members-popup" onClick={(e) => e.stopPropagation()}>
+                  <div className="clubdetail-members-popup-head">
+                    <h3>Danh sách thành viên</h3>
+                    <button
+                      type="button"
+                      className="clubdetail-members-popup-close"
+                      onClick={() => setMembersPopupOpen(false)}
+                    >
+                      Đóng
+                    </button>
+                  </div>
+
+                  {membersPopupLoading ? (
+                    <p className="clubdetail-members-popup-empty">Đang tải danh sách thành viên...</p>
+                  ) : membersPopupList.length === 0 ? (
+                    <p className="clubdetail-members-popup-empty">Chưa có dữ liệu thành viên.</p>
+                  ) : (
+                    <div className="clubdetail-members-popup-list">
+                      {membersPopupList.map((member) => (
+                        <div key={member.id} className="clubdetail-members-popup-item">
+                          {member.avatar ? (
+                            <img
+                              src={member.avatar.startsWith('http') ? member.avatar : `${ASSET_BASE}${member.avatar}`}
+                              alt={member.name}
+                              className="clubdetail-members-popup-avatar"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = '/images/users/default.png';
+                              }}
+                            />
+                          ) : (
+                            <div className="clubdetail-members-popup-avatar-placeholder" aria-hidden>
+                              <Users size={16} />
+                            </div>
+                          )}
+                          <div className="clubdetail-members-popup-meta">
+                            <span className="clubdetail-members-popup-name">{member.name}</span>
+                            <span className="clubdetail-members-popup-role">{member.roleLabel || 'Thành viên'}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </Container>

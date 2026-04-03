@@ -2,6 +2,15 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getClubCreationRequests, updateClubStatus } from '../../api/adminapi'
 import { toast } from 'react-toastify'
+import { ASSET_BASE } from '../../api/api'
+
+const buildLogoSrc = (logoUrl) => {
+    if (!logoUrl || typeof logoUrl !== 'string') return ''
+    if (logoUrl.startsWith('http')) return logoUrl
+    return `${ASSET_BASE}${logoUrl}`
+}
+
+
 
 const ClubRequests = () => {
     const navigate = useNavigate()
@@ -10,7 +19,6 @@ const ClubRequests = () => {
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-
     const [registrations, setRegistrations] = useState([])
 
     // Fetch club creation requests from API
@@ -89,6 +97,7 @@ const ClubRequests = () => {
                 return {
                     id: req._id || req.id,
                     club: req.name || req.clubName || 'CLB Unknown',
+                    logo_url: req.logo_url ,
                     sender: req.creator?.name || req.creator?.username || req.creatorName || req.leader_id?.name || 'Unknown',
                     date: req.created_at ? new Date(req.created_at).toLocaleDateString('vi-VN') :
                         req.createdAt ? new Date(req.createdAt).toLocaleDateString('vi-VN') : '19/01/2026',
@@ -115,7 +124,7 @@ const ClubRequests = () => {
             setRegistrations(mockRequests)
 
             setError(err.message || 'Không thể kết nối đến server. Đang sử dụng dữ liệu mẫu.')
-            toast.warning('Không thể kết nối đến server. Đang hiển thị dữ liệu mẫu.')
+            toast.warning('Không thể kết nối đến máy chủ. Đang hiển thị dữ liệu mẫu.')
         } finally {
             setLoading(false)
         }
@@ -199,6 +208,7 @@ const ClubRequests = () => {
                     <div className="admin-col admin-col--sender">Người gửi</div>
                     <div className="admin-col admin-col--date">Ngày gửi</div>
                     <div className="admin-col admin-col--status">Trạng thái</div>
+                    <div className="admin-col admin-col--logo-url">Logo URL</div>
                     <div className="admin-col admin-col--action" />
                 </div>
 
@@ -231,7 +241,48 @@ const ClubRequests = () => {
                             return (
                                 <div className="admin-row-wrap" key={r.id}>
                                     <div className="admin-row">
-                                        <div className="admin-col admin-col--club">{r.club}</div>
+                                        <div className="admin-col admin-col--club">
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                {r.logo_url ? (
+                                                    (() => {
+                                                        const logoSrc = buildLogoSrc(r.logo_url)
+                                                        return (
+                                                    <img
+                                                        src={logoSrc}
+                                                        alt={r.club}
+                                                        style={{
+                                                            width: 36,
+                                                            height: 36,
+                                                            borderRadius: '50%',
+                                                            objectFit: 'cover',
+                                                            border: '1px solid #e5e7eb',
+                                                            flexShrink: 0,
+                                                        }}
+                                                    />
+                                                        )
+                                                    })()
+                                                ) : (
+                                                    <div
+                                                        style={{
+                                                            width: 36,
+                                                            height: 36,
+                                                            borderRadius: '50%',
+                                                            background: '#f3f4f6',
+                                                            color: '#6b7280',
+                                                            display: 'grid',
+                                                            placeItems: 'center',
+                                                            fontSize: 12,
+                                                            fontWeight: 700,
+                                                            flexShrink: 0,
+                                                        }}
+                                                        aria-hidden
+                                                    >
+                                                        CLB
+                                                    </div>
+                                                )}
+                                                <span>{r.club}</span>
+                                            </div>
+                                        </div>
                                         <div className="admin-col admin-col--sender">{r.sender}</div>
                                         <div className="admin-col admin-col--date">{r.date}</div>
                                         <div className="admin-col admin-col--status">
@@ -262,6 +313,7 @@ const ClubRequests = () => {
                                                 </span>
                                             )}
                                         </div>
+                                        
                                         <div className="admin-col admin-col--action">
                                             <button
                                                 className="admin-eye-btn"

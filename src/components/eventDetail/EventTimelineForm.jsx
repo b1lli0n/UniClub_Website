@@ -4,7 +4,6 @@ import { getActionTypes } from '../../api/actionTypesAPI';
 import '../../styles/EventTimelineForm.css';
 
 export default function EventTimelineForm({ 
-  eventId, 
   onSubmit, 
   onCancel, 
   initialData = null,
@@ -52,11 +51,22 @@ export default function EventTimelineForm({
     }
   }, [initialData]);
 
-  const formatDateTimeForInput = (isoDateTime) => {
-    if (!isoDateTime) return '';
+  const formatDateTimeForInput = (dateTimeValue) => {
+    if (!dateTimeValue) return '';
+
     try {
-      const date = new Date(isoDateTime);
-      return date.toISOString().slice(0, 16);
+      const date = new Date(dateTimeValue);
+      if (Number.isNaN(date.getTime())) return '';
+
+      const pad = (num) => String(num).padStart(2, '0');
+      const year = date.getFullYear();
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
+      const hours = pad(date.getHours());
+      const minutes = pad(date.getMinutes());
+
+      // datetime-local expects local clock time, not UTC.
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
     } catch {
       return '';
     }

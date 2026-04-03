@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import {
     Calendar as CalendarIcon,
     Plus,
@@ -21,7 +21,6 @@ import '../../styles/ClubActivitySchedule.css';
 
 const ClubActivitySchedule = () => {
     const { id: clubId } = useParams();
-    const navigate = useNavigate();
     const [activities, setActivities] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('create'); // 'create', 'edit', 'view'
@@ -181,7 +180,7 @@ const ClubActivitySchedule = () => {
     };
 
     // ========= FETCH DATA TỪ BACKEND NHƯ TRONG YÊU CẦU =========
-    const fetchActivitiesData = async () => {
+    const fetchActivitiesData = useCallback(async () => {
         try {
             // Lấy T2 đến CN để filter start_date và end_date
             const start_date = new Date(weekStartDate);
@@ -208,7 +207,6 @@ const ClubActivitySchedule = () => {
             const activitiesArray = Array.isArray(data) ? data : (data.activities || []);
 
             const mappedActivities = activitiesArray
-                .filter(dbItem => dbItem.status !== 3) // Loại bỏ các hoạt động đã bị Hủy (status: 3)
                 .map(dbItem => {
                     const sDate = new Date(dbItem.start_time);
                     const eDate = new Date(dbItem.end_time);
@@ -230,13 +228,13 @@ const ClubActivitySchedule = () => {
             console.error('Fetch activities error:', error);
             toast.error(error?.response?.data?.message || 'Lỗi lấy dữ liệu');
         }
-    };
+    }, [clubId, filterType, weekStartDate]);
 
     useEffect(() => {
         if (clubId) {
             fetchActivitiesData();
         }
-    }, [clubId, weekStartDate, filterType]);
+    }, [clubId, fetchActivitiesData]);
 
     const getActivitiesForDay = (date) => {
         const dateString = formatDateForHeader(date);
@@ -244,6 +242,21 @@ const ClubActivitySchedule = () => {
     };
 
     const dayNames = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 0:
+                return 'Sắp diễn ra';
+            case 1:
+                return 'Đang diễn ra';
+            case 2:
+                return 'Đã hoàn thành';
+            case 3:
+                return 'Đã hủy';
+            default:
+                return 'Không xác định';
+        }
+    };
 
     return (
         <>
@@ -304,6 +317,7 @@ const ClubActivitySchedule = () => {
                                         dayActivities.map(activity => (
                                             <div key={activity.id} className="activity-card-mini">
                                                 <div className="activity-card-info" onClick={() => handleOpenModal('view', activity)}>
+                                                    <div className="activity-status-badge">{getStatusLabel(activity.status)}</div>
                                                     <div className="activity-meta">{activity.location}</div>
                                                     <div className="activity-title-mini">{activity.title}</div>
                                                     <div className="activity-time-mini">{activity.startTime} - {activity.endTime}</div>
@@ -433,6 +447,15 @@ const ClubActivitySchedule = () => {
                                     disabled={modalMode === 'view'}
                                 ></textarea>
                             </div>
+
+                            {modalMode === 'view' && selectedActivity && (
+                                <div className="form-group">
+                                    <label>Trạng thái</label>
+                                    <div className="activity-status-badge activity-status-badge--view">
+                                        {getStatusLabel(selectedActivity.status)}
+                                    </div>
+                                </div>
+                            )}
 
                             {modalMode !== 'view' && (
                                 <div className="form-actions">

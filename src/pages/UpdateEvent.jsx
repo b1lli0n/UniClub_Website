@@ -154,7 +154,7 @@ function UpdateEventPage() {
             setMessage('Cập nhật thành công!');
             setTimeout(() => {
                 setMessage('');
-                navigate(`/events/${eventId}`);
+                navigate(`/clubEvent/${eventId}`);
             }, 1200);
         } catch (err) {
             console.error('❌ Update error:', err);
@@ -237,7 +237,7 @@ function UpdateEventPage() {
                         <p className="update-event-notfound-text">
                             Sự kiện này không tồn tại hoặc đã bị xóa
                         </p>
-                        <button className="card-button" onClick={() => navigate('/events')}>
+                        <button className="card-button" onClick={() => navigate('/clubEvent ')}>
                             ← Quay lại danh sách
                         </button>
                     </div>
@@ -259,7 +259,7 @@ function UpdateEventPage() {
                         <p className="update-event-notfound-text">
                             Trạng thái hiện tại không cho phép chỉnh sửa thông tin.
                         </p>
-                        <button className="card-button" onClick={() => navigate(`/events/${eventId}`)}>
+                        <button className="card-button" onClick={() => navigate(`/clubEvent/${eventId}`)}>
                             ← Quay lại chi tiết
                         </button>
                     </div>
@@ -278,7 +278,7 @@ function UpdateEventPage() {
                 </header>
 
                 <div className="create-event-nav">
-                    <button className="btn-back-soft" onClick={() => navigate(`/events/${eventId}`)}>
+                    <button className="btn-back-soft" onClick={() => navigate(`/clubEvent/${eventId}`)}>
                         <ArrowLeft size={18} />
                         <span>Quay lại</span>
                     </button>
@@ -312,7 +312,7 @@ function UpdateEventPage() {
                     onChange={handleChange}
                     onSubmit={handleUpdate}
                     updating={updating}
-                    onBack={() => navigate(`/events/${eventId}`)}
+                    onBack={() => navigate(`/clubEvent/${eventId}`)}
                     eventTitle={event.title}
 
                 />

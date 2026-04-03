@@ -57,4 +57,15 @@ export const updateTimelineItem = async (timelineId, timelineData) => {
   }
 };
 
+// Xóa timeline
+export const deleteTimelineItem = async (timelineId) => {
+  try {
+    const response = await eventTimelineAPI.delete(`/events/timeline/${timelineId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Delete timeline error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể xóa timeline' };
+  }
+};
+
 export default eventTimelineAPI;

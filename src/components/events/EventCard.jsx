@@ -2,6 +2,14 @@ import StatusBadge from './StatusBadge';
 import '../../styles/EventCard.css';
 import { Calendar, MapPin, Users, ArrowRight, ImageIcon } from 'lucide-react';
 
+const getProgressStatusLabel = (progressStatus) => {
+    switch (String(progressStatus)) {
+        case '0': return 'Nháp';
+        case '1': return 'Hoàn thành';
+        default: return 'N/A';
+    }
+};
+
 const EventCard = ({ event, onViewDetails, formatDateTime }) => {
     const startTime = event.start_time || event.startAt || event.start_at;
     const location = event.location || 'Địa điểm: TBC';
@@ -25,6 +33,11 @@ const EventCard = ({ event, onViewDetails, formatDateTime }) => {
                 )}
                 <div className="event-card-badges">
                     <StatusBadge status={event.status} />
+                    {event.progress_status !== undefined && (
+                        <div className="event-card-badge-progress">
+                            {getProgressStatusLabel(event.progress_status)}
+                        </div>
+                    )}
                 </div>
             </div>
 

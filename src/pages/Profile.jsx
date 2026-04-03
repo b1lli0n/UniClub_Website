@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { getProfile, updateProfile, uploadProfileAvatar } from '../api/userApi';
 import '../styles/Profile.css';
 import { ASSET_BASE } from '../api/api';
+import { isValidPhoneNumber } from '../lib/utils';
 
 const genderOptions = [
   { value: 'female', label: 'Nữ' },
@@ -215,7 +216,7 @@ const Profile = () => {
     }
 
     const phoneTrim = (profile.phone || '').trim();
-    if (phoneTrim && !/^0\d{9}$/.test(phoneTrim)) {
+    if (phoneTrim && !isValidPhoneNumber(phoneTrim)) {
       toast.error('Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)');
       return;
     }
@@ -249,7 +250,7 @@ const Profile = () => {
         return;
       }
       if (!res.data) {
-        toast.error('Phản hồi từ server không hợp lệ');
+        toast.error('Phản hồi từ máy chủ không hợp lệ');
         return;
       }
       toast.success(res.message || 'Cập nhật profile thành công');
@@ -438,6 +439,8 @@ const Profile = () => {
                     className="profile-input"
                     value={profile.phone}
                     onChange={handleChange}
+                    inputMode="numeric"
+                    maxLength={10}
                     placeholder="Nhập số điện thoại"
                     disabled={!isEditing || saving}
                   />

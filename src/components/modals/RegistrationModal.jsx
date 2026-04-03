@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import eventApi from '../../api/eventApi';
 import { getCurrentUser } from '../../api/authApi';
 import { updateProfile } from '../../api/userApi';
+import { isValidPhoneNumber } from '../../lib/utils';
 import '../../styles/RegistrationModal.css';
 
 // Default avatar logic if needed
@@ -63,14 +64,21 @@ const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle, event
 
             // If in edit mode, update profile first
             if (isEditing) {
+                const phoneTrim = String(formData.phone || '').trim();
+                if (phoneTrim && !isValidPhoneNumber(phoneTrim)) {
+                    toast.error('Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)');
+                    setLoading(false);
+                    return;
+                }
+
                 try {
                     await updateProfile({
                         fullName: formData.name,
-                        phone: formData.phone,
+                        phone: phoneTrim,
                         // email is usually read-only or requires verify, depend on backend
                     });
                     // Update local storage user just in case
-                    const updatedUser = { ...user, fullName: formData.name, phone: formData.phone };
+                    const updatedUser = { ...user, fullName: formData.name, phone: phoneTrim };
                     localStorage.setItem('user', JSON.stringify(updatedUser));
                 } catch (updateErr) {
                     console.error("Failed to update profile", updateErr);
@@ -198,6 +206,8 @@ const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle, event
                                         className="reg-form-input"
                                         value={formData.phone}
                                         onChange={handleChange}
+                                        inputMode="numeric"
+                                        maxLength={10}
                                     />
                                 </div>
                                 <div className="reg-form-group">

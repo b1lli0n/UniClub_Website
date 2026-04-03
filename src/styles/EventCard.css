@@ -51,6 +51,24 @@
     top: 12px;
     right: 12px;
     z-index: 2;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.event-card-badge-progress {
+    background: linear-gradient(135deg, #F3E8FF, #E8F4FD) !important;
+    color: #4F46E5 !important;
+    padding: 6px 14px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px;
+    border: 1px solid rgba(79, 70, 229, 0.15);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
 }
 
 /* Body Section */

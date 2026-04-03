@@ -1,7 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { getClubCreationRequestDetail, updateClubStatus } from '../../api/adminapi'
 import { toast } from 'react-toastify'
+import { ASSET_BASE } from '../../api/api'
+
+const buildLogoSrc = (logoUrl) => {
+    if (!logoUrl || typeof logoUrl !== 'string') return ''
+    if (logoUrl.startsWith('http')) return logoUrl
+    console.log('Building logo src from:', logoUrl)
+    return `${ASSET_BASE}${logoUrl}`
+}
 
 const ClubRequestDetail = () => {
     const { id } = useParams()
@@ -12,12 +20,7 @@ const ClubRequestDetail = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
-    // Fetch request detail from API
-    useEffect(() => {
-        fetchRequestDetail()
-    }, [id])
-
-    const fetchRequestDetail = async () => {
+    const fetchRequestDetail = useCallback(async () => {
         try {
             setLoading(true)
             setError(null)
@@ -51,6 +54,7 @@ const ClubRequestDetail = () => {
             const mappedRequest = {
                 id: requestData._id || requestData.id,
                 club: requestData.name || requestData.clubName || 'CLB Unknown',
+                logo_url: requestData.logo_url,
                 // Ưu tiên leader_id.name theo xác nhận của bạn
                 sender: requestData.leader_id?.name || requestData.creator?.name || requestData.creatorName || 'Unknown',
                 date: requestData.createdAt ? new Date(requestData.createdAt).toLocaleDateString('vi-VN') :
@@ -72,6 +76,7 @@ const ClubRequestDetail = () => {
             const fallbackData = state?.registration || {
                 id: id,
                 club: 'CLB Unknown',
+                logo_url: state?.registration?.logo_url || '',
                 sender: 'Unknown',
                 date: '19/01/2026',
                 status: 'pending',
@@ -81,11 +86,16 @@ const ClubRequestDetail = () => {
 
             setRegistration(fallbackData)
             setError(err.message || 'Không thể tải thông tin yêu cầu')
-            toast.warning('Không thể tải thông tin từ server. Đang hiển thị dữ liệu tạm thời.')
+            toast.warning('Không thể tải thông tin từ máy chủ. Đang hiển thị dữ liệu tạm thời.')
         } finally {
             setLoading(false)
         }
-    }
+    }, [id, state?.registration])
+
+    // Fetch request detail from API
+    useEffect(() => {
+        fetchRequestDetail()
+    }, [fetchRequestDetail])
 
     const updateStatus = async (statusString) => {
         try {
@@ -148,60 +158,87 @@ const ClubRequestDetail = () => {
             ) : (
                 <div className="admin-row-details">
                     <h4 className="admin-detail-section-title">Thông tin yêu cầu</h4>
-                    <div className="admin-detail-grid">
-                        <div className="admin-detail-item">
-                            <div className="admin-detail-label">Tên câu lạc bộ</div>
-                            <div className="admin-detail-value">{registration.club}</div>
+                    {error && (
+                        <div style={{ marginBottom: 12, color: '#b45309', fontSize: 12 }}>
+                            {error}
                         </div>
-                        <div className="admin-detail-item">
-                            <div className="admin-detail-label">Người gửi yêu cầu</div>
-                            <div className="admin-detail-value">{registration.sender}</div>
-                        </div>
-                        <div className="admin-detail-item">
-                            <div className="admin-detail-label">Ngày tạo</div>
-                            <div className="admin-detail-value">{registration.date}</div>
-                        </div>
-                        <div className="admin-detail-item">
-                            <div className="admin-detail-label">Số lượng thành viên</div>
-                            <div className="admin-detail-value">{registration.membersCount}</div>
-                        </div>
-                        <div className="admin-detail-item">
-                            <div className="admin-detail-label">Trạng thái</div>
-                            <div className="admin-detail-value">
-                                {registration.status === 'pending' ? (
-                                    <span className="admin-status" style={{ color: '#d97706', fontWeight: 600 }}>
-                                        Đang chờ duyệt
-                                    </span>
-                                ) : (
-                                    <span className={`admin-status admin-status--${registration.status}`}>
-                                        {registration.status === 'approved' ? 'Đã duyệt' : 'Từ chối'}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        {registration.category && (
+                    )}
+                    <div className="admin-detail-layout">
+                        <div className="admin-detail-grid">
                             <div className="admin-detail-item">
-                                <div className="admin-detail-label">Danh mục</div>
-                                <div className="admin-detail-value">{registration.category}</div>
+                                <div className="admin-detail-label">Tên câu lạc bộ</div>
+                                <div className="admin-detail-value">{registration.club}</div>
                             </div>
-                        )}
-                        {registration.contactEmail && (
                             <div className="admin-detail-item">
-                                <div className="admin-detail-label">Email liên hệ</div>
-                                <div className="admin-detail-value">{registration.contactEmail}</div>
+                                <div className="admin-detail-label">Người gửi yêu cầu</div>
+                                <div className="admin-detail-value">{registration.sender}</div>
                             </div>
-                        )}
-                        {registration.contactPhone && (
                             <div className="admin-detail-item">
-                                <div className="admin-detail-label">Số điện thoại</div>
-                                <div className="admin-detail-value">{registration.contactPhone}</div>
+                                <div className="admin-detail-label">Ngày tạo</div>
+                                <div className="admin-detail-value">{registration.date}</div>
                             </div>
-                        )}
-                        <div className="admin-detail-item" style={{ gridColumn: '1 / -1' }}>
-                            <div className="admin-detail-label">Nội dung chi tiết</div>
-                            <div className="admin-detail-value" style={{ lineHeight: 1.6 }}>
-                                {registration.description || 'Nội dung mô tả về câu lạc bộ, mục tiêu hoạt động và kế hoạch phát triển.'}
+                            <div className="admin-detail-item">
+                                <div className="admin-detail-label">Số lượng thành viên</div>
+                                <div className="admin-detail-value">{registration.membersCount}</div>
                             </div>
+                            <div className="admin-detail-item">
+                                <div className="admin-detail-label">Trạng thái</div>
+                                <div className="admin-detail-value">
+                                    {registration.status === 'pending' ? (
+                                        <span className="admin-status" style={{ color: '#d97706', fontWeight: 600 }}>
+                                            Đang chờ duyệt
+                                        </span>
+                                    ) : (
+                                        <span className={`admin-status admin-status--${registration.status}`}>
+                                            {registration.status === 'approved' ? 'Đã duyệt' : 'Từ chối'}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            {registration.category && (
+                                <div className="admin-detail-item">
+                                    <div className="admin-detail-label">Danh mục</div>
+                                    <div className="admin-detail-value">{registration.category}</div>
+                                </div>
+                            )}
+                            {registration.contactEmail && (
+                                <div className="admin-detail-item">
+                                    <div className="admin-detail-label">Email liên hệ</div>
+                                    <div className="admin-detail-value">{registration.contactEmail}</div>
+                                </div>
+                            )}
+                            {registration.contactPhone && (
+                                <div className="admin-detail-item">
+                                    <div className="admin-detail-label">Số điện thoại</div>
+                                    <div className="admin-detail-value">{registration.contactPhone}</div>
+                                </div>
+                            )}
+                            <div className="admin-detail-item" style={{ gridColumn: '1 / -1' }}>
+                                <div className="admin-detail-label">Nội dung chi tiết</div>
+                                <div className="admin-detail-value" style={{ lineHeight: 1.6 }}>
+                                    {registration.description || 'Nội dung mô tả về câu lạc bộ, mục tiêu hoạt động và kế hoạch phát triển.'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="admin-logo-panel">
+                            <div className="admin-detail-label">Logo câu lạc bộ</div>
+                            {registration.logo_url ? (
+                                <img
+                                    className="admin-logo-preview"
+                                    src={buildLogoSrc(registration.logo_url)}
+                                    alt={registration.club}
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null
+                                        e.currentTarget.src = '/images/clubs/default.png'
+                                    }}
+                                />
+                            ) : (
+                                <div className="admin-logo-empty">Chưa có logo</div>
+                            )}
+                            <i>
+                                {registration.logo_url ?  registration.logo_url: 'Yêu cầu này không có logo đính kèm.'}
+                            </i>
                         </div>
                     </div>
 

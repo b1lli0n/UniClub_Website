@@ -48,6 +48,34 @@ const formatCreatedDate = (value) => {
   return parsedDate.toLocaleDateString('vi-VN', { timeZone: 'UTC' });
 };
 
+const parseDateOnly = (value) => {
+  if (!value) return null;
+
+  if (typeof value === 'string') {
+    const datePart = value.split('T')[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      const [year, month, day] = datePart.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    }
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+};
+
+const isOverdueFee = (item) => {
+  if (Number(item?.status) !== 0) return false;
+
+  const createdDate = parseDateOnly(item?.created_at || item?.createdAt);
+  if (!createdDate) return false;
+
+  const today = new Date();
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  return createdDate < todayDate;
+};
+
 const DEFAULT_SUMMARY = {
   unpaid: 0,
   paid: 0,
@@ -256,7 +284,7 @@ export default function MyMembershipFees() {
       const paymentUrl = response?.paymentUrl;
 
       if (!paymentUrl) {
-        toast.error('Không lấy được link thanh toán VNPay từ server.');
+        toast.error('Không lấy được liên kết thanh toán VNPay từ máy chủ.');
         return;
       }
 
@@ -411,7 +439,7 @@ export default function MyMembershipFees() {
                 </span>
                 <strong>{formatCurrency(item.amount)}</strong>
                 <div className="my-fees-status-actions">
-                  {Number(item.status) === 0 ? (
+                  {Number(item.status) === 0 && !isOverdueFee(item) ? (
                     <button
                       type="button"
                       className="my-fees-pay-btn"
@@ -419,6 +447,10 @@ export default function MyMembershipFees() {
                     >
                       Cần thanh toán
                     </button>
+                  ) : Number(item.status) === 0 && isOverdueFee(item) ? (
+                    <span className="my-fees-overdue-msg">
+                      Đã quá hạn thanh toán khoản phí này
+                    </span>
                   ) : (
                     <span className={`my-fees-status status-${String(item.status || '').toLowerCase()}`}>
                       {getStatusLabel(item.status)}

@@ -69,7 +69,7 @@ export const getClubRewards = async (clubId, params = {}) => {
  * body: { name, description, points_required, quantity }
  */
 export const createReward = async (clubId, data) => {
-    return axiosInstance.post(`/clubs/${clubId}/rewards`, data);
+    return axiosInstance.post(`/rewards/clubs/${clubId}/rewards`, data);
 };
 
 /**

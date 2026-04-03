@@ -131,6 +131,54 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+.timeline-event-range-card {
+  max-width: 800px;
+  margin: 0 auto 20px auto;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 175, 204, 0.35);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(31, 42, 68, 0.08);
+}
+
+.timeline-event-range-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--club-ink);
+  margin-bottom: 12px;
+}
+
+.timeline-event-range-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.timeline-event-range-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(162, 210, 255, 0.4);
+  background: rgba(162, 210, 255, 0.12);
+}
+
+.timeline-event-range-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--candy-text);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.timeline-event-range-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--club-ink);
+}
+
 .timeline-loading-container,
 .timeline-error-container,
 .timeline-empty-container {
@@ -305,6 +353,36 @@
   transform: scale(0.95);
 }
 
+.timeline-delete-btn {
+  background: rgba(255, 99, 132, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.timeline-delete-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: scale(1.05);
+}
+
+.timeline-delete-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.timeline-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .timeline-card-body {
   padding: 16px;
 }
@@ -395,6 +473,10 @@
 
   .timeline-management-content {
     padding: 24px 16px;
+  }
+
+  .timeline-event-range-grid {
+    grid-template-columns: 1fr;
   }
 
   .timeline-vertical {

@@ -63,7 +63,7 @@ export const login = async (credentials) => {
         localStorage.setItem('adminToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
         localStorage.setItem('user', JSON.stringify(user));
-        console.log('User logged in:', accessToken, user);
+        // console.log('User logged in:', accessToken, user);
       }
     }
 

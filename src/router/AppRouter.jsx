@@ -78,6 +78,7 @@ import MyMembershipFees from '../pages/MyMembershipFees'
 import ViewJoinRequests from '../pages/ViewJoinRequests'
 import EventTimelineManagement from '../pages/EventTimelineManagement'
 import ClubActivitySchedule from '../pages/Secretary/ClubActivitySchedule'
+import PaymentReceipt from '../pages/PaymentReceipt'
 
 const AppRouter = () => {
   return (
@@ -103,6 +104,7 @@ const AppRouter = () => {
         <Route path="/club/:clubId/rewards" element={<ViewRewards />} />
         <Route path="/club/:clubId/rewards/:rewardId" element={<ViewRewardDetail />} />
         <Route path="/my-membership-fees" element={<MyMembershipFees />} />
+        <Route path="/payment/receipt" element={<PaymentReceipt />} />
         <Route path='/my-requests' element={<ViewJoinRequests />} />
         <Route
           path="/club/:clubId/rewards/history"
@@ -134,6 +136,7 @@ const AppRouter = () => {
         <Route path="/clubs/manager/:id/dashboard" element={<DashboardLeaderClub />} />
         <Route path="/clubs/manager/:id/members" element={<ClubMemberManagement />} />
         <Route path="/clubs/manager/:id/transactions" element={<TransactionList />} />
+        <Route path="/clubs/manager/:id/finance" element={<FinancialDashboard />} />
         <Route path='/clubs/manager/:id/point-rules-management' element={<PointRulesManagement />} />
         <Route path="/clubs/manager/:id/activity-schedule" element={<ClubActivitySchedule />} />
 
@@ -144,10 +147,6 @@ const AppRouter = () => {
 
         <Route path="/dashboard/:clubId" element={<DashboardLeaderClub />} />
         <Route path="/clubs/:id/events/:eventId/attendance" element={<EventAttendanceList />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/events/create" element={<CreateEventPage />} />
-        <Route path="/events/:eventId" element={<EventDetailPage />} />
-        <Route path="/events/:eventId/update" element={<UpdateEventPage />} />
 
         <Route path="/clubEvent" element={<EventsPage />} />
         <Route path="/clubEvent/create" element={<CreateEventPage />} />

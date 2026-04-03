@@ -1,8 +1,15 @@
 import StatusBadge from '../events/StatusBadge';
 import '../../styles/EventDetail.css';
-import { ArrowLeft, Edit, Calendar } from 'lucide-react';
+import { ArrowLeft, Calendar } from 'lucide-react';
 
-const EventHeader = ({ title, status, onBack, onEdit, canEdit }) => {
+const getProgressStatusLabel = (progressStatus) => {
+    const value = String(progressStatus ?? '').toLowerCase();
+    if (value === '0' || value === 'draft') return 'Nháp';
+    if (value === '1' || value === 'completed') return 'Hoàn thành';
+    return 'N/A';
+};
+
+const EventHeader = ({ title, status, progressStatus, onBack }) => {
     return (
         <div className="event-detail-header-premium">
             <div className="header-nav-row">
@@ -10,15 +17,6 @@ const EventHeader = ({ title, status, onBack, onEdit, canEdit }) => {
                     <ArrowLeft size={18} />
                     <span>Quay lại</span>
                 </button>
-                
-                <div className="header-actions-right">
-                    {canEdit && (
-                        <button className="btn-edit-premium" onClick={onEdit}>
-                            <Edit size={16} />
-                            <span>Chỉnh sửa</span>
-                        </button>
-                    )}
-                </div>
             </div>
 
             <div className="header-main-title-row">
@@ -31,6 +29,11 @@ const EventHeader = ({ title, status, onBack, onEdit, canEdit }) => {
                 </div>
                 <div className="header-status-wrap">
                     <StatusBadge status={status} />
+                    {progressStatus !== undefined && progressStatus !== null && (
+                        <span className="event-progress-badge">
+                            Tiến độ: {getProgressStatusLabel(progressStatus)}
+                        </span>
+                    )}
                 </div>
             </div>
         </div>

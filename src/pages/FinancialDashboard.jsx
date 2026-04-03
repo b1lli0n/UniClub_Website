@@ -260,10 +260,11 @@ const getClubNameFromResponse = (response) => {
 }
 
 const FinancialDashboard = () => {
-    const { clubId } = useParams()
+    const { clubId: routeClubId, id } = useParams()
+    const clubId = routeClubId || id
     const navigate = useNavigate()
     const clubRole = Number(localStorage.getItem('clubRole'))
-    const [isTreasurer, setIsTreasurer] = useState(clubRole === 4)
+    const [isTreasurer, setIsTreasurer] = useState(clubRole === 1 || clubRole === 4)
     const deniedOnceRef = React.useRef(false)
 
     const [tab, setTab] = useState('overview')
@@ -326,7 +327,7 @@ const FinancialDashboard = () => {
             if (err?.response?.status === 403) {
                 if (!deniedOnceRef.current) {
                     deniedOnceRef.current = true
-                    toast.error(err?.response?.data?.message || 'Chỉ Treasurer mới có quyền truy cập mục Financial')
+                    toast.error(err?.response?.data?.message || 'Chỉ Leader hoặc Treasurer mới có quyền truy cập mục Financial')
                 }
                 navigate(-1)
                 return
@@ -335,7 +336,7 @@ const FinancialDashboard = () => {
         } finally {
             setDashLoading(false)
         }
-    }, [clubId, rangeFrom, rangeTo])
+    }, [clubId, rangeFrom, rangeTo, navigate])
 
     // ── Fetch transactions ──────────────────────────────────────
     const fetchTransactions = useCallback(async () => {
@@ -357,7 +358,7 @@ const FinancialDashboard = () => {
             if (err?.response?.status === 403) {
                 if (!deniedOnceRef.current) {
                     deniedOnceRef.current = true
-                    toast.error(err?.response?.data?.message || 'Chỉ Treasurer mới có quyền truy cập mục Financial')
+                    toast.error(err?.response?.data?.message || 'Chỉ Leader hoặc Treasurer mới có quyền truy cập mục Financial')
                 }
                 navigate(-1)
                 return
@@ -366,7 +367,7 @@ const FinancialDashboard = () => {
         } finally {
             setTxnLoading(false)
         }
-    }, [clubId, page, filterType, filterStatus, filterCategory, txnFrom, txnTo])
+    }, [clubId, page, filterType, filterStatus, filterCategory, txnFrom, txnTo, navigate])
 
     const extractRoleFromClub = (response) => {
         const payload = response?.data?.club || response?.club || response?.data || response || {}
@@ -386,18 +387,18 @@ const FinancialDashboard = () => {
                 const res = await getClubDetail(clubId)
                 if (cancelled) return
                 const roleNum = extractRoleFromClub(res)
-                const isTr = roleNum === 4 || Number(localStorage.getItem('clubRole')) === 4
+                const isTr = roleNum === 1 || roleNum === 4 || Number(localStorage.getItem('clubRole')) === 1 || Number(localStorage.getItem('clubRole')) === 4
                 setIsTreasurer(isTr)
                 if (!isTr) {
                     if (!deniedOnceRef.current) {
                         deniedOnceRef.current = true
-                        toast.error('Chỉ Treasurer mới có quyền truy cập mục Financial')
+                        toast.error('Chỉ Leader hoặc Treasurer mới có quyền truy cập mục Financial')
                     }
                     navigate(-1)
                     return
                 }
                 await fetchDashboard()
-            } catch (err) {
+            } catch {
                 // Nếu lấy chi tiết club lỗi, fallback vào check backend khi gọi dashboard
                 await fetchDashboard()
             }

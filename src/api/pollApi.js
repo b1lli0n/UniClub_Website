@@ -38,5 +38,6 @@ export const votePoll = async (clubId, pollId, optionIds) => {
   const response = await api.post(`/clubs/${clubId}/polls/${pollId}/vote`, {
     option_ids: optionIds,
   });
+  console.log('votePoll response', response);
   return response.data;
 };

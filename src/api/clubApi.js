@@ -35,10 +35,25 @@ export const getEventsByClub = async (clubId, params = {}) => {
   }
 };
 
+// Lấy danh sách sự kiện của một club cho leader
+export const getEventsByClubToManage   = async (clubId, params = {}) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/events-management`, { params });
+    return response.data;
+  } catch (error) {
+    console.error('Get events by club error:', error);
+    throw error.response?.data || { message: error.message || 'Không thể lấy danh sách sự kiện của câu lạc bộ' };
+  }
+};
+
 // Tạo club mới
 export const createClub = async (clubData) => {
   try {
-    const response = await clubAPI.post('/clubs/create', clubData);
+    const response = await clubAPI.post('/clubs/create', clubData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -68,7 +83,11 @@ export const getClubDetail = async (clubId) => {
 // Cập nhật club
 export const updateClub = async (clubId, clubData) => {
   try {
-    const response = await clubAPI.put(`/${clubId}`, clubData);
+    const response = await clubAPI.put(`/${clubId}`, clubData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -78,7 +97,11 @@ export const updateClub = async (clubId, clubData) => {
 // Xóa club
 export const deleteClub = async (clubId) => {
   try {
-    const response = await clubAPI.delete(`/${clubId}`);
+    const response = await clubAPI.delete(`/${clubId}`, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -93,7 +116,7 @@ export const updateClubStatus = async (clubId, status) => {
     if (![1, 2].includes(normalizedStatus)) {
       throw new Error('Status chỉ hợp lệ với 1 (active) hoặc 2 (paused)');
     }
-    const response = await clubAPI.patch(`/${clubId}/status`, { status: normalizedStatus });
+    const response = await clubAPI.patch(`/clubs/${clubId}/status`, { status: normalizedStatus });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -107,6 +130,16 @@ export const getClubMembers = async (clubId) => {
   try {
 
     const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Xem danh sách thành viên của club (user đã tham gia cũng xem được)
+export const getClubMembersList = async (clubId) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/members`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -158,10 +191,11 @@ export const approveJoinRequest = async (clubId, membershipId, payload = { role:
   }
 };
 
-export const rejectJoinRequest = async (clubId, membershipId) => {
+export const rejectJoinRequest = async (clubId, membershipId, payload = {}) => {
   try {
     const response = await clubAPI.post(
-      `/clubs/${clubId}/memberships/${membershipId}/reject`
+      `/clubs/${clubId}/memberships/${membershipId}/reject`,
+      payload
     );
     return response.data;
   } catch (error) {
@@ -210,7 +244,7 @@ export const getMyClubs = async () => {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
     return response.data;
-  } catch (error) {
+  } catch {
     // Nếu vẫn lỗi, thử fallback về endpoint mặc định nhưng xử lý error tốt hơn
     console.warn("Retrying with default my-clubs endpoint...");
     const token = localStorage.getItem('accessToken') || localStorage.getItem('token');

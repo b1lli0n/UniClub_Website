@@ -1,11 +1,52 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import ClubBadgeModal from '../../components/modals/ClubBadgeModal';
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import { getClubBadges } from '../../api/clubBadgeApi'
 import { getAllClubs } from '../../api/clubApi'
 import '../../styles/badges.css'
 
+const PAGE_SIZE = 12
+
+const normalizeActiveFlag = (value) => {
+    if (value === true || value === 1 || value === '1' || String(value).toLowerCase() === 'true') {
+        return 1
+    }
+    return 0
+}
+
+const sortBadgesList = (items, field, order) => {
+    const list = Array.isArray(items) ? [...items] : []
+    const direction = Number(order) === 1 ? 1 : -1
+
+    const toBoolNumber = (value) => {
+        if (value === true || value === 1 || value === '1' || String(value).toLowerCase() === 'true') return 1
+        return 0
+    }
+
+    const pickValue = (badge) => {
+        if (field === 'is_active') {
+            const raw = badge?.is_active ?? badge?.isActive
+            return toBoolNumber(raw)
+        }
+        if (field === 'points_required') return Number(badge?.points_required ?? 0)
+        if (field === 'created_at') {
+            const raw = badge?.created_at || badge?.createdAt
+            const d = raw ? new Date(raw) : null
+            return d && !Number.isNaN(d.getTime()) ? d.getTime() : 0
+        }
+        return String(badge?.[field] ?? '').toLowerCase()
+    }
+
+    list.sort((a, b) => {
+        const av = pickValue(a)
+        const bv = pickValue(b)
+        if (av < bv) return -1 * direction
+        if (av > bv) return 1 * direction
+        return 0
+    })
+
+    return list
+}
 
 const Badges = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -16,7 +57,7 @@ const Badges = () => {
     const [page, setPage] = useState(1)
     const [search, setSearch] = useState('')
     const [appliedSearch, setAppliedSearch] = useState('')
-    const [isActiveFilter, setIsActiveFilter] = useState('all') // 'all', 'true', 'false'
+    const [isActiveFilter, setIsActiveFilter] = useState('all') // 'all', '1', '0'
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     // Sort state
@@ -25,14 +66,15 @@ const Badges = () => {
     // Club filter state
     const [clubFilter, setClubFilter] = useState('all')
     const [clubs, setClubs] = useState([])
+    const [useServerPagination, setUseServerPagination] = useState(false)
     // Fetch clubs on mount
     useEffect(() => {
         const fetchClubs = async () => {
             try {
                 const res = await getAllClubs()
-                console.log('Fetched clubs for badge filter:', res)
+                // console.log('Fetched clubs for badge filter:', res)
                 setClubs(res?.clubs || res?.data || [])
-            } catch (err) {
+            } catch {
                 setClubs([])
             }
         }
@@ -54,35 +96,89 @@ const Badges = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, isActiveFilter, appliedSearch, sortBy, sortOrder, clubFilter])
 
+    const normalizeBadgeResponse = (res, fallbackPage) => {
+        const payload = res?.data || res || {}
+        const items = payload?.badges || payload?.data || []
+        const pg = payload?.pagination || {}
+        const hasServerPagination =
+            pg?.total !== undefined ||
+            pg?.totalPages !== undefined ||
+            pg?.total_pages !== undefined ||
+            pg?.page !== undefined ||
+            payload?.total !== undefined ||
+            payload?.totalPages !== undefined ||
+            payload?.total_pages !== undefined
+
+        const total = Number(pg.total ?? payload?.total ?? items.length ?? 0) || 0
+        const currentPage = Number(pg.page ?? payload?.page ?? fallbackPage) || fallbackPage
+        const limit = Number(pg.limit ?? payload?.limit ?? PAGE_SIZE) || PAGE_SIZE
+        const totalPages = Number(pg.totalPages ?? pg.total_pages ?? payload?.totalPages ?? payload?.total_pages) || Math.max(1, Math.ceil(total / limit))
+
+        return {
+            badges: Array.isArray(items) ? items : [],
+            hasServerPagination,
+            pagination: {
+                total,
+                page: currentPage,
+                totalPages: Math.max(1, totalPages),
+            },
+        }
+    }
+
     const fetchBadges = async () => {
         setLoading(true)
         setError(null)
-        console.log('Fetching badges with params:',clubFilter )
+        // console.log('Fetching badges with params:',clubFilter )
+        console.log('Fetching badges with params:', isActiveFilter)
         try {
             let isActive;
-            if (isActiveFilter === 'true') isActive = 'true';
-            else if (isActiveFilter === 'false') isActive = 'false';
+            if (isActiveFilter !== 'all') isActive = Number(isActiveFilter);
             const params = {
                 page,
-                limit: 12,
+                limit: PAGE_SIZE,
                 search: appliedSearch || undefined,
                 sortBy,
                 sortOrder: Number(sortOrder),
-                isActive,
+                is_active: isActive,
             };
             console.log('Final params for API call:', params)
 
-            const res = await getClubBadges(clubFilter !== 'all' ? clubFilter : null, params);
-            setBadges(res?.badges || res?.data || [])
-            setPagination(res?.pagination || { total: 0, page: 1, totalPages: 1 })
+            const selectedClubId = clubFilter !== 'all' ? clubFilter : null
+            const res = await getClubBadges(selectedClubId, params);
+            const normalized = normalizeBadgeResponse(res, page)
+            const badgesWithNumericActive = normalized.badges.map((badge) => ({
+                ...badge,
+                is_active: normalizeActiveFlag(badge?.is_active ?? badge?.isActive),
+            }))
+            setBadges(badgesWithNumericActive)
+            setUseServerPagination(normalized.hasServerPagination)
+            if (normalized.hasServerPagination) {
+                setPagination(normalized.pagination)
+            } else {
+                const total = badgesWithNumericActive.length
+                setPagination({
+                    total,
+                    page,
+                    totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+                })
+            }
         } catch (err) {
             console.error('fetchBadges error:', err)
             setError(err?.message || 'Không thể tải danh sách huy hiệu')
             setBadges([])
+            setUseServerPagination(false)
+            setPagination({ total: 0, page: 1, totalPages: 1 })
         } finally {
             setLoading(false)
         }
     }
+
+    const visibleBadges = useMemo(() => {
+        const sorted = sortBadgesList(badges, sortBy, sortOrder)
+        if (useServerPagination) return sorted
+        const start = (page - 1) * PAGE_SIZE
+        return sorted.slice(start, start + PAGE_SIZE)
+    }, [badges, page, sortBy, sortOrder, useServerPagination])
 
     // ─── Render ───────────────────────────────────────────────────────────────
     return (
@@ -157,8 +253,8 @@ const Badges = () => {
                         style={{ padding: '4px 8px', borderRadius: 4 }}
                     >
                         <option value="all">Tất cả</option>
-                        <option value="true">Hoạt động</option>
-                        <option value="false">Ngừng hoạt động</option>
+                        <option value="1">Hoạt động</option>
+                        <option value="0">Ngừng hoạt động</option>
                     </select>
                     <label htmlFor="sortBy" style={{ fontWeight: 500, margin: '0 4px 0 16px' }}>Sắp xếp:</label>
                     <select
@@ -211,12 +307,11 @@ const Badges = () => {
                 <div className="reward-empty">
                     <i className="fa-solid fa-medal" />
                     <p>Không tìm thấy huy hiệu nào</p>
-                    const [showCreateModal, setShowCreateModal] = useState(false); // Modal state
                 </div>
             ) : (
                 /* Badge Grid */
                 <div className="badge-grid">
-                    {badges.map((badge) => (
+                    {visibleBadges.map((badge) => (
                         <div
                             key={badge._id}
                             className="badge-card"

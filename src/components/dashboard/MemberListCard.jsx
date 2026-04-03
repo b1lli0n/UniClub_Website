@@ -45,13 +45,13 @@ const getMemberRoleLabel = (member) => {
     return member?.role || 'Member';
 };
 
-export function MemberListCard({ title = 'Thành viên', members = [], onManage }) {
+export function MemberListCard({ title = 'Thành viên', members = [], onManage, onInvite }) {
     return (
         <div className="glass-card member-list-card">
             <div className="member-list-header">
                 <h3 className="member-list-title">{title}</h3>
                 <button
-                    onClick={onManage}
+                    onClick={onInvite   }
                     className="card-button member-list-add"
                 >
                     +

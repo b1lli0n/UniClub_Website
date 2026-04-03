@@ -135,7 +135,7 @@ const ClubList = () => {
             setClubs(mockClubs)
 
             setError(err.message || 'Không thể kết nối đến server. Đang sử dụng dữ liệu mẫu.')
-            toast.warning('Không thể kết nối đến server. Đang hiển thị dữ liệu mẫu.')
+            toast.warning('Không thể kết nối đến máy chủ. Đang hiển thị dữ liệu mẫu.')
         } finally {
             setLoading(false)
         }
@@ -185,7 +185,7 @@ const ClubList = () => {
         } catch (err) {
             console.error('Error updating club status:', err)
             // Nếu lỗi, revert lại state cũ bằng cách load lại từ server
-            toast.error('Không thể cập nhật trạng thái: ' + (err.message || 'Lỗi server'))
+            toast.error('Không thể cập nhật trạng thái: ' + (err.message || 'Lỗi máy chủ'))
             fetchClubs()
         }
     }

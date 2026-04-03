@@ -11,8 +11,8 @@ import {
   ArrowLeft, 
   Settings, 
   Calendar, 
+    Edit,
   Trash2, 
-  CheckCircle, 
   XCircle, 
   AlertTriangle,
   Send,
@@ -25,8 +25,6 @@ export default function EventDetailPage() {
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [isRegistered, setIsRegistered] = useState(false);
-    const [registering, setRegistering] = useState(false);
     const [canceling, setCanceling] = useState(false);
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const [cancelReason, setCancelReason] = useState('');
@@ -57,10 +55,6 @@ export default function EventDetailPage() {
                 if (foundEvent) {
                     setEvent(foundEvent);
                     setError('');
-                    // Check if user is already registered
-                    if (foundEvent.userRegistration?.status === 'approved' || foundEvent.userRegistration?.status === 1) {
-                        setIsRegistered(true);
-                    }
                 } else {
                     setError('Sự kiện không tồn tại');
                 }
@@ -85,60 +79,6 @@ export default function EventDetailPage() {
         });
     };
 
-    const handleRegisterEvent = async () => {
-        try {
-            setRegistering(true);
-            const response = await fetch(`http://localhost:5000/api/events/${eventId}/register`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userId: localStorage.getItem('userId') })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Đăng ký thất bại');
-            }
-
-            setIsRegistered(true);
-            alert('Đăng ký sự kiện thành công!');
-        } catch (err) {
-            console.error('❌ Register error:', err);
-            alert(err.message || 'Không thể đăng ký sự kiện');
-        } finally {
-            setRegistering(false);
-        }
-    };
-
-    const handleCancelEvent = async () => {
-        try {
-            setRegistering(true);
-            const response = await fetch(`http://localhost:5000/api/events/${eventId}/register`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userId: localStorage.getItem('userId') })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Hủy đăng ký thất bại');
-            }
-
-            setIsRegistered(false);
-            alert('Hủy đăng ký thành công!');
-        } catch (err) {
-            console.error('❌ Cancel error:', err);
-            alert(err.message || 'Không thể hủy đăng ký');
-        } finally {
-            setRegistering(false);
-        }
-    };
-
     const handleCancelWholeEvent = async () => {
         if (!cancelReason.trim()) {
             toast.warning('Vui lòng nhập lý do hủy sự kiện');
@@ -147,7 +87,7 @@ export default function EventDetailPage() {
 
         try {
             setCanceling(true);
-            const response = await api.patch(
+            await api.patch(
                 `/clubs/${clubId}/events/${eventId}/cancel`,
                 { reason: cancelReason }
             );
@@ -203,7 +143,7 @@ export default function EventDetailPage() {
                         <AlertTriangle size={48} className="icon-warning-orange" />
                         <h3 className="error-title-modern">Không tìm thấy sự kiện</h3>
                         <p className="error-desc-modern">Sự kiện này không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
-                        <button className="btn-back-soft mt-4" onClick={() => navigate(-1)}>
+                        <button className="btn-back-soft mt-4" onClick={() => navigate(`/clubEvent`)}>
                             <ArrowLeft size={18} />
                             <span>Quay lại</span>
                         </button>
@@ -219,9 +159,8 @@ export default function EventDetailPage() {
                 <EventHeader
                     title={event.title}
                     status={event.status}
-                    onBack={() => navigate(clubId ? `/clubs/manager/${clubId}/dashboard` : '/events')}
-                    onEdit={() => navigate(`/events/${eventId}/update`)}
-                    canEdit={event.status !== 'canceled'}
+                    progressStatus={event.progress_status}
+                    onBack={() => navigate(-1)}
                 />
 
                 <div className="event-detail-content-row">
@@ -250,6 +189,16 @@ export default function EventDetailPage() {
                                 <Calendar size={18} />
                                 <span>Xem lịch trình</span>
                             </button>
+
+                            {event.status !== 'canceled' && (
+                                <button
+                                    className="btn-edit-premium"
+                                    onClick={() => navigate(`/clubEvent/${eventId}/update`)}
+                                >
+                                    <Edit size={16} />
+                                    <span>Chỉnh sửa</span>
+                                </button>
+                            )}
 
                             {isOrganizer && event.status !== 'canceled' && (
                                 <button

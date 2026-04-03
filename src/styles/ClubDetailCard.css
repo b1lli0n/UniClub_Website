@@ -180,6 +180,51 @@
   min-height: calc(1.35em * 2);
 }
 
+.club-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.club-detail-title-row .club-detail-title {
+  flex: 1;
+  min-height: 0;
+}
+
+.club-detail-name-status {
+  flex-shrink: 0;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+.club-detail-name-status--pending {
+  color: #7c5800;
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.club-detail-name-status--active {
+  color: #0f766e;
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.club-detail-name-status--paused {
+  color: #155e75;
+  background: rgba(14, 165, 233, 0.16);
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+.club-detail-name-status--rejected {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
 .club-detail-description {
   color: var(--card-muted);
   font-size: 0.875rem;

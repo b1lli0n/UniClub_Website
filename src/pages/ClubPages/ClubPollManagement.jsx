@@ -119,14 +119,14 @@ const ClubPollManagement = () => {
         }
       } else {
         setPolls([]);
-        toast.error(res?.message || 'Không tải được danh sách poll');
+        toast.error(res?.message || 'Không tải được danh sách bình chọn');
       }
     } catch (e) {
       setPolls([]);
       if (e?.response?.status === 403) {
         toast.error('Bạn không phải thành viên CLB này');
       } else {
-        toast.error(e?.message || 'Không tải được danh sách poll');
+        toast.error(e?.message || 'Không tải được danh sách bình chọn');
       }
     } finally {
       setLoading(false);
@@ -267,7 +267,7 @@ const ClubPollManagement = () => {
     const endIso = toIso(form.end_date);
 
     if (!title) {
-      toast.error('Tiêu đề poll không được để trống');
+      toast.error('Tiêu đề bình chọn không được để trống');
       return;
     }
     if (cleanOptions.length < 2) {
@@ -324,25 +324,25 @@ const ClubPollManagement = () => {
       if (editingPollId) {
         const res = await updatePoll(clubId, editingPollId, payload);
         if (res?.success) {
-          toast.success(res?.message || 'Cập nhật poll thành công');
+          toast.success(res?.message || 'Cập nhật bình chọn thành công');
           closeCreateModal();
           await loadPolls();
           await loadDetail();
         } else {
-          toast.error(res?.message || 'Không thể cập nhật poll');
+          toast.error(res?.message || 'Không thể cập nhật bình chọn');
         }
       } else {
         const res = await createPoll(clubId, payload);
         if (res?.success) {
-          toast.success(res?.message || 'Tạo poll thành công');
+          toast.success(res?.message || 'Tạo bình chọn thành công');
           closeCreateModal();
           await loadPolls();
         } else {
-          toast.error(res?.message || 'Không thể tạo poll');
+          toast.error(res?.message || 'Không thể tạo bình chọn');
         }
       }
     } catch (e2) {
-      toast.error(e2?.response?.data?.message || e2?.message || (editingPollId ? 'Không thể cập nhật poll' : 'Không thể tạo poll'));
+      toast.error(e2?.response?.data?.message || e2?.message || (editingPollId ? 'Không thể cập nhật bình chọn' : 'Không thể tạo bình chọn'));
     } finally {
       setCreating(false);
     }

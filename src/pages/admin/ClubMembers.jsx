@@ -32,7 +32,6 @@ const ClubMembers = () => {
             2: 'Phó chủ nhiệm',
             3: 'Thư ký',
             4: 'Thủ quỹ',
-            5: 'Quản lý sự kiện'
         }
         return roleMap[role] || 'Không xác định'
     }
@@ -45,7 +44,6 @@ const ClubMembers = () => {
             2: '#2563eb',
             3: '#7c3aed',
             4: '#dc2626',
-            5: '#ea580c'
         }
         return colorMap[role] || '#6b7280'
     }

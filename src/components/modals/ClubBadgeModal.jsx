@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllClubs } from '../../api/clubApi';
 import { createClubBadge, updateClubBadge } from '../../api/clubBadgeApi';
-import '../../styles/CreateEvent.css';
+import '../../styles/ClubBadgeModal.css';
 
 const ClubBadgeModal = ({ open, onClose, onSuccess, mode = 'create', badgeData }) => {
     const [clubs, setClubs] = useState([]);
@@ -72,45 +72,45 @@ const ClubBadgeModal = ({ open, onClose, onSuccess, mode = 'create', badgeData }
 
     if (!open) return null;
     return (
-        <div className="modal-overlay">
-            <div className="modal-content" style={{ minWidth: 400 }}>
-                <h2 style={{ marginBottom: 16 }}>{mode === 'edit' ? 'Cập nhật huy hiệu CLB' : 'Tạo mới huy hiệu CLB'}</h2>
-                <form className="modal-form" onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label className="modal-label">Tên huy hiệu</label>
-                        <input className="modal-input" name="name" value={form.name} onChange={handleChange} required placeholder="Nhập tên huy hiệu" />
+        <div className="club-badge-modal-overlay">
+            <div className="club-badge-modal-content">
+                <h2 className="club-badge-modal-title">{mode === 'edit' ? 'Cập nhật huy hiệu CLB' : 'Tạo mới huy hiệu CLB'}</h2>
+                <form className="club-badge-modal-form" onSubmit={handleSubmit}>
+                    <div className="club-badge-form-group">
+                        <label className="club-badge-modal-label">Tên huy hiệu</label>
+                        <input className="club-badge-modal-input" name="name" value={form.name} onChange={handleChange} required placeholder="Nhập tên huy hiệu" />
                     </div>
-                    <div className="form-group">
-                        <label className="modal-label">Mô tả huy hiệu</label>
-                        <textarea className="modal-input" name="description" value={form.description} onChange={handleChange} required placeholder="Nhập mô tả" rows={2} />
+                    <div className="club-badge-form-group">
+                        <label className="club-badge-modal-label">Mô tả huy hiệu</label>
+                        <textarea className="club-badge-modal-input" name="description" value={form.description} onChange={handleChange} required placeholder="Nhập mô tả" rows={2} />
                     </div>
-                    <div className="form-group">
-                        <label className="modal-label">Ảnh huy hiệu (icon_url)</label>
-                        <input className="modal-input" name="icon_url" value={form.icon_url} onChange={handleChange} required placeholder="Nhập URL ảnh" />
+                    <div className="club-badge-form-group">
+                        <label className="club-badge-modal-label">Ảnh huy hiệu (icon_url)</label>
+                        <input className="club-badge-modal-input" name="icon_url" value={form.icon_url} onChange={handleChange} required placeholder="Nhập URL ảnh" />
                     </div>
-                    <div className="form-group">
-                        <label className="modal-label">Chọn CLB</label>
-                        <select className="modal-select" name="club_id" value={form.club_id} onChange={handleChange} required>
+                    <div className="club-badge-form-group">
+                        <label className="club-badge-modal-label">Chọn CLB</label>
+                        <select className="club-badge-modal-select" name="club_id" value={form.club_id} onChange={handleChange} required>
                             <option value="">-- Chọn CLB --</option>
                             {clubs.map(club => (
                                 <option key={club._id || club.id} value={club._id || club.id}>{club.name}</option>
                             ))}
                         </select>
                     </div>
-                    <div className="form-group">
-                        <label className="modal-label">Điểm yêu cầu</label>
-                        <input className="modal-input" type="number" name="points_required" value={form.points_required} onChange={handleChange} required min={0} />
+                    <div className="club-badge-form-group">
+                        <label className="club-badge-modal-label">Điểm yêu cầu</label>
+                        <input className="club-badge-modal-input" type="number" name="points_required" value={form.points_required} onChange={handleChange} required min={0} />
                     </div>
-                    <div className="form-group">
-                        <label className="modal-label">
+                    <div className="club-badge-form-group">
+                        <label className="club-badge-modal-label">
                             <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleChange} />
                             &nbsp;Hoạt động
                         </label>
                     </div>
-                    {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                        <button type="button" className="modal-btn" onClick={onClose} disabled={loading}>Hủy</button>
-                        <button type="submit" className="modal-btn modal-btn--primary" disabled={loading}>
+                    {error && <div className="club-badge-modal-error">{error}</div>}
+                    <div className="club-badge-modal-actions">
+                        <button type="button" className="club-badge-modal-btn" onClick={onClose} disabled={loading}>Hủy</button>
+                        <button type="submit" className="club-badge-modal-btn club-badge-modal-btn--primary" disabled={loading}>
                             {loading ? 'Đang lưu...' : (mode === 'edit' ? 'Cập nhật' : 'Tạo mới')}
                         </button>
                     </div>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { getAllUsers } from '../api/userApi';
 import { sendInvitation } from '../api/invitationApi';
 
 function SendClubInvitation({ clubId, onSuccess }) {
     const [userId, setUserId] = useState('');
+    const [message, setMessage] = useState('');
     const [status, setStatus] = useState('');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -16,7 +18,9 @@ function SendClubInvitation({ clubId, onSuccess }) {
                 const userList = data?.users || data || [];
                 setUsers(Array.isArray(userList) ? userList : []);
             } catch (err) {
-                setStatus('Không thể tải danh sách user');
+                const msg = err?.response?.data?.message || err?.message || 'Không thể tải danh sách user';
+                setStatus(msg);
+                toast.error(msg);
             }
         }
         fetchUsers();
@@ -27,19 +31,26 @@ function SendClubInvitation({ clubId, onSuccess }) {
         setStatus('Đang gửi...');
         setLoading(true);
         try {
-            await sendInvitation({
+            const trimmedMessage = message.trim();
+            const response = await sendInvitation({
                 clubId,
                 userId,
+                message: trimmedMessage,
             });
-            setStatus('Gửi lời mời thành công!');
+            const successMessage = response?.data?.message || response?.message || 'Gửi lời mời thành công!';
+            setStatus(successMessage);
+            toast.success(successMessage);
             setUserId('');
+            setMessage('');
             if (onSuccess) onSuccess();
         } catch (err) {
+            const serverMessage = err?.response?.data?.message || err?.message || 'Gửi lời mời thất bại';
             if (err?.response?.status === 409) {
-                setStatus('Gửi thất bại: Người dùng đã có lời mời pending.');
+                setStatus(serverMessage);
             } else {
-                setStatus('Gửi thất bại: ' + (err.response?.data?.message || err.message));
+                setStatus(serverMessage);
             }
+            toast.error(serverMessage);
         } finally {
             setLoading(false);
         }
@@ -56,6 +67,13 @@ function SendClubInvitation({ clubId, onSuccess }) {
                     </option>
                 ))}
             </select>
+            <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={3}
+                maxLength={500}
+                placeholder="Nhập lời nhắn mời thành viên (tuỳ chọn)..."
+            />
             <button type="submit" disabled={loading || !userId}>
                 {loading ? 'Đang gửi...' : 'Gửi lời mời'}
             </button>

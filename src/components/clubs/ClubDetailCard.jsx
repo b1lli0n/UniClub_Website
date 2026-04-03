@@ -11,6 +11,13 @@ const ROLE_DISPLAY = {
   4: { label: 'Treasurer', color: '#52C41A' },
 };
 
+const CLUB_STATUS_DISPLAY = {
+  0: { label: 'Chờ duyệt', className: 'club-detail-name-status--pending' },
+  1: { label: 'Hoạt động', className: 'club-detail-name-status--active' },
+  2: { label: 'Tạm dừng', className: 'club-detail-name-status--paused' },
+  3: { label: 'Từ chối', className: 'club-detail-name-status--rejected' },
+};
+
 const ClubDetailCard = ({ club }) => {
   const navigate = useNavigate();
 
@@ -33,6 +40,7 @@ const ClubDetailCard = ({ club }) => {
   const clubStatus = normalizeClubStatus(club);
   const isPaused = clubStatus === 2;
   const isRejected = clubStatus === 3;
+  const statusMeta = CLUB_STATUS_DISPLAY[clubStatus] || null;
   const statusLabel = isPaused ? 'Tạm dừng' : isRejected ? 'Từ chối' : '';
 
   const handleSeeMore = () => {
@@ -115,7 +123,14 @@ const ClubDetailCard = ({ club }) => {
         )}
       </div>
       <div className="club-detail-card-body">
-        <h3 className="club-detail-title">{club.name || 'Club Name'}</h3>
+        <div className="club-detail-title-row">
+          <h3 className="club-detail-title">{club.name || 'Câu lạc bộ'}</h3>
+          {statusMeta && (
+            <span className={`club-detail-name-status ${statusMeta.className}`}>
+              {statusMeta.label}
+            </span>
+          )}
+        </div>
         <p className="club-detail-description">{club.description || 'Mô tả về câu lạc bộ này...'}</p>
         <div className="club-detail-info">
           <span className="club-detail-members">

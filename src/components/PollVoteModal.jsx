@@ -98,16 +98,24 @@ const PollVoteModal = ({
     }
     setSubmitting(true);
     try {
+      // console.log('Voting with optionIds', selected);
       const res = await votePoll(clubId, pollId, selected);
+      console.log('votePoll res', res);
       if (res?.success) {
         toast.success(res.message || 'Bình chọn thành công');
         await loadDetail();
         onUpdated?.();
       } else {
-        toast.error(res?.message || 'Không thể bình chọn');
+        toast.error('Không thể bình chọn');
       }
     } catch (e) {
-      toast.error(e?.message || 'Không thể bình chọn');
+      const status = e?.response?.status;
+      const serverMessage = e?.response?.data?.message;
+      if (status === 403) {
+        toast.error(serverMessage || 'Bạn không có quyền bình chọn');
+        return;
+      }
+      toast.error(serverMessage || e?.message || 'Không thể bình chọn');
     } finally {
       setSubmitting(false);
     }

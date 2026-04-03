@@ -222,6 +222,24 @@
     cursor: pointer;
 }
 
+.activity-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #334155;
+    background: #e2e8f0;
+    border: 1px solid #cbd5e1;
+    margin-bottom: 8px;
+}
+
+.activity-status-badge--view {
+    width: fit-content;
+    margin-bottom: 0;
+}
+
 .activity-meta {
     font-size: 11px;
     font-weight: 700;

@@ -66,6 +66,27 @@
   line-height: 1.1;
 }
 
+.header-status-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.event-progress-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #4F46E5;
+  background: linear-gradient(135deg, #F3E8FF, #E8F4FD);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.08);
+}
+
 /* Info Container & Grid */
 .event-main-info-container {
   background: rgba(255, 255, 255, 0.45);
@@ -266,6 +287,8 @@
 .action-buttons-group {
   display: flex;
   gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 /* Buttons Modern */
@@ -287,6 +310,27 @@
   background: white;
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.btn-edit-premium {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, rgba(255, 175, 204, 0.16), rgba(189, 224, 254, 0.18));
+  border: 1px solid rgba(255, 175, 204, 0.35);
+  border-radius: 12px;
+  color: #7C3AED;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 8px 20px rgba(255, 175, 204, 0.08);
+}
+
+.btn-edit-premium:hover {
+  background: linear-gradient(135deg, rgba(255, 175, 204, 0.24), rgba(189, 224, 254, 0.26));
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(255, 175, 204, 0.16);
 }
 
 .btn-success-premium {

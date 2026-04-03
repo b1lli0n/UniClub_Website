@@ -181,8 +181,9 @@ function InvitationListPage() {
 
         const isCanceledLocally = recentlyCanceledIds.includes(invitationId);
         const currentStatus = isCanceledLocally ? 'canceled' : normalizeStatus(invite?.status);
-        if (currentStatus !== 'pending') {
-            alert('Chỉ có thể gửi lại lời mời đang chờ xử lý. Lời mời đã hủy không thể gửi lại.');
+        const resendableStatuses = ['pending', 'rejected', 'canceled'];
+        if (!resendableStatuses.includes(currentStatus)) {
+            alert('Chỉ có thể gửi lại lời mời ở trạng thái chờ xử lý, đã từ chối hoặc đã hủy.');
             return;
         }
 
@@ -274,7 +275,7 @@ function InvitationListPage() {
                                         const isCanceledLocally = recentlyCanceledIds.includes(invitationId);
                                         const currentStatus = isCanceledLocally ? 'canceled' : normalizeStatus(invite.status);
                                         const isPending = currentStatus === 'pending';
-                                        const canResend = isPending && !isCanceledLocally;
+                                        const canResend = ['pending', 'rejected', 'canceled'].includes(currentStatus);
                                         const isActionLoading = actionLoadingId === invitationId;
                                         const invitedUser = invite?.user_id;
 

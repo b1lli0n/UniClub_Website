@@ -20,13 +20,13 @@ const getNavItems = (clubId, isSecretary, isSubLeader, isTreasurer, isLeader) =>
     const hasClubId = isValidClubId(clubId);
     const items = [
         { icon: Home, label: 'Dashboard', path: hasClubId ? `/clubs/manager/${clubId}/dashboard` : '/dashboard' },
+        { icon: Users, label: 'Thành viên', path: hasClubId ? `/clubs/manager/${clubId}/members` : '/clubs' },
         { icon: Bell, label: 'Thông báo', path: '/notifications' },
     ];
 
     if (isLeader && hasClubId) {
         items.push(
             { icon: Users, label: 'Duyệt Tham gia', path: hasClubId ? `/clubs/manager/${clubId}/join-requests` : '/clubs' },
-            { icon: Users, label: 'Thành viên', path: hasClubId ? `/clubs/manager/${clubId}/members` : '/clubs' },
             { icon: Vote, label: 'Bình chọn', path: hasClubId ? `/clubs/manager/${clubId}/polls` : '/clubs' },
             { icon: LayoutGrid, label: 'Sự kiện CLB', path: '/clubEvent' },
             { icon: Banknote, label: 'Tài chính', path: hasClubId ? `/clubs/manager/${clubId}/finance` : '/clubs' },

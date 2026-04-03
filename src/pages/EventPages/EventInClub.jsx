@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Button } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import '../../styles/Event.css';
 import RegistrationModal from '../../components/modals/RegistrationModal';
 import eventApi from '../../api/eventApi';
@@ -63,6 +63,7 @@ const DISCOVER_CATEGORIES = [
 
 const Event = () => {
     const { clubId } = useParams();
+    const navigate = useNavigate();
     const [query, setQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('Tất cả');
     const [sortBy, setSortBy] = useState('date-desc');
@@ -236,13 +237,9 @@ const Event = () => {
                                         <Button
                                             className="event-rowBtn"
                                             type="button"
-                                            onClick={() => {
-                                                setRegisterEventTitle(e.title);
-                                                setRegisterEventId(e._id || e.id);
-                                                setShowRegister(true);
-                                            }}
+                                            onClick={() => navigate(`/club/${clubId}/events/${e._id || e.id}`)}
                                         >
-                                            Đăng ký
+                                            Xem chi tiết
                                         </Button>
                                     </div>
 

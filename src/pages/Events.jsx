@@ -1,12 +1,11 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getEventsByClub } from '../api/clubApi';
+import { getEventsByClubToManage } from '../api/clubApi';
 import EventCard from '../components/events/EventCard';
-import EventsFilter from '../components/events/EventsFilter';
 import EmptyEventState from '../components/events/EmptyEventState';
 import '../styles/Events.css';
-import { Plus, Calendar, Settings, Sparkles, Filter } from 'lucide-react';
+import { Plus, Calendar, Settings, Sparkles, Filter, Search } from 'lucide-react';
 
 export default function EventsPage() {
     useEffect(() => {
@@ -19,12 +18,13 @@ export default function EventsPage() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [progressStatusFilter, setProgressStatusFilter] = useState('all');
 
     // Get clubId from params, user context, or localStorage
     const clubId = paramClubId || user?.clubId || localStorage.getItem('clubId');
 
-    const loadEvents = async () => {
+    const loadEvents = useCallback(async () => {
         if (!clubId) {
             setError('Bạn chưa chọn câu lạc bộ. Vui lòng quay lại trang chính và chọn một câu lạc bộ.');
             setLoading(false);
@@ -34,9 +34,10 @@ export default function EventsPage() {
         try {
             setLoading(true);
             setError('');
-            const filterValue = statusFilter === 'all' ? null : statusFilter;
-            const params = filterValue ? { status: filterValue } : {};
-            const response = await getEventsByClub(clubId, params);
+            const progressValue = progressStatusFilter === 'all' ? null : progressStatusFilter;
+            const params = {};
+            if (progressValue) params.progress_status = progressValue;
+            const response = await getEventsByClubToManage(clubId, params);
             console.log('✅ Events response:', response);
             const eventsData = response?.data || response?.events || response || [];
             console.log('✅ Events data:', eventsData);
@@ -55,19 +56,30 @@ export default function EventsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [clubId, progressStatusFilter]);
 
     useEffect(() => {
         loadEvents();
-    }, [statusFilter, clubId]);
+    }, [loadEvents]);
 
     const filteredEvents = useMemo(() => {
         let eventsList = [...events];
+        
+        // Filter by search query
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase().trim();
+            eventsList = eventsList.filter(event => 
+                (event.title || '').toLowerCase().includes(query) ||
+                (event.name || '').toLowerCase().includes(query) ||
+                (event.description || '').toLowerCase().includes(query)
+            );
+        }
+        
         // Sort by start date (earliest first)
         const dateKey = events[0]?.startAt ? 'startAt' : (events[0]?.start_time ? 'start_time' : 'start_at');
         eventsList.sort((a, b) => new Date(a[dateKey]).getTime() - new Date(b[dateKey]).getTime());
         return eventsList;
-    }, [events]);
+    }, [events, searchQuery]);
 
     const formatDateTime = (dateString) => {
         if (!dateString) return 'Thời gian: TBC';
@@ -133,14 +145,40 @@ export default function EventsPage() {
                 </header>
 
                 <div className="events-controls-row">
+                    <div className="search-input-wrap">
+                        <Search size={18} className="events-search-icon" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm sự kiện..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="events-search-input"
+                        />
+                        {searchQuery && (
+                            <button
+                                className="search-clear-btn"
+                                onClick={() => setSearchQuery('')}
+                                aria-label="Xóa tìm kiếm"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                    
                     <div className="filter-label-wrap">
                         <Filter size={18} />
-                        <span>Bộ lọc trạng thái:</span>
+                        <span>Lọc tiến độ:</span>
                     </div>
-                    <EventsFilter
-                        statusFilter={statusFilter}
-                        onFilterChange={setStatusFilter}
-                    />
+                    <select
+                        value={progressStatusFilter}
+                        onChange={(e) => setProgressStatusFilter(e.target.value)}
+                        className="events-filter-select"
+                        style={{ minWidth: '150px' }}
+                    >
+                        <option value="all">Tất cả</option>
+                        <option value="0">Nháp</option>
+                        <option value="1">Hoàn thành</option>
+                    </select>
                 </div>
 
                 {/* Events grid */}

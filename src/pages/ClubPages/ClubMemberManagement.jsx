@@ -122,13 +122,13 @@ export default function ClubMemberManagement() {
     try {
       setRemoving(true);
       await removeMember(clubId, membershipId);
-      toast.success(`Đã xóa ${name} khỏi club`);
+      toast.success(`Đã xóa ${name} khỏi câu lạc bộ`);
       setMembers((prev) => prev.filter((m) => m._id !== membershipId));
       setConfirmTarget(null);
     } catch (err) {
       const msg = err?.message || 'Xóa thành viên thất bại';
       if (msg.includes('Cannot remove')) {
-        toast.error('Không thể xóa Leader của club');
+        toast.error('Không thể xóa Trưởng câu lạc bộ');
       } else if (msg.includes('not found')) {
         toast.error('Không tìm thấy thành viên');
       } else {

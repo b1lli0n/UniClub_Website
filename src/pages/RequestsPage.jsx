@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { approveJoinRequest, getJoinRequests, rejectJoinRequest } from '../api/clubApi';
-import SendClubInvitation from '../components/SendClubInvitation';
 import '../styles/Memberships.css';
 
 function Memberships() {
@@ -9,9 +8,26 @@ function Memberships() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [actionLoadingId, setActionLoadingId] = useState('');
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [rejectModal, setRejectModal] = useState({
+        open: false,
+        membershipId: '',
+        userName: '',
+        reason: ''
+    });
+    const [rejectModalError, setRejectModalError] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
     const navigate = useNavigate();
     const { id } = useParams();
     const clubId = id;
+
+    const normalizeStatus = (status) => {
+        if (status === 0 || status === '0' || status === 'pending') return 0;
+        if (status === 1 || status === '1' || status === 'approved') return 1;
+        if (status === 2 || status === '2' || status === 'rejected') return 2;
+        if (status === 3 || status === '3' || status === 'canceled' || status === 'cancelled') return 3;
+        return 0;
+    };
 
 
     useEffect(() => {
@@ -46,17 +62,12 @@ function Memberships() {
                         name: member.user_id?.fullName || member.user?.fullName || member.user_id?.email?.split('@')[0] || member.user?.email?.split('@')[0] || 'Unknown',
                         email: member.user_id?.email || member.user?.email || 'No email'
                     },
-                    status: member.status === 0 || member.status === 'pending'
-                        ? 'pending'
-                        : member.status === 1 || member.status === 'approved'
-                            ? 'approved'
-                            : member.status === 2 || member.status === 'rejected'
-                                ? 'rejected'
-                                : member.status === 3 || member.status === 'canceled' || member.status === 'cancelled'
-                                    ? 'cancelled'
-                                    : 'unknown',
+                    status: normalizeStatus(member.status),
                     role: member.role,
-                    requestedAt: member.createdAt || member.joined_at || new Date().toISOString()
+                    requestedAt: member.createdAt || member.joined_at || new Date().toISOString(),
+                    requestReason: member.reason || member.requestReason || member.request_reason || '',
+                    rejectReason: member.rejectReason || member.rejectedReason || member.reject_reason || member.rejectionReason || '',
+                    raw: member
                 }));
 
                 setMemberships(mapped);
@@ -78,7 +89,7 @@ function Memberships() {
             await approveJoinRequest(clubId, membershipId, { role: 0 });
             setMemberships((prev) =>
                 prev.map((item) =>
-                    item.membershipId === membershipId ? { ...item, status: 'approved' } : item
+                    item.membershipId === membershipId ? { ...item, status: 1 } : item
                 )
             );
         } catch (err) {
@@ -88,14 +99,14 @@ function Memberships() {
         }
     };
 
-    const handleReject = async (membershipId) => {
+    const handleReject = async (membershipId, reason) => {
         if (!membershipId) return;
         try {
             setActionLoadingId(`reject-${membershipId}`);
-            await rejectJoinRequest(clubId, membershipId);
+            await rejectJoinRequest(clubId, membershipId, { reason });
             setMemberships((prev) =>
                 prev.map((item) =>
-                    item.membershipId === membershipId ? { ...item, status: 'rejected' } : item
+                    item.membershipId === membershipId ? { ...item, status: 2, rejectReason: reason } : item
                 )
             );
         } catch (err) {
@@ -103,6 +114,52 @@ function Memberships() {
         } finally {
             setActionLoadingId('');
         }
+    };
+
+    const openDetailModal = (request) => {
+        setSelectedRequest(request);
+    };
+
+    const closeDetailModal = () => {
+        setSelectedRequest(null);
+    };
+
+    const openRejectModal = (request) => {
+        setRejectModalError('');
+        setRejectModal({
+            open: true,
+            membershipId: request.membershipId,
+            userName: request.user?.name || 'thành viên này',
+            reason: ''
+        });
+    };
+
+    const closeRejectModal = () => {
+        if (actionLoadingId.startsWith('reject-')) return;
+        setRejectModalError('');
+        setRejectModal({
+            open: false,
+            membershipId: '',
+            userName: '',
+            reason: ''
+        });
+    };
+
+    const submitRejectModal = async () => {
+        const reasonText = rejectModal.reason.trim();
+        if (!reasonText) {
+            setRejectModalError('Vui lòng nhập lý do từ chối.');
+            return;
+        }
+
+        await handleReject(rejectModal.membershipId, reasonText);
+        setRejectModal({
+            open: false,
+            membershipId: '',
+            userName: '',
+            reason: ''
+        });
+        setRejectModalError('');
     };
 
     if (loading) {
@@ -147,19 +204,46 @@ function Memberships() {
     }
 
     const getStatusLabel = (status) => {
+        const normalizedStatus = normalizeStatus(status);
         switch (status) {
+            case 0:
+            case '0':
             case 'pending':
-                return 'Chờ xử lý';
+                return 'Chờ duyệt';
+            case 1:
+            case '1':
             case 'approved':
-                return 'Chấp nhận';
+                return 'Đã duyệt';
+            case 2:
+            case '2':
             case 'rejected':
                 return 'Từ chối';
+            case 3:
+            case '3':
+            case 'canceled':
             case 'cancelled':
                 return 'Đã hủy';
             default:
-                return status;
+                switch (normalizedStatus) {
+                    case 0:
+                        return 'Chờ duyệt';
+                    case 1:
+                        return 'Đã duyệt';
+                    case 2:
+                        return 'Từ chối';
+                    case 3:
+                        return 'Đã hủy';
+                    default:
+                        return status;
+                }
         }
     };
+
+    const getStatusClassName = (status) => `status-${normalizeStatus(status)}`;
+
+    const filteredMemberships = statusFilter === 'all'
+        ? memberships
+        : memberships.filter((request) => String(request.status) === String(statusFilter));
 
     const getRoleLabel = (role) => {
         if (typeof role === 'string') {
@@ -193,6 +277,20 @@ function Memberships() {
                 <header className="myclub-header">
                     <h1 className="myclub-title">Duyệt thành viên CLB</h1>
                     <div className="memberships-header-actions">
+                        <label className="memberships-filter-wrap">
+                            <span className="memberships-filter-label">Lọc trạng thái</span>
+                            <select
+                                className="memberships-filter-select"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="all">Tất cả</option>
+                                <option value="0">Chờ duyệt</option>
+                                <option value="1">Đã duyệt</option>
+                                <option value="2">Từ chối</option>
+                                <option value="3">Đã hủy</option>
+                            </select>
+                        </label>
                         <button
                             type="button"
                             className="memberships-invite-list-button"
@@ -204,10 +302,9 @@ function Memberships() {
                     </div>
                 </header>
 
-                {memberships.length > 0 ? (
+                {filteredMemberships.length > 0 ? (
                     <div className="memberships-list">
-                        {memberships.map((request) => {
-                            const isPending = request.status === 'pending';
+                        {filteredMemberships.map((request) => {
                             const isApproving = actionLoadingId === `approve-${request.membershipId}`;
                             const isRejecting = actionLoadingId === `reject-${request.membershipId}`;
                             return (
@@ -232,13 +329,20 @@ function Memberships() {
                                         <p className="memberships-requested-at">
                                             Tham gia lúc: {new Date(request.requestedAt).toLocaleString('vi-VN')}
                                         </p>
+                                        <button
+                                            type="button"
+                                            className="memberships-view-detail"
+                                            onClick={() => openDetailModal(request)}
+                                        >
+                                            Xem chi tiết
+                                        </button>
                                     </div>
 
                                     <div className="memberships-actions">
-                                        <span className={`memberships-status-badge status-${request.status}`}>
+                                        <span className={`memberships-status-badge ${getStatusClassName(request.status)}`}>
                                             {getStatusLabel(request.status)}
                                         </span>
-                                        {isPending ? (
+                                        {normalizeStatus(request.status) === 0 ? (
                                             <div className="memberships-action-buttons">
                                                 <button
                                                     type="button"
@@ -251,7 +355,7 @@ function Memberships() {
                                                 <button
                                                     type="button"
                                                     className="memberships-reject"
-                                                    onClick={() => handleReject(request.membershipId)}
+                                                    onClick={() => openRejectModal(request)}
                                                     disabled={isApproving || isRejecting}
                                                 >
                                                     {isRejecting ? 'Đang xử lý...' : 'Từ chối'}
@@ -270,12 +374,113 @@ function Memberships() {
                 ) : (
                     <div className="glass-card memberships-empty">
                         <p className="memberships-empty-text">
-                            Chưa có yêu cầu tham gia nào
+                            {statusFilter === 'all'
+                                ? 'Chưa có yêu cầu tham gia nào'
+                                : 'Không có yêu cầu nào khớp bộ lọc này'}
                         </p>
                     </div>
                 )}
 
-                
+                {selectedRequest ? (
+                    <div className="memberships-modal-backdrop" onClick={closeDetailModal}>
+                        <div className="memberships-detail-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="memberships-detail-modal-header">
+                                <h3 className="memberships-detail-modal-title">Chi tiết yêu cầu tham gia</h3>
+                                <button type="button" className="memberships-modal-close" onClick={closeDetailModal}>
+                                    Đóng
+                                </button>
+                            </div>
+
+                            <div className="memberships-detail-grid">
+                                <div className="memberships-detail-item">
+                                    <span className="memberships-detail-label">Họ tên</span>
+                                    <span className="memberships-detail-value">{selectedRequest.user?.name || 'N/A'}</span>
+                                </div>
+                                <div className="memberships-detail-item">
+                                    <span className="memberships-detail-label">Email</span>
+                                    <span className="memberships-detail-value">{selectedRequest.user?.email || 'N/A'}</span>
+                                </div>
+                                <div className="memberships-detail-item">
+                                    <span className="memberships-detail-label">Trạng thái</span>
+                                    <span className="memberships-detail-value">{getStatusLabel(selectedRequest.status)}</span>
+                                </div>
+                                <div className="memberships-detail-item">
+                                    <span className="memberships-detail-label">Vai trò</span>
+                                    <span className="memberships-detail-value">{getRoleLabel(selectedRequest.role)}</span>
+                                </div>
+                                <div className="memberships-detail-item">
+                                    <span className="memberships-detail-label">Thời gian gửi</span>
+                                    <span className="memberships-detail-value">{new Date(selectedRequest.requestedAt).toLocaleString('vi-VN')}</span>
+                                </div>
+                                <div className="memberships-detail-item memberships-detail-item-full">
+                                    <span className="memberships-detail-label">Lý do tham gia</span>
+                                    <span className="memberships-detail-value">{selectedRequest.requestReason || 'Chưa có thông tin'}</span>
+                                </div>
+                                {selectedRequest.rejectReason ? (
+                                    <div className="memberships-detail-item memberships-detail-item-full">
+                                        <span className="memberships-detail-label">Lý do bị từ chối</span>
+                                        <span className="memberships-detail-value memberships-detail-reject-reason">{selectedRequest.rejectReason}</span>
+                                    </div>
+                                ) : null}
+                            </div>
+                        </div>
+                    </div>
+                ) : null}
+
+                {rejectModal.open ? (
+                    <div className="memberships-modal-backdrop" onClick={closeRejectModal}>
+                        <div className="memberships-reject-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="memberships-detail-modal-header">
+                                <h3 className="memberships-detail-modal-title">Từ chối yêu cầu</h3>
+                                <button
+                                    type="button"
+                                    className="memberships-modal-close"
+                                    onClick={closeRejectModal}
+                                    disabled={actionLoadingId.startsWith('reject-')}
+                                >
+                                    Đóng
+                                </button>
+                            </div>
+
+                            <p className="memberships-reject-help-text">
+                                Nhập lý do từ chối cho {rejectModal.userName}.
+                            </p>
+
+                            <textarea
+                                className="memberships-reject-textarea"
+                                value={rejectModal.reason}
+                                onChange={(e) => {
+                                    setRejectModal((prev) => ({ ...prev, reason: e.target.value }));
+                                    if (rejectModalError) setRejectModalError('');
+                                }}
+                                placeholder="Ví dụ: Hiện tại CLB đã đủ số lượng thành viên..."
+                                rows={4}
+                            />
+
+                            {rejectModalError ? <p className="memberships-reject-error">{rejectModalError}</p> : null}
+
+                            <div className="memberships-reject-actions">
+                                <button
+                                    type="button"
+                                    className="memberships-reject-cancel"
+                                    onClick={closeRejectModal}
+                                    disabled={actionLoadingId.startsWith('reject-')}
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    type="button"
+                                    className="memberships-reject-confirm"
+                                    onClick={submitRejectModal}
+                                    disabled={actionLoadingId.startsWith('reject-')}
+                                >
+                                    {actionLoadingId.startsWith('reject-') ? 'Đang gửi...' : 'Xác nhận từ chối'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ) : null}
+
             </div>
         </div>
     );

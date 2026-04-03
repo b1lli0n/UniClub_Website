@@ -45,15 +45,15 @@ body.profile-body #root {
   padding: 2.5rem 0 1.25rem;
   text-align: center;
 }
-
-/* .profile-page-title {
-  margin: 0;
-  font-weight: 900;
-  font-size: 2.4rem;
-  letter-spacing: -0.2px;
-  color: var(--club-ink);
+.profile-page-title {
+ margin-top: 88px;
+  font-size: 3rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* 
 .profile-page-subtitle {
   margin: 0.5rem 0 0;
   color: rgba(31, 42, 68, 0.8);
@@ -67,19 +67,8 @@ body.profile-body #root {
 }
 
 .profile-page-title {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-top: -88px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: 20px;
 }
-
-.profile-page-subtitle {
-  font-size: 1.4rem;
-  opacity: 0.95;
-  margin-top: -10px;
-  margin-bottom: -10px;
-}
-
 
 .profile-card {
   width: 100%;
