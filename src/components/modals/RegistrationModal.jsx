@@ -7,7 +7,6 @@ import { updateProfile } from '../../api/userApi';
 import { isValidPhoneNumber } from '../../lib/utils';
 import '../../styles/RegistrationModal.css';
 
-// Default avatar logic if needed
 const DefaultAvatar = () => (
     <div className="reg-avatar-placeholder">
         <i className="fa-solid fa-user"></i>
@@ -17,7 +16,7 @@ const DefaultAvatar = () => (
 const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle, eventImage, isRegistered }) => {
     const [registered, setRegistered] = useState(isRegistered || false);
     const [loading, setLoading] = useState(false);
-    const [isEditing, setIsEditing] = useState(false); // Toggle Edit Mode
+    const [isEditing, setIsEditing] = useState(false); 
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -39,7 +38,7 @@ const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle, event
                     avatar: user.avatar || null
                 });
             }
-            setIsEditing(false); // Reset to view mode when opening
+            setIsEditing(false); 
         }
     }, [isRegistered, show]);
 
@@ -62,7 +61,6 @@ const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle, event
                 return;
             }
 
-            // If in edit mode, update profile first
             if (isEditing) {
                 const phoneTrim = String(formData.phone || '').trim();
                 if (phoneTrim && !isValidPhoneNumber(phoneTrim)) {
@@ -75,16 +73,11 @@ const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle, event
                     await updateProfile({
                         fullName: formData.name,
                         phone: phoneTrim,
-                        // email is usually read-only or requires verify, depend on backend
                     });
-                    // Update local storage user just in case
                     const updatedUser = { ...user, fullName: formData.name, phone: phoneTrim };
                     localStorage.setItem('user', JSON.stringify(updatedUser));
                 } catch (updateErr) {
                     console.error("Failed to update profile", updateErr);
-                    // Decide if we should block registration or just warn
-                    // For now, continue but warn
-                    // toast.warning("Cập nhật thông tin thất bại, nhưng vẫn đang tiến hành đăng ký...");
                 }
             }
 
@@ -93,7 +86,6 @@ const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle, event
             setRegistered(true);
             if (onChanged) onChanged();
 
-            // Auto close after success
             setTimeout(() => {
                 onHide();
             }, 1500);

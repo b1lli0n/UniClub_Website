@@ -94,8 +94,8 @@ const ClubActivitySchedule = () => {
                 location: formData.location,
                 start_time,
                 end_time,
-                status: 0, 
-                progress_status: 1 
+                status: 0, // 0: Coming soon
+                progress_status: 1 // 1: Published
             };
             console.log('Request body:', reqBody);
             if (modalMode === 'create') {
@@ -106,7 +106,7 @@ const ClubActivitySchedule = () => {
                 toast.success('Đã cập nhật hoạt động!');
             }
             setShowModal(false);
-            fetchActivitiesData(); 
+            fetchActivitiesData(); // Refresh data
         } catch (error) {
             toast.error(error?.response?.data?.message || 'Có lỗi xảy ra!');
         }
