@@ -337,16 +337,17 @@ const EventDetail = () => {
           <div className="event-detailSide">
             <div className="event-sideCard glass-panel">
               <div className="event-sideImage" aria-hidden="true">
-                {event.media_urls && event.media_urls.length > 0 ? (
-                  <img
-                    src={`http://localhost:5000${event.media_urls[0]}`}
-                    alt={event.title}
-                    className="event-rowImg"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
-                  />
-                ) : (
-                  <div className="event-rowMediaOverlay" />
-                )}
+                <img
+                  src={event.media_urls && event.media_urls.length > 0 
+                    ? (event.media_urls[0].startsWith('http') ? event.media_urls[0] : `http://localhost:5000${event.media_urls[0]}`) 
+                    : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"}
+                  alt={event.title}
+                  className="event-rowImg"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
+                  onError={(e) => {
+                    e.target.src = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070&auto=format&fit=crop";
+                  }}
+                />
               </div>
               <div className="event-sideInfo">
                 <div className="event-sideTwoCol">
