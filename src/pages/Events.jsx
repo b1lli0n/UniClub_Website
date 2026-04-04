@@ -190,6 +190,8 @@ export default function EventsPage() {
                                     key={event._id}
                                     event={event}
                                     onViewDetails={(id) => navigate(`/clubEvent/${id}`)}
+                                    onEdit={(id) => navigate(`/clubEvent/${id}/update`)}
+                                    onAttend={(id) => navigate(`/clubs/${clubId}/events/${id}/attendance`)}
                                     formatDateTime={formatDateTime}
                                 />
                             ))}

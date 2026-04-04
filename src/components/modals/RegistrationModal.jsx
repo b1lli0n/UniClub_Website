@@ -147,13 +147,15 @@ const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle, event
             <div className="reg-modal-body">
                 {/* Event Image Banner */}
                 <div className="reg-image-wrapper">
-                    {eventImage ? (
-                        <img src={`http://localhost:5000${eventImage}`} alt={eventTitle} onError={(e) => e.target.style.display = 'none'} />
-                    ) : (
-                        <div style={{ width: '100%', height: '100%', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
-                            {eventTitle}
-                        </div>
-                    )}
+                    <img 
+                        src={eventImage 
+                            ? (eventImage.startsWith('http') ? eventImage : `http://localhost:5000${eventImage}`) 
+                            : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"} 
+                        alt={eventTitle} 
+                        onError={(e) => {
+                            e.target.src = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070&auto=format&fit=crop";
+                        }} 
+                    />
                 </div>
 
                 <div className="reg-event-title">{eventTitle}</div>

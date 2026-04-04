@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import adminApi, { getClubCreationRequests, getClubs, getDashboardSummary } from '../../api/adminapi'
+import {
+    getAdminDashboardOverview,
+    getAdminDashboardClubStatistics,
+    getAdminDashboardMembershipStatistics,
+    getAdminDashboardSystemActivity
+} from '../../api/adminapi'
 
 const numberFormat = new Intl.NumberFormat('vi-VN')
 
@@ -19,6 +24,13 @@ const formatActivityTime = (value) => {
     })
 }
 
+const ACTIVITY_STATUS_LABEL = {
+    0: 'Coming soon',
+    1: 'Opening',
+    2: 'Closed',
+    3: 'Cancelled'
+}
+
 const pickArray = (data, candidateKeys) => {
     for (const key of candidateKeys) {
         const value = data?.[key]
@@ -27,17 +39,6 @@ const pickArray = (data, candidateKeys) => {
 
     if (Array.isArray(data)) return data
     return []
-}
-
-const pickTotal = (data, fallbackArray = []) => {
-    const keys = ['total', 'totalItems', 'totalCount', 'count', 'total_records', 'recordsTotal']
-
-    for (const key of keys) {
-        const value = Number(data?.[key])
-        if (!Number.isNaN(value) && value >= 0) return value
-    }
-
-    return fallbackArray.length
 }
 
 const pickFirstValue = (objectValue, keys, defaultValue = 0) => {
@@ -60,19 +61,30 @@ const toActivity = (item, defaultType = 'system') => {
         item?.message ||
         'Cap nhat he thong'
     const createdAt = item?.createdAt || item?.created_at || item?.updatedAt || item?.updated_at
-    const status = item?.status ?? item?.state ?? item?.result
+    const statusCode = item?.status ?? item?.state ?? item?.result
+    const statusLabel = Number.isInteger(Number(statusCode))
+        ? ACTIVITY_STATUS_LABEL[Number(statusCode)] || String(statusCode)
+        : statusCode == null
+            ? 'N/A'
+            : String(statusCode)
 
     return {
         id: item?._id || item?.id || `${type}-${title}-${createdAt || 'unknown'}`,
         type,
         title,
+        description: item?.description || item?.message || '',
+        clubName: item?.club?.name || item?.club_name || '',
+        createdBy: item?.created_by?.fullName || item?.created_by?.name || '',
         createdAt,
-        status: status == null ? 'N/A' : String(status)
+        status: statusLabel
     }
 }
 
+const getPayload = (response) => response?.data || response || {}
+
 const Dashboard = () => {
     const [loading, setLoading] = useState(true)
+    const [activityLoading, setActivityLoading] = useState(false)
     const [error, setError] = useState('')
     const [stats, setStats] = useState({
         totalClubs: 0,
@@ -80,23 +92,21 @@ const Dashboard = () => {
         totalTransactions: 0,
         pendingClubRequests: 0
     })
+    const [clubCategoryStats, setClubCategoryStats] = useState([])
+    const [membershipStats, setMembershipStats] = useState({ active: 0, left: 0 })
     const [activities, setActivities] = useState([])
+    const [activityPage, setActivityPage] = useState(1)
+    const [activityPagination, setActivityPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: 8
+    })
+
+    const activityLimit = 8
 
     useEffect(() => {
         let cancelled = false
-
-        const fetchJson = async (paths, fallback = null) => {
-            for (const path of paths) {
-                try {
-                    const response = await adminApi.get(path)
-                    return response
-                } catch {
-                    // try next path
-                }
-            }
-
-            return fallback
-        }
 
         const loadDashboard = async () => {
             setLoading(true)
@@ -104,52 +114,42 @@ const Dashboard = () => {
 
             try {
                 const [
-                    dashboardSummary,
-                    clubsResponse,
-                    usersResponse,
-                    transactionsResponse,
-                    activitiesResponse,
-                    clubRequestsResponse
+                    overviewResponse,
+                    categoryStatsResponse,
+                    membershipStatsResponse,
+                    systemActivityResponse
                 ] = await Promise.all([
-                    getDashboardSummary(),
-                    getClubs({ page: 1, limit: 1 }),
-                    fetchJson(['/users', '/users/list', '/members']),
-                    fetchJson(['/transactions', '/payments', '/membership-fees']),
-                    fetchJson(['/dashboard/activities', '/activities', '/audit-logs']),
-                    getClubCreationRequests({ page: 1, limit: 5 })
+                    getAdminDashboardOverview(),
+                    getAdminDashboardClubStatistics(),
+                    getAdminDashboardMembershipStatistics(),
+                    getAdminDashboardSystemActivity({ page: 1, limit: activityLimit })
                 ])
 
                 if (cancelled) return
 
-                const clubsList = pickArray(clubsResponse, ['clubs', 'items', 'data'])
-                const usersList = pickArray(usersResponse, ['users', 'members', 'items', 'data'])
-                const transactionList = pickArray(transactionsResponse, ['transactions', 'payments', 'items', 'data'])
-
-                const dashboardStatsSource =
-                    dashboardSummary?.stats || dashboardSummary?.data || dashboardSummary || {}
-
+                const overview = getPayload(overviewResponse)
                 const totalClubs = pickFirstValue(
-                    dashboardStatsSource,
-                    ['totalClubs', 'clubs', 'clubCount'],
-                    pickTotal(clubsResponse, clubsList)
+                    overview,
+                    ['total_clubs', 'totalClubs', 'clubs', 'clubCount'],
+                    0
                 )
 
                 const totalMembers = pickFirstValue(
-                    dashboardStatsSource,
-                    ['totalMembers', 'members', 'memberCount', 'users', 'totalUsers'],
-                    pickTotal(usersResponse, usersList)
+                    overview,
+                    ['total_members', 'totalMembers', 'members', 'memberCount'],
+                    0
                 )
 
                 const totalTransactions = pickFirstValue(
-                    dashboardStatsSource,
-                    ['totalTransactions', 'transactions', 'paymentCount', 'totalPayments'],
-                    pickTotal(transactionsResponse, transactionList)
+                    overview,
+                    ['total_transactions', 'totalTransactions', 'transactions', 'paymentCount'],
+                    0
                 )
 
                 const pendingClubRequests = pickFirstValue(
-                    dashboardStatsSource,
-                    ['pendingClubRequests', 'pendingRequests', 'clubRequestsPending'],
-                    pickTotal(clubRequestsResponse, pickArray(clubRequestsResponse, ['items', 'requests', 'clubs']))
+                    overview,
+                    ['total_club_creation_requests', 'pendingClubRequests', 'pendingRequests', 'clubRequestsPending'],
+                    0
                 )
 
                 setStats({
@@ -159,29 +159,33 @@ const Dashboard = () => {
                     pendingClubRequests
                 })
 
-                const activityItemsFromSummary = pickArray(dashboardSummary, ['activities', 'logs'])
-                const activityItemsFromApi = pickArray(activitiesResponse, ['activities', 'logs', 'items', 'data'])
-                const activityItems = activityItemsFromSummary.length > 0 ? activityItemsFromSummary : activityItemsFromApi
-                if (activityItems.length > 0) {
-                    setActivities(activityItems.slice(0, 8).map((item) => toActivity(item)))
-                    return
-                }
+                const categoryStats = pickArray(getPayload(categoryStatsResponse), ['items', 'data'])
+                setClubCategoryStats(
+                    categoryStats.map((item) => ({
+                        id: item?._id || item?.category || 'Khac',
+                        label: item?._id || item?.category || 'Khac',
+                        count: Number(item?.count) || 0
+                    }))
+                )
 
-                const fallbackActivities = pickArray(clubRequestsResponse, ['items', 'requests', 'clubs'])
-                    .slice(0, 8)
-                    .map((item) =>
-                        toActivity(
-                            {
-                                ...item,
-                                title: item?.club_name || item?.name || 'Yeu cau CLB moi',
-                                createdAt: item?.createdAt || item?.created_at,
-                                type: 'club-request'
-                            },
-                            'club-request'
-                        )
-                    )
+                const membership = getPayload(membershipStatsResponse)
+                setMembershipStats({
+                    active: Number(membership?.active) || 0,
+                    left: Number(membership?.left) || 0
+                })
 
-                setActivities(fallbackActivities)
+                const systemActivityPayload = getPayload(systemActivityResponse)
+                const activityItems = pickArray(systemActivityPayload, ['activities', 'items', 'data'])
+                const recentFromOverview = pickArray(overview, ['recent_activities', 'recentActivities'])
+                setActivities((activityItems.length > 0 ? activityItems : recentFromOverview).map((item) => toActivity(item)))
+
+                const pagination = systemActivityPayload?.pagination || {}
+                setActivityPagination({
+                    currentPage: Number(pagination?.currentPage) || 1,
+                    totalPages: Number(pagination?.totalPages) || 1,
+                    totalItems: Number(pagination?.totalItems) || activityItems.length,
+                    itemsPerPage: Number(pagination?.itemsPerPage) || activityLimit
+                })
             } catch (loadError) {
                 if (!cancelled) {
                     setError(loadError?.message || 'Khong the tai du lieu tong quan he thong.')
@@ -191,6 +195,8 @@ const Dashboard = () => {
                         totalTransactions: 0,
                         pendingClubRequests: 0
                     })
+                    setClubCategoryStats([])
+                    setMembershipStats({ active: 0, left: 0 })
                     setActivities([])
                 }
             } finally {
@@ -206,6 +212,46 @@ const Dashboard = () => {
             cancelled = true
         }
     }, [])
+
+    useEffect(() => {
+        let cancelled = false
+
+        const loadSystemActivity = async () => {
+            if (activityPage === 1) return
+
+            try {
+                setActivityLoading(true)
+                const response = await getAdminDashboardSystemActivity({ page: activityPage, limit: activityLimit })
+                if (cancelled) return
+
+                const payload = getPayload(response)
+                const activityItems = pickArray(payload, ['activities', 'items', 'data'])
+                setActivities(activityItems.map((item) => toActivity(item)))
+
+                const pagination = payload?.pagination || {}
+                setActivityPagination({
+                    currentPage: Number(pagination?.currentPage) || activityPage,
+                    totalPages: Number(pagination?.totalPages) || 1,
+                    totalItems: Number(pagination?.totalItems) || activityItems.length,
+                    itemsPerPage: Number(pagination?.itemsPerPage) || activityLimit
+                })
+            } catch (activityError) {
+                if (!cancelled) {
+                    setError(activityError?.message || 'Khong the tai danh sach hoat dong he thong.')
+                }
+            } finally {
+                if (!cancelled) {
+                    setActivityLoading(false)
+                }
+            }
+        }
+
+        loadSystemActivity()
+
+        return () => {
+            cancelled = true
+        }
+    }, [activityPage])
 
     const statCards = useMemo(
         () => [
@@ -241,6 +287,13 @@ const Dashboard = () => {
         [stats]
     )
 
+    const maxCategoryCount = useMemo(() => {
+        if (clubCategoryStats.length === 0) return 0
+        return Math.max(...clubCategoryStats.map((item) => item.count))
+    }, [clubCategoryStats])
+
+    const membershipTotal = membershipStats.active + membershipStats.left
+
     return (
         <div className="admin-dashboard">
             <header className="admin-dashboard-header">
@@ -271,28 +324,81 @@ const Dashboard = () => {
                 ))}
             </section>
 
+            <section className="admin-insight-grid">
+                <article className="admin-insight-card">
+                    <div className="admin-activity-header">
+                        <h2>CLB theo danh muc</h2>
+                        <span>{clubCategoryStats.length} danh muc</span>
+                    </div>
+
+                    {clubCategoryStats.length === 0 ? (
+                        <p className="admin-activity-empty">Chua co du lieu danh muc CLB.</p>
+                    ) : (
+                        <div className="admin-category-list">
+                            {clubCategoryStats.map((item) => {
+                                const width = maxCategoryCount > 0 ? (item.count / maxCategoryCount) * 100 : 0
+                                return (
+                                    <div key={item.id} className="admin-category-item">
+                                        <div className="admin-category-head">
+                                            <span>{item.label}</span>
+                                            <strong>{formatCount(item.count)}</strong>
+                                        </div>
+                                        <div className="admin-category-track">
+                                            <div className="admin-category-fill" style={{ width: `${width}%` }} />
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </article>
+
+                <article className="admin-insight-card">
+                    <div className="admin-activity-header">
+                        <h2>Trang thai thanh vien</h2>
+                        <span>{formatCount(membershipTotal)} tong thanh vien</span>
+                    </div>
+
+                    <div className="admin-membership-grid">
+                        <div className="admin-membership-box is-active">
+                            <p>Dang hoat dong</p>
+                            <strong>{loading ? '...' : formatCount(membershipStats.active)}</strong>
+                        </div>
+                        <div className="admin-membership-box is-left">
+                            <p>Da roi CLB</p>
+                            <strong>{loading ? '...' : formatCount(membershipStats.left)}</strong>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
             <section className="admin-activity-card">
                 <div className="admin-activity-header">
                     <h2>System Activity</h2>
-                    <span>{activities.length} hoat dong gan day</span>
+                    <span>{formatCount(activityPagination.totalItems)} hoat dong</span>
                 </div>
 
-                {loading && <p className="admin-activity-empty">Dang tai hoat dong he thong...</p>}
+                {(loading || activityLoading) && <p className="admin-activity-empty">Dang tai hoat dong he thong...</p>}
 
-                {!loading && activities.length === 0 && (
+                {!loading && !activityLoading && activities.length === 0 && (
                     <p className="admin-activity-empty">Chua co hoat dong he thong de hien thi.</p>
                 )}
 
-                {!loading && activities.length > 0 && (
+                {!loading && !activityLoading && activities.length > 0 && (
                     <div className="admin-activity-list">
                         {activities.map((activity) => (
                             <div key={activity.id} className="admin-activity-item">
                                 <div className="admin-activity-dot" aria-hidden="true" />
                                 <div className="admin-activity-main">
                                     <p className="admin-activity-title">{activity.title}</p>
+                                    {activity.description ? (
+                                        <p className="admin-activity-desc">{activity.description}</p>
+                                    ) : null}
                                     <p className="admin-activity-meta">
                                         <span>{activity.type}</span>
                                         <span>{activity.status}</span>
+                                        {activity.clubName ? <span>CLB: {activity.clubName}</span> : null}
+                                        {activity.createdBy ? <span>By: {activity.createdBy}</span> : null}
                                         <span>{formatActivityTime(activity.createdAt)}</span>
                                     </p>
                                 </div>
@@ -300,6 +406,30 @@ const Dashboard = () => {
                         ))}
                     </div>
                 )}
+
+                <div className="admin-activity-pagination">
+                    <button
+                        type="button"
+                        className="admin-page-nav"
+                        onClick={() => setActivityPage((p) => Math.max(1, p - 1))}
+                        disabled={activityPagination.currentPage <= 1 || activityLoading}
+                    >
+                        <i className="fa-solid fa-chevron-left" />
+                    </button>
+                    <span>
+                        Trang {activityPagination.currentPage}/{Math.max(1, activityPagination.totalPages)}
+                    </span>
+                    <button
+                        type="button"
+                        className="admin-page-nav"
+                        onClick={() =>
+                            setActivityPage((p) => Math.min(Math.max(1, activityPagination.totalPages), p + 1))
+                        }
+                        disabled={activityPagination.currentPage >= activityPagination.totalPages || activityLoading}
+                    >
+                        <i className="fa-solid fa-chevron-right" />
+                    </button>
+                </div>
             </section>
         </div>
     )

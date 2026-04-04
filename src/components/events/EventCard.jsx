@@ -1,6 +1,6 @@
 import StatusBadge from './StatusBadge';
 import '../../styles/EventCard.css';
-import { Calendar, MapPin, Users, ArrowRight, ImageIcon } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowRight, ImageIcon, Edit3, ClipboardCheck, Eye } from 'lucide-react';
 
 const getProgressStatusLabel = (progressStatus) => {
     switch (String(progressStatus)) {
@@ -10,7 +10,7 @@ const getProgressStatusLabel = (progressStatus) => {
     }
 };
 
-const EventCard = ({ event, onViewDetails, formatDateTime }) => {
+const EventCard = ({ event, onViewDetails, onEdit, onAttend, formatDateTime }) => {
     const startTime = event.start_time || event.startAt || event.start_at;
     const location = event.location || 'Địa điểm: TBC';
     const capacity = event.capacity || 'N/A';
@@ -24,13 +24,16 @@ const EventCard = ({ event, onViewDetails, formatDateTime }) => {
     return (
         <div className="glass-card-premium event-card-modern">
             <div className="event-card-media-wrapper">
-                {hasImage ? (
-                    <img src={mainImage} alt={title} className="event-card-img" />
-                ) : (
-                    <div className="event-card-img-placeholder">
-                        <ImageIcon size={32} />
-                    </div>
-                )}
+                <img 
+                    src={hasImage 
+                        ? (mainImage.startsWith('http') ? mainImage : `http://localhost:5000${mainImage}`) 
+                        : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"} 
+                    alt={title} 
+                    className="event-card-img" 
+                    onError={(e) => {
+                        e.target.src = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070&auto=format&fit=crop";
+                    }}
+                />
                 <div className="event-card-badges">
                     <StatusBadge status={event.status} />
                     {event.progress_status !== undefined && (
@@ -64,10 +67,31 @@ const EventCard = ({ event, onViewDetails, formatDateTime }) => {
                     <button
                         onClick={() => onViewDetails(event._id)}
                         className="btn-view-modern"
+                        title="Xem chi tiết"
+                        style={{ flex: 1, justifyContent: 'center' }}
                     >
+                        <Eye size={16} />
                         <span>Xem chi tiết</span>
-                        <ArrowRight size={16} />
                     </button>
+
+                    {onAttend && (
+                        <button
+                            onClick={() => onAttend(event._id)}
+                            className="btn-attend-modern"
+                            title="Điểm danh"
+                            style={{ 
+                                display: 'flex', alignItems: 'center', gap: '8px', 
+                                padding: '10px 20px', borderRadius: '12px', border: 'none',
+                                background: 'linear-gradient(135deg, #FF4B91 0%, #7B66FF 100%)', 
+                                color: 'white', transition: 'all 0.3s ease', fontSize: '0.9rem',
+                                fontWeight: '600', flex: 1.2, justifyContent: 'center',
+                                boxShadow: '0 4px 15px rgba(123, 102, 255, 0.3)'
+                            }}
+                        >
+                            <ClipboardCheck size={18} />
+                            <span>Điểm danh</span>
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

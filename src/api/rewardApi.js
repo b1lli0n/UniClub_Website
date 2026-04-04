@@ -127,8 +127,8 @@ export const updateRedemptionStatus = async (clubId, transactionId, status) => {
  * GET /api/admin/clubs/:clubId/badges-for-assign
  * @param {string} clubId - ID của CLB
  */
-export const getClubBadgesForAssign = async (clubId) => {
-    return axiosInstance.get(`/clubs/${clubId}/badges-for-assign`);
+export const  getClubBadgesForAssign = async (clubId) => {
+    return axiosInstance.get(`/rewards/clubs/${clubId}/badges-for-assign`);
 };
 
 /**
@@ -149,7 +149,7 @@ export const assignBadgeToMember = async (clubId, membershipId, badgeId) => {
  * @param {string} membershipId - ID của membership
  */
 export const getMemberBadges = async (clubId, membershipId) => {
-    return axiosInstance.get(`/clubs/${clubId}/members/${membershipId}/badges`);
+    return axiosInstance.get(`/rewards/clubs/${clubId}/members/${membershipId}/badges`);
 };
 
 // ==================== BADGE APIS ====================

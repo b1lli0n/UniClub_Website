@@ -105,9 +105,9 @@ const ClubRequests = () => {
                 }
             })
 
-            console.log('Mapped requests:', mappedRequests)
+            // console.log('Mapped requests:', mappedRequests)
             setRegistrations(mappedRequests)
-            toast.success(`Đã tải ${mappedRequests.length} yêu cầu`)
+            // toast.success(`Đã tải ${mappedRequests.length} yêu cầu`)
         } catch (err) {
             console.error('Error fetching requests:', err)
 

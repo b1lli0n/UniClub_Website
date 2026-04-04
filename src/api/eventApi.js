@@ -4,6 +4,12 @@ import api from './api';
 const eventAPI = api;
 
 const eventApi = {
+  // Lấy tất cả sự kiện công khai (Across all clubs)
+  getAllEvents: async (params = {}) => {
+    // params: { q, category, sort, page, limit }
+    return await api.get('/events', { params });
+  },
+
   // Lấy danh sách sự kiện của câu lạc bộ
   getEvents: (clubId) => eventAPI.get(`/events/${clubId}/event`),
 
@@ -26,7 +32,8 @@ const eventApi = {
 
   // Alias cũ (deprecated, giữ để tương thích code cũ)
   getEvents: (clubId) => eventAPI.get(`/events/club/${clubId}`),
-  getPastEvents: () => eventAPI.get('/events/my-events', { params: { status: 'past' } }),
+  // Lấy sự kiện đã tham gia/đăng ký
+  getPastEvents: (params = {}) => eventAPI.get('/events/my-events', { params }),
 
   // ===== EVENT REGISTRATION =====
   // Đăng ký tham gia sự kiện
@@ -59,6 +66,7 @@ export default eventApi;
 
 // Named exports để tương thích các page đang import
 export const {
+  getAllEvents,
   getEventsByClub,
   getMyEvents,
   getEvents,

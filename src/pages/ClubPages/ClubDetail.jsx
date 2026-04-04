@@ -21,19 +21,20 @@ const buildImageSrc = (raw) => {
 };
 
 const pickEventShowcaseImage = (event) => {
-  if (!event) return null;
+  if (!event) return "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop";
   const order = [
     event.banner_url,
     event.image_url,
     event.image,
     event.thumbnail_url,
-    Array.isArray(event.media_urls) ? event.media_urls[0] : null,
+    Array.isArray(event.media_urls) ? event.media_urls[0] : (event.media_urls || null),
   ];
   for (const raw of order) {
     const src = buildImageSrc(raw);
     if (src) return src;
   }
-  return null;
+  // Return high-quality default if no images found
+  return "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop";
 };
 
 const formatRoleLabel = (role) => {
@@ -846,22 +847,18 @@ const handleLeaveClub = async () => {
                               }}
                             >
                               <div className="clubdetail-event-showcase-card-visual">
-                                {showcaseImg ? (
-                                  <img
-                                    src={showcaseImg}
-                                    alt={event.name}
-                                    className="clubdetail-event-showcase-card-img"
-                                    loading="lazy"
-                                    decoding="async"
-                                    sizes="(max-width: 600px) 86vw, 280px"
-                                    onError={(e) => {
-                                      e.currentTarget.onerror = null;
-                                      e.currentTarget.src = '/images/events/default.png';
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="clubdetail-event-showcase-card-placeholder" aria-hidden />
-                                )}
+                                <img
+                                  src={showcaseImg || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"}
+                                  alt={event.name}
+                                  className="clubdetail-event-showcase-card-img"
+                                  loading="lazy"
+                                  decoding="async"
+                                  sizes="(max-width: 600px) 86vw, 280px"
+                                  onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070&auto=format&fit=crop';
+                                  }}
+                                />
                                 <span className="clubdetail-event-showcase-tag">
                                   {(event.category || 'Sự kiện').toUpperCase()}
                                 </span>

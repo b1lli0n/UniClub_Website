@@ -169,6 +169,12 @@
     transform: rotate(90deg);
 }
 
+.members-modal-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
 .members-modal-list {
     display: grid;
     gap: 16px;

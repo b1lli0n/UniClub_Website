@@ -101,7 +101,7 @@ const ClubList = () => {
                 return true
             })
 
-            console.log(`Total clubs fetched: ${clubsData.length} (pages: ${totalPages})`)
+            // console.log(`Total clubs fetched: ${clubsData.length} (pages: ${totalPages})`)
 
             // Map API response to match component structure
             const mappedClubs = clubsData.map(club => {
@@ -117,9 +117,9 @@ const ClubList = () => {
                 }
             })
 
-            console.log('Mapped clubs:', mappedClubs)
+            // console.log('Mapped clubs:', mappedClubs)
             setClubs(mappedClubs)
-            toast.success(`Đã tải ${mappedClubs.length} câu lạc bộ`)
+            // toast.success(`Đã tải ${mappedClubs.length} câu lạc bộ`)
         } catch (err) {
             console.error('Error fetching clubs:', err)
 

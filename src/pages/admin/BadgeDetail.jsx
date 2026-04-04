@@ -75,7 +75,8 @@ const BadgeDetail = () => {
             <div className="admin-panel-header" style={{ marginBottom: 20 }}>
                 <div>
                     <h2 className="admin-title">Chi tiết huy hiệu</h2>
-                    <p className="admin-subtitle">Thông tin và điều kiện nhận huy hiệu</p>
+                    {/* <p className="admin-subtitle">Thông tin và điều kiện nhận huy hiệu</p> */}
+                    <p className="admin-subtitle">Thông tin huy hiệu</p>
                 </div>
             </div>
 
@@ -122,10 +123,10 @@ const BadgeDetail = () => {
 
             {/* Info Grid */}
             <div className="badge-detail-grid">
-                <div className="badge-info-card">
+                {/* <div className="badge-info-card">
                     <div className="info-label">🎯 Loại điều kiện</div>
                     <div className="info-value">{badge.condition_type}</div>
-                </div>
+                </div> */}
                 {/* <div className="badge-info-card">
                     <div className="info-label">🔢 Giá trị mốc</div>
                     <div className="info-value">{badge.condition_value.toLocaleString('vi-VN')}</div>
@@ -146,7 +147,7 @@ const BadgeDetail = () => {
 
             {/* Condition explanation */}
             <div className="reward-detail-card" style={{ marginTop: 16 }}>
-                <div className="reward-desc-section">
+                {/* <div className="reward-desc-section">
                     <h4>
                         <i className="fa-solid fa-circle-info" style={{ marginRight: 6, color: '#6366f1' }} />
                         Điều kiện nhận huy hiệu
@@ -158,7 +159,7 @@ const BadgeDetail = () => {
                         </strong>{' '}
                         để nhận được huy hiệu <strong>"{badge.name}"</strong>.
                     </p>
-                </div>
+                </div> */}
 
                 {badge.icon_url && (
                     <div className="reward-desc-section">

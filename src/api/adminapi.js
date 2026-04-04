@@ -103,6 +103,37 @@ export const getDashboardSummary = async () => {
 }
 
 /**
+ * Admin dashboard overview
+ */
+export const getAdminDashboardOverview = async () => {
+  return axiosInstance.get('/dashboard/overview')
+}
+
+/**
+ * Club statistics by category for admin dashboard
+ */
+export const getAdminDashboardClubStatistics = async () => {
+  return axiosInstance.get('/dashboard/clubs-statistics')
+}
+
+/**
+ * Membership statistics for admin dashboard
+ */
+export const getAdminDashboardMembershipStatistics = async () => {
+  return axiosInstance.get('/dashboard/membership-statistics')
+}
+
+/**
+ * System activity with pagination for admin dashboard
+ */
+export const getAdminDashboardSystemActivity = async (params = {}) => {
+  const { page = 1, limit = 20 } = params
+  return axiosInstance.get('/dashboard/system-activity', {
+    params: { page, limit }
+  })
+}
+
+/**
  * Lấy danh sách yêu cầu tạo CLB (pending)
  */
 export const getClubCreationRequests = async (params = {}) => {

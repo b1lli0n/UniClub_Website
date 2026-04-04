@@ -42,23 +42,16 @@ const EventCard = ({ event }) => {
       style={{ cursor: eventId ? 'pointer' : 'default' }}
     >
       <div className="event-card-media-wrapper">
-        {imageUrl ? (
-          <img 
-            src={typeof imageUrl === 'string' && imageUrl.startsWith('http') ? imageUrl : `http://localhost:5000${imageUrl}`}  
-            alt={event.name || event.title || 'Event Image'}
-            className="event-card-img"
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextElementSibling.style.display = 'flex';
-            }}
-          />
-        ) : null}
-        <div 
-          className="event-card-img-placeholder"
-          style={{ display: imageUrl ? 'none' : 'flex' }}
-        >
-          <span>{formatDate(event.date || event.start_at || event.start_time)}</span>
-        </div>
+        <img 
+          src={imageUrl 
+            ? (typeof imageUrl === 'string' && imageUrl.startsWith('http') ? imageUrl : `http://localhost:5000${imageUrl}`)
+            : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"}  
+          alt={event.name || event.title || 'Event Image'}
+          className="event-card-img"
+          onError={(e) => {
+            e.target.src = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070&auto=format&fit=crop";
+          }}
+        />
         <div className="event-card-badges">
           <span style={{ background: 'rgba(45, 27, 61, 0.75)', backdropFilter: 'blur(4px)', color: '#fff', padding: '6px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
              {formatDate(event.date || event.start_at || event.start_time)}
