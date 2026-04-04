@@ -18,7 +18,10 @@ const VerifyOtp = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(initialCooldown);
+  const [otpError, setOtpError] = useState('');
   const inputRefs = useRef([]);
+  const otpRef = useRef(otp);
+  otpRef.current = otp;
 
   useEffect(() => {
     if (!email) {
@@ -43,6 +46,7 @@ const VerifyOtp = () => {
     const next = [...otp];
     next[idx] = value.slice(-1);
     setOtp(next);
+    setOtpError('');
     if (value && idx < OTP_LENGTH - 1) focusInput(idx + 1);
   };
 
@@ -59,10 +63,20 @@ const VerifyOtp = () => {
     const next = [...otp];
     for (let i = 0; i < pasted.length; i++) next[i] = pasted[i];
     setOtp(next);
+    setOtpError('');
     focusInput(Math.min(pasted.length, OTP_LENGTH - 1));
   };
 
   const otpString = otp.join('');
+
+  const handleOtpCellBlur = () => {
+    const s = otpRef.current.join('');
+    if (s.length > 0 && s.length < OTP_LENGTH) {
+      setOtpError('Vui lòng nhập đủ 6 số OTP');
+    } else {
+      setOtpError('');
+    }
+  };
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -125,7 +139,7 @@ const VerifyOtp = () => {
   if (success) {
     return (
       <div className="verify-otp-page">
-        <div className="verify-otp-card">
+        <div className="verify-otp-card glass-card">
           <div className="verify-otp-success">
             <div className="verify-otp-success-icon">✓</div>
             <h2>Xác thực thành công!</h2>
@@ -140,7 +154,7 @@ const VerifyOtp = () => {
 
   return (
     <div className="verify-otp-page">
-      <div className="verify-otp-card">
+      <div className="verify-otp-card glass-card">
         <div className="verify-otp-header">
           <h2>Xác thực mã OTP</h2>
           <p>
@@ -148,7 +162,7 @@ const VerifyOtp = () => {
           </p>
         </div>
 
-        <form onSubmit={handleVerify}>
+        <form onSubmit={handleVerify} noValidate>
           <div className="verify-otp-input-group" onPaste={handlePaste}>
             {otp.map((digit, idx) => (
               <input
@@ -160,11 +174,17 @@ const VerifyOtp = () => {
                 value={digit}
                 onChange={(e) => handleOtpChange(idx, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(idx, e)}
+                onBlur={handleOtpCellBlur}
                 disabled={loading}
-                autoComplete="off"
+                autoComplete="one-time-code"
               />
             ))}
           </div>
+          {otpError ? (
+            <span className="verify-otp-field-error" role="alert">
+              {otpError}
+            </span>
+          ) : null}
 
           <button
             type="submit"

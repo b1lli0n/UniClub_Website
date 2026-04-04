@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import ClubDetailCard from '../../components/ClubDetailCard';
+import ClubDetailCard from '../../components/clubs/ClubDetailCard';
 import { getUserClubs } from '../../api/userApi';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/Profile.css';
@@ -174,7 +174,7 @@ const ListOfClubs = () => {
                             membershipRole: membership?.role,
                             role: membership?.role, // fallback
                             membershipStatus: membership?.status,
-                            status: membership?.status,
+                            status: club?.status,
                             joinedAt: membership?.joined_at,
                             joined_at: membership?.joined_at,
                         };
@@ -191,8 +191,7 @@ const ListOfClubs = () => {
                 if (query) {
                     filtered = filtered.filter((club) => {
                         const name = (club.name || '').toLowerCase();
-                        const desc = (club.description || '').toLowerCase();
-                        return name.includes(query) || desc.includes(query);
+                        return name.includes(query);
                     });
                 }
                 if (sortBy === 'members') {
@@ -279,7 +278,7 @@ const ListOfClubs = () => {
                             <input
                                 type="text"
                                 className="club-search-input"
-                                placeholder="Tìm kiếm theo tên, mô tả..."
+                                placeholder="Tìm kiếm theo tên câu lạc bộ..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />

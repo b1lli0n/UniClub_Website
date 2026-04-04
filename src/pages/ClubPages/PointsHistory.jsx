@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { Gift, Trophy, TrendingUp, Building2, Calendar } from 'lucide-react';
 import { getPointsHistory } from '../../api/pointsApi';
 import { ASSET_BASE } from '../../api/api';
-import ClubDetailNav from '../../components/ClubDetailNav';
+import ClubDetailNav from '../../components/clubs/ClubDetailNav';
 import '../../styles/PointsHistory.css';
 
 const formatDateBox = (dateStr) => {

@@ -1,28 +1,35 @@
 /* Sidebar base */
 .sidebar {
-    width: 56px;
+    width: 72px;
+    /* Increased from 64px for better breathability */
     min-height: 100%;
-    background: #ffffff;
-    border-right: 1px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     flex-direction: column;
-    padding: 16px 0;
-    transition: width 220ms ease;
-    overflow: hidden;
+    padding: 24px 0;
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Added bounce for premium feel */
+    overflow-x: hidden;
     position: sticky;
     top: 0;
     height: 100vh;
     align-self: flex-start;
+    z-index: 1001;
 }
 
 .sidebar:hover {
-    width: 200px;
+    width: 240px;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 15px 0 40px rgba(0, 0, 0, 0.04);
 }
 
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 12px;
     padding: 0 12px;
 }
 
@@ -40,63 +47,77 @@
 .sidebar-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    color: #2563eb;
+    gap: 16px;
+    padding: 14px;
+    /* Balanced padding */
+    border-radius: 16px;
+    color: #4A4A6A;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     position: relative;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: all 0.3s ease;
+    width: auto;
 }
 
 .sidebar-item:hover {
-    background: #f3f4f6;
+    background: rgba(214, 211, 209, 0.2);
+    transform: translateX(4px);
+    color: #6366f1;
 }
 
 .sidebar-item.active {
-    background: #eaf2ff;
-    color: #2563eb;
-    font-weight: 600;
+    background: #ffffff;
+    color: #6366f1;
+    box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.15);
 }
 
 .sidebar-icon {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    /* Increased from 18px */
+    height: 22px;
     flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-item:hover .sidebar-icon {
+    transform: scale(1.1);
 }
 
 .sidebar-label {
-    font-size: 14px;
+    font-size: 15px;
     white-space: nowrap;
     opacity: 0;
-    transition: opacity 160ms ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateX(-10px);
 }
 
 .sidebar:hover .sidebar-label {
     opacity: 1;
+    transform: translateX(0);
 }
 
 .sidebar-active-indicator {
-    display: none;
+    display: block;
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%) scaleY(0);
+    width: 4px;
+    height: 20px;
+    background: #6366f1;
+    border-radius: 0 4px 4px 0;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .sidebar-item.active .sidebar-active-indicator {
-    display: block;
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 60%;
-    background: #2563eb;
-    border-radius: 0 6px 6px 0;
+    transform: translateY(-50%) scaleY(1);
+    box-shadow: 2px 0 8px rgba(99, 102, 241, 0.4);
 }
 
 .sidebar-bottom {
     margin-top: auto;
-    padding: 12px;
-    border-top: 1px solid #e5e7eb;
+    padding: 20px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -105,31 +126,34 @@
 .sidebar-button {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
+    gap: 16px;
+    padding: 14px;
+    border-radius: 16px;
     border: none;
     background: transparent;
-    color: #111827;
+    color: #4A4A6A;
     cursor: pointer;
-    font-weight: 500;
-    transition: background 0.2s ease;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
 }
 
 .sidebar-button:hover {
-    background: #f3f4f6;
-}
-
-.sidebar-button.danger {
-    color: #ef4444;
-}
-
-.sidebar-button.danger:hover {
-    background: #fee2e2;
+    background: rgba(255, 255, 255, 0.4);
+    color: #6366f1;
 }
 
 @media (max-width: 900px) {
     .sidebar {
-        width: 170px;
+        width: 72px;
+    }
+
+    .sidebar:hover {
+        width: 72px;
+        /* Keep collapsed on mobile if layout is tight */
+    }
+
+    .sidebar-label {
+        display: none;
     }
 }

@@ -1,19 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import ClubCard from './ClubCard';
+import ClubCard from './clubs/ClubCard';
+import { getAllClubs } from '../api/clubApi';
 import '../styles/ClubSection.css';
 
 const ClubSection = () => {
-  // Sample club data
-  const [clubs] = useState([
-    { id: 1, name: 'Câu lạc bộ Công nghệ', description: 'Nơi gặp gỡ và chia sẻ về công nghệ thông tin', members: 150 },
-    { id: 2, name: 'Câu lạc bộ Nghệ thuật', description: 'Khám phá và phát triển tài năng nghệ thuật', members: 120 },
-    { id: 3, name: 'Câu lạc bộ Thể thao', description: 'Rèn luyện sức khỏe và tinh thần đồng đội', members: 200 },
-    { id: 4, name: 'Câu lạc bộ Văn học', description: 'Chia sẻ đam mê văn học và viết lách', members: 80 },
-    { id: 5, name: 'Câu lạc bộ Kinh doanh', description: 'Phát triển kỹ năng kinh doanh và khởi nghiệp', members: 180 },
-  ]);
-
+  const [clubs, setClubs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllClubs();
+        setClubs(data.data || data || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching clubs:', err);
+        setError(err.message || 'Không thể tải danh sách câu lạc bộ');
+        setClubs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClubs();
+  }, []);
   const visibleClubs = 3;
 
   const handlePrev = () => {
@@ -26,10 +40,49 @@ const ClubSection = () => {
 
   const displayedClubs = clubs.slice(currentIndex, currentIndex + visibleClubs);
 
+  if (loading) {
+    return (
+      <section className="club-section">
+        <div className="section-header">
+          <h2 className="section-title">Câu lạc bộ</h2>
+        </div>
+        <div className="club-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <p>Đang tải danh sách câu lạc bộ...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="club-section">
+        <div className="section-header">
+          <h2 className="section-title">Câu lạc bộ</h2>
+        </div>
+        <div className="club-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <p style={{ color: '#e74c3c' }}>Lỗi: {error}</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (clubs.length === 0) {
+    return (
+      <section className="club-section">
+        <div className="section-header">
+          <h2 className="section-title">Câu lạc bộ</h2>
+        </div>
+        <div className="club-section-content" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <p>Không có câu lạc bộ nào</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="club-section">
       <div className="section-header">
-        <h2 className="section-title">Club</h2>
+        <h2 className="section-title">Câu lạc bộ</h2>
         <Link to="/clubs" className="see-more-link">
           Xem thêm
           <svg
@@ -76,7 +129,7 @@ const ClubSection = () => {
 
         <div className="club-cards-container">
           {displayedClubs.map((club) => (
-            <ClubCard key={club.id} club={club} />
+            <ClubCard key={club.id || club._id} club={club} />
           ))}
         </div>
 

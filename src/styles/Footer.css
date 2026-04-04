@@ -1,8 +1,14 @@
 .main-footer {
-  background-color: #333;
-  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  /* Transparent glass */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  color: #4A4A6A;
   padding: 2rem 0;
   margin-top: auto;
+  text-align: center;
+  font-size: 14px;
 }
 
 .footer-content {

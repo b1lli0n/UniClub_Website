@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import ClubDetailCard from '../../components/ClubDetailCard';
+import ClubDetailCard from '../../components/clubs/ClubDetailCard';
 import { getAllClubs } from '../../api/clubApi';
 import '../../styles/ListOfClubs.css';
 
+
+// Icon Components
 const IconBase = ({ children, viewBox = '0 0 24 24' }) => (
   <svg
     className="club-catIcon"
@@ -110,16 +112,21 @@ const ListOfClubs = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [clubs, setClubs] = useState([]);
-  // Add body class for styling (nền + header giống Profile, footer giống Home)
+  const [loading, setLoading] = useState(true);
+  const dropdownRef = useRef(null);
+
+// Scroll to top khi navigate đến trang này
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Add body class for styling
   useEffect(() => {
     document.body.classList.add('clubs-list-body');
     return () => {
       document.body.classList.remove('clubs-list-body');
     };
   }, []);
-
-  const [loading, setLoading] = useState(true);
-  const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -141,7 +148,6 @@ const ListOfClubs = () => {
         const response = await getAllClubs({
           category,
           sortBy: sortBy || null,
-          search: searchQuery.trim() || null,
         });
 
         if (response.success) {
@@ -162,10 +168,10 @@ const ListOfClubs = () => {
 
     const timeoutId = setTimeout(() => {
       fetchClubs();
-    }, searchQuery ? 400 : 0);
+    }, 0);
 
     return () => clearTimeout(timeoutId);
-  }, [selectedCategory, sortBy, searchQuery]);
+  }, [selectedCategory, sortBy]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -173,8 +179,13 @@ const ListOfClubs = () => {
 
   const currentSortLabel =
     SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label || 'Mặc định';
-  const totalPages = Math.max(1, Math.ceil(clubs.length / CLUBS_PER_PAGE));
-  const paginatedClubs = clubs.slice(
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const filteredClubs = clubs.filter((club) => {
+    if (!normalizedSearch) return true;
+    return (club.name || '').toLowerCase().includes(normalizedSearch);
+  });
+  const totalPages = Math.max(1, Math.ceil(filteredClubs.length / CLUBS_PER_PAGE));
+  const paginatedClubs = filteredClubs.slice(
     (currentPage - 1) * CLUBS_PER_PAGE,
     currentPage * CLUBS_PER_PAGE
   );
@@ -199,7 +210,8 @@ const ListOfClubs = () => {
       <Container className="loc-container py-4 pb-5">
         <section className="loc-cat-section" aria-label="Lọc theo danh mục">
           <div className="loc-cat-tabs" role="list">
-            {CLUB_CATEGORIES.map(({ id, labelTop, labelBottom, mapsTo, Icon }) => {
+            {CLUB_CATEGORIES.map((category) => {
+              const { id, labelTop, labelBottom, mapsTo } = category;
               const isActive =
                 selectedCategory === mapsTo ||
                 (mapsTo === 'all' && selectedCategory === 'all');
@@ -213,7 +225,7 @@ const ListOfClubs = () => {
                   aria-label={`${labelTop} ${labelBottom}`}
                 >
                   <span className="loc-cat-pill-icon" aria-hidden="true">
-                    <Icon />
+                    <category.Icon />
                   </span>
                   <span className="loc-cat-pill-label">{labelTop}</span>
                 </button>
@@ -232,7 +244,7 @@ const ListOfClubs = () => {
                     : `Câu lạc bộ • ${selectedCategory}`}
                 </h3>
                 <p className="club-sectionSub">
-                  {loading ? 'Đang tải...' : `${clubs.length} câu lạc bộ.`}
+                  {loading ? 'Đang tải...' : `${filteredClubs.length} câu lạc bộ.`}
                 </p>
               </div>
             </div>
@@ -242,7 +254,7 @@ const ListOfClubs = () => {
                 <input
                   type="text"
                   className="club-search-input"
-                  placeholder="Tìm kiếm theo tên, mô tả..."
+                  placeholder="Tìm kiếm theo tên"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -326,7 +338,7 @@ const ListOfClubs = () => {
               <div className="club-empty glass-panel">
                 <div className="club-emptyTitle">Đang tải dữ liệu...</div>
               </div>
-            ) : clubs.length > 0 ? (
+            ) : filteredClubs.length > 0 ? (
               paginatedClubs.map((club, index) => (
                 <ClubDetailCard key={club.id || club._id || `club-card-${index}`} club={club} />
               ))
@@ -347,7 +359,7 @@ const ListOfClubs = () => {
             )}
           </div>
 
-          {!loading && clubs.length > 0 && totalPages > 1 && (
+          {!loading && filteredClubs.length > 0 && totalPages > 1 && (
             <nav className="loc-pagination" aria-label="Phân trang câu lạc bộ">
               <button
                 type="button"

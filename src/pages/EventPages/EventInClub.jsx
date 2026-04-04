@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Button } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import '../../styles/Event.css';
-import RegistrationModal from '../../components/RegistrationModal';
+import RegistrationModal from '../../components/modals/RegistrationModal';
 import eventApi from '../../api/eventApi';
 import { Form } from "react-bootstrap";
+import Pagination from '../../components/common/Pagination';
 
 const CATEGORY_BADGE_MAP = {
     'Workshop': 'Workshop, Học tập',
@@ -63,6 +64,7 @@ const DISCOVER_CATEGORIES = [
 
 const Event = () => {
     const { clubId } = useParams();
+    const navigate = useNavigate();
     const [query, setQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('Tất cả');
     const [sortBy, setSortBy] = useState('date-desc');
@@ -73,6 +75,21 @@ const Event = () => {
 
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const EVENTS_PER_PAGE = 12;
+
+    // Reset về trang 1 khi lọc
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeCategory, query, sortBy]);
+
+    // Scroll to top khi đổi trang
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [currentPage]);
 
     useEffect(() => {
         document.body.classList.add('event-body');
@@ -86,17 +103,32 @@ const Event = () => {
         const fetchEvents = async () => {
             setLoading(true);
             try {
-                console.log('Fetching events for clubId:', clubId);
-                const res = await eventApi.getEventsByClub(clubId);
-                setEvents(res.data.data || []);
+                // Tạo params để gửi lên BE
+                const params = {
+                    q: query || '',
+                    category: activeCategory !== 'Tất cả' ? activeCategory : '',
+                    sort: sortBy,
+                    page: currentPage,
+                    limit: EVENTS_PER_PAGE
+                };
+
+                const res = await eventApi.getEventsByClub(clubId, params);
+                if (res?.data?.success) {
+                    setEvents(res.data.data || []);
+                    setTotalPages(res.data.pagination?.pages || 1);
+                } else {
+                    setEvents(res?.data?.data || []);
+                    setTotalPages(1);
+                }
             } catch (err) {
                 console.error('Error fetching events:', err);
                 setEvents([]);
+                setTotalPages(1);
             }
             setLoading(false);
         };
-        fetchEvents();
-    }, [regVersion, clubId]);
+        if (clubId) fetchEvents();
+    }, [regVersion, clubId, query, activeCategory, sortBy, currentPage]);
 
     const categories = useMemo(() => {
         // Lọc bỏ null/undefined và chuẩn hóa về đúng kiểu
@@ -104,41 +136,8 @@ const Event = () => {
         return ['Tất cả', ...Array.from(set)];
     }, [events]);
 
-    const filteredEvents = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        const filtered = events.filter((e) => {
-            const eventCat = e.category ? e.category.trim().toLowerCase() : '';
-            const activeCat = activeCategory.trim().toLowerCase();
-            const byCategory = activeCat === 'tất cả'
-                ? true
-                : eventCat === activeCat;
-            const byQuery = !q
-                ? true
-                : `${e.title} ${e.description} ${e.category} ${e.location}`.toLowerCase().includes(q);
-            return byCategory && byQuery;
-        });
-
-
-        // Sort
-        const sorted = [...filtered];
-        if (sortBy === 'date-desc') {
-            sorted.sort((a, b) => {
-                const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
-                const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
-                return bDate - aDate; //mới nhất
-            });
-        } else if (sortBy === 'date-asc') {
-            sorted.sort((a, b) => {
-                const aDate = parseDate(a.end_time ?? a.start_time ?? a.endDate ?? a.startDate ?? a.dateText ?? '');
-                const bDate = parseDate(b.end_time ?? b.start_time ?? b.endDate ?? b.startDate ?? b.dateText ?? '');
-                return aDate - bDate;//cũ nhất
-            });
-        } else if (sortBy === 'name') {
-            sorted.sort((a, b) => a.title.localeCompare(b.title));
-        }
-
-        return sorted;
-    }, [events, activeCategory, query, sortBy]);
+    // Bỏ filter ở client vì BE đã filter sẵn
+    const filteredEvents = events;
 
     return (
         <div className="event-container">
@@ -147,15 +146,14 @@ const Event = () => {
                 <Container className="pb-4">
                     <div className="event-catGrid" role="list">
                         {DISCOVER_CATEGORIES.map(({ id, labelTop, labelBottom, mapsTo, icon }) => {
-                            const canMap = categories.includes(mapsTo);
-                            const isActive = canMap && activeCategory.toLowerCase() === mapsTo.toLowerCase();
+                            const isActive = activeCategory.toLowerCase() === mapsTo.toLowerCase();
                             return (
                                 <button
                                     key={id}
                                     type="button"
                                     className={`event-catItem ${isActive ? 'is-active' : ''}`}
                                     role="listitem"
-                                    onClick={() => setActiveCategory(canMap ? mapsTo : 'Tất cả')}
+                                    onClick={() => setActiveCategory(mapsTo)}
                                     aria-label={`${labelTop} ${labelBottom}`}
                                 >
                                     <div className="event-catCircle">{icon}</div>
@@ -214,69 +212,67 @@ const Event = () => {
                         </Button>
                     </div>
                 ) : (
-                    <div className="event-rowList">
+                    <div className="event-grid">
                         {filteredEvents.map((e) => {
                             const { day, month } = getDateParts(e);
                             const badgeText = CATEGORY_BADGE_MAP[e.category] ?? e.category;
+                            const eventId = e._id || e.id;
+                            const eventLink = `/club/${clubId}/events/${eventId}`;
+
                             return (
-                                <div key={e._id || e.id} className="event-row glass-panel">
-                                    <div className="event-rowMedia" aria-hidden="true">
-                                        {e.media_urls && e.media_urls.length > 0 ? (
-                                            <img
-                                                src={`http://localhost:5000${e.media_urls[0]}`}
-                                                alt={e.title}
-                                                className="event-rowImg"
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
-                                            />
-                                        ) : (
-                                            <div className="event-rowMediaOverlay" />
-                                        )}
+                                <div key={`${clubId || 'event'}-${eventId}`} className="event-grid-card glass-panel">
+                                    <div className="event-grid-badge">{badgeText}</div>
+
+                                    <div className="event-grid-date-overlay">
+                                        <span className="event-grid-day">{day}</span>
+                                        <span className="event-grid-month">Tháng {month}</span>
                                     </div>
 
-                                    <div className="event-rowBody">
-                                        <div className="event-rowTitleWrap">
-                                            <Link className="event-rowTitle" to={`/club/${clubId}/events/${e._id}`}>
-                                                {e.title}
-                                            </Link>
-                                            <div className="event-rowBadge">{badgeText}</div>
-                                        </div>
-
-                                        <div className="event-rowMeta">
-                                            <div className="event-rowMetaItem">
-                                                <span className="event-rowMetaIcon" aria-hidden="true">
-                                                    👤
-                                                </span>
-                                                <span className="event-rowMetaText">{e.host ?? 'UniClub'}</span>
-                                            </div>
-                                            <div className="event-rowMetaItem">
-                                                <span className="event-rowMetaIcon" aria-hidden="true">
-                                                    📍
-                                                </span>
-                                                <span className="event-rowMetaText">{e.location}</span>
-                                            </div>
-                                        </div>
-
-                                        <Button
-                                            className="event-rowBtn"
-                                            type="button"
-                                            onClick={() => {
-                                                setRegisterEventTitle(e.title);
-                                                setRegisterEventId(e._id || e.id);
-                                                setShowRegister(true);
+                                    <div className="event-grid-media">
+                                        <img
+                                            src={e.media_urls && e.media_urls.length > 0 
+                                                ? (e.media_urls[0].startsWith('http') ? e.media_urls[0] : `http://localhost:5000${e.media_urls[0]}`)
+                                                : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"}
+                                            alt={e.title}
+                                            className="event-grid-img"
+                                            onError={(e) => {
+                                                e.target.src = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070&auto=format&fit=crop";
                                             }}
-                                        >
-                                            Đăng ký
-                                        </Button>
+                                        />
                                     </div>
 
-                                    <div className="event-rowDate" aria-hidden="true">
-                                        <div className="event-rowDay">{day}</div>
-                                        <div className="event-rowMonth">Tháng {month}</div>
+                                    <div className="event-grid-body">
+                                        <Link className="event-grid-title" to={eventLink}>
+                                            {e.title}
+                                        </Link>
+
+                                        <div className="event-grid-meta">
+                                            <div className="event-grid-meta-item">
+                                                <span aria-hidden="true">📍</span>
+                                                <span title={e.location}>{e.location}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="event-grid-footer">
+                                            <Link to={eventLink} className="btn event-grid-btn">
+                                                Xem chi tiết
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
+                )}
+
+                {/* Pagination Section */}
+                {!loading && events.length > 0 && totalPages > 1 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        loading={loading}
+                    />
                 )}
             </Container>
 

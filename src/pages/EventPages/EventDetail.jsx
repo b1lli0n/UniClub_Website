@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Button, Container, Spinner } from "react-bootstrap";
+import { Badge, Button, Container, Spinner, Modal } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../../styles/Event.css";
-import RegistrationModal from "../../components/RegistrationModal";
+import RegistrationModal from "../../components/modals/RegistrationModal";
+import ConfirmModal from "../../components/modals/ConfirmModal";
 import eventApi from "../../api/eventApi";
 import { getCurrentUser } from "../../api/authApi";
 
@@ -33,6 +34,32 @@ function formatDate(date) {
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
+// Component StarRating để hiển thị và chọn sao
+const StarRating = ({ rating, setRating, disabled = false }) => {
+  const [hoverRating, setHoverRating] = useState(0);
+
+  return (
+    <div className="d-flex align-items-center" style={{ gap: '4px' }}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span
+          key={star}
+          style={{
+            cursor: disabled ? 'default' : 'pointer',
+            fontSize: '24px',
+            color: (hoverRating || rating) >= star ? '#ffc107' : '#e4e5e9',
+            transition: 'color 0.2s',
+          }}
+          onClick={() => !disabled && setRating(star)}
+          onMouseEnter={() => !disabled && setHoverRating(star)}
+          onMouseLeave={() => !disabled && setHoverRating(0)}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+};
+
 // Hàm lấy profile user thực tế từ authApi
 function getProfile() {
   const user = getCurrentUser();
@@ -55,6 +82,19 @@ const EventDetail = () => {
   const [checkinVersion, setCheckinVersion] = useState(0);
   const [checkinLoading, setCheckinLoading] = useState(false);
   const [checkinError, setCheckinError] = useState(null);
+
+  const [editingFeedbackId, setEditingFeedbackId] = useState(null);
+  const [editFeedbackText, setEditFeedbackText] = useState("");
+  const [editFeedbackRating, setEditFeedbackRating] = useState(5);
+  const [editFeedbackSubmitting, setEditFeedbackSubmitting] = useState(false);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [feedbackToDelete, setFeedbackToDelete] = useState(null);
+
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+
+  const currentUserProfile = getProfile();
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -81,7 +121,7 @@ const EventDetail = () => {
         const ev = res.data.data;
         setEvent(ev);
         setRegistered(
-          !!ev.userRegistration ||
+          (!!ev.userRegistration && ev.userRegistration.status !== 2) ||
           ["pending", "approved", "attended"].includes(ev.userRegistrationStatus)
         );
         setCheckedIn(ev.userRegistration?.status === 3 || false);
@@ -164,6 +204,45 @@ const EventDetail = () => {
       toast.error(message);
     }
     setFeedbackSubmitting(false);
+  };
+
+  // Cập nhật feedback
+  const handleUpdateFeedback = async () => {
+    if (!editFeedbackText.trim()) return;
+    setEditFeedbackSubmitting(true);
+    try {
+      await eventApi.updateFeedback(editingFeedbackId, {
+        rating: editFeedbackRating,
+        comments: editFeedbackText.trim(),
+      });
+      toast.success("Cập nhật đánh giá thành công.");
+      setEditingFeedbackId(null);
+      setFeedbackVersion((v) => v + 1);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Cập nhật đánh giá thất bại.");
+    }
+    setEditFeedbackSubmitting(false);
+  };
+
+  // Bấm nút xóa (hiển thị modal)
+  const handleDeleteFeedback = (feedbackId) => {
+    setFeedbackToDelete(feedbackId);
+    setShowDeleteConfirm(true);
+  };
+
+  // Xác nhận xóa feedback
+  const confirmDeleteFeedback = async () => {
+    if (!feedbackToDelete) return;
+    try {
+      await eventApi.deleteFeedback(feedbackToDelete);
+      toast.success("Xóa đánh giá thành công.");
+      setFeedbackVersion((v) => v + 1);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Xóa đánh giá thất bại.");
+    } finally {
+      setShowDeleteConfirm(false);
+      setFeedbackToDelete(null);
+    }
   };
 
   if (loading) {
@@ -258,16 +337,17 @@ const EventDetail = () => {
           <div className="event-detailSide">
             <div className="event-sideCard glass-panel">
               <div className="event-sideImage" aria-hidden="true">
-                {event.media_urls && event.media_urls.length > 0 ? (
-                  <img
-                    src={`http://localhost:5000${event.media_urls[0]}`}
-                    alt={event.title}
-                    className="event-rowImg"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
-                  />
-                ) : (
-                  <div className="event-rowMediaOverlay" />
-                )}
+                <img
+                  src={event.media_urls && event.media_urls.length > 0 
+                    ? (event.media_urls[0].startsWith('http') ? event.media_urls[0] : `http://localhost:5000${event.media_urls[0]}`) 
+                    : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"}
+                  alt={event.title}
+                  className="event-rowImg"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
+                  onError={(e) => {
+                    e.target.src = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070&auto=format&fit=crop";
+                  }}
+                />
               </div>
               <div className="event-sideInfo">
                 <div className="event-sideTwoCol">
@@ -294,36 +374,79 @@ const EventDetail = () => {
                   </div>
                 </div>
               </div>
-              <Button
-                className={`event-sideRegisterBtn ${registered && !hasEnded ? 'is-registered' : ''}`}
-                type="button"
-                onClick={async () => {
-                  if (registered && !hasEnded) {
-                    if (window.confirm("Bạn có chắc chắn muốn hủy đăng ký tham gia sự kiện này?")) {
-                      setLoading(true);
-                      try {
-                        const profile = getProfile();
-                        await eventApi.cancelRegistration(eventId, profile.userId);
-                        toast.info("Đã hủy đăng ký thành công.");
-                        setRegVersion(v => v + 1);
-                      } catch (err) {
-                        toast.error(err.response?.data?.message || "Hủy đăng ký thất bại.");
-                      } finally {
-                        setLoading(false);
-                      }
-                    }
-                  } else {
-                    setShowRegister(true);
+              {(() => {
+                const regStatus = event.userRegistration?.status ?? (registered ? 0 : -1);
+                const isStarted = event.isEventStarted;
+
+                // 2: Rejected
+                if (regStatus === 2) {
+                  return (
+                    <Button
+                      className="event-sideRegisterBtn btn-rejected"
+                      onClick={() => setShowRegister(true)}
+                    >
+                      Đăng ký của bạn bị từ chối (Đăng ký lại?)
+                    </Button>
+                  );
+                }
+
+                // Event started
+                if (isStarted) {
+                  if (regStatus === 1 || regStatus === 3 || checkedIn) {
+                    return (
+                      <Button className="event-sideRegisterBtn btn-attended" disabled>
+                        Đang diễn ra / Đã tham gia
+                      </Button>
+                    );
                   }
-                }}
-                disabled={hasEnded || loading}
-              >
-                {hasEnded
-                  ? "Sự kiện đã kết thúc"
-                  : registered
-                    ? "✓ Đã đăng ký (Hủy?)"
-                    : "Đăng ký tham gia"}
-              </Button>
+                  if (regStatus === 0) {
+                    return (
+                      <Button className="event-sideRegisterBtn disabled" disabled>
+                        Sự kiện đã bắt đầu
+                      </Button>
+                    );
+                  }
+                }
+
+                // If registered, show specific status
+                if (registered) {
+                  let btnText = "✓ Đã đăng ký (Huỷ?)";
+                  let btnClass = "event-sideRegisterBtn is-registered";
+
+                  if (regStatus === 0) {
+                    btnText = "Đang chờ duyệt (Hủy?)";
+                    btnClass += " btn-pending";
+                  } else if (regStatus === 1) {
+                    btnText = "✓ Đã duyệt (Hủy?)";
+                    btnClass += " btn-approved";
+                  } else if (regStatus === 3 || checkedIn) {
+                    btnText = "✓ Đã tham gia";
+                    btnClass += " btn-attended";
+                    return <Button className={btnClass} disabled>{btnText}</Button>;
+                  }
+
+                  return (
+                    <Button
+                      className={btnClass}
+                      onClick={() => setShowCancelConfirm(true)}
+                      disabled={loading || cancelLoading}
+                    >
+                      {btnText}
+                    </Button>
+                  );
+                }
+
+                // Not registered
+                return (
+                  <Button
+                    className="event-sideRegisterBtn"
+                    onClick={() => setShowRegister(true)}
+                    disabled={hasEnded || loading}
+                  >
+                    {hasEnded ? "Sự kiện đã kết thúc" : "Đăng ký tham gia"}
+                  </Button>
+                );
+              })()}
               {registered && isOngoing && (() => {
                 const checkInStatus = event.check_in_status ?? 0;
                 const isCheckInOpen = checkInStatus === 1;
@@ -420,41 +543,102 @@ const EventDetail = () => {
             {feedbackList.length === 0 ? (
               <div className="event-feedbackEmpty2">Chưa có feedback.</div>
             ) : (
-              feedbackList.map((f) => (
-                <div key={f._id || f.id} className="event-feedbackItem">
-                  <div className="event-feedbackItemTop">
-                    <div className="event-feedbackName">
-                      {f.user_id?.fullName ?? f.user_id?.name ?? f.userFullName ?? f.userName ?? "Ẩn danh"}
+              feedbackList.map((f) => {
+                const fId = f._id || f.id;
+                const isMyFeedback = currentUserProfile.userId && (
+                  (f.user_id?._id === currentUserProfile.userId) ||
+                  (f.user_id?.id === currentUserProfile.userId) ||
+                  (String(f.user_id) === String(currentUserProfile.userId)) ||
+                  (String(f.userId) === String(currentUserProfile.userId))
+                );
+                const isEditing = editingFeedbackId === fId;
+
+                return (
+                  <div key={fId} className="event-feedbackItem">
+                    <div className="event-feedbackItemTop">
+                      <div className="event-feedbackName">
+                        {f.user_id?.fullName ?? f.user_id?.name ?? f.userFullName ?? f.userName ?? "Ẩn danh"}
+                      </div>
+                      <div className="event-feedbackDate">
+                        {(f.created_at ?? f.createdAt)
+                          ? new Date(f.created_at ?? f.createdAt).toLocaleString("vi-VN")
+                          : ""}
+                      </div>
                     </div>
-                    <div className="event-feedbackDate">
-                      {(f.created_at ?? f.createdAt)
-                        ? new Date(f.created_at ?? f.createdAt).toLocaleString("vi-VN")
-                        : ""}
-                    </div>
+                    {isEditing ? (
+                      <div className="event-feedbackEditForm mt-2">
+                        <div className="event-feedbackRatingWrap mb-2 d-flex align-items-center">
+                          <label className="event-feedbackRatingLabel" style={{ marginRight: '8px' }}>Đánh giá:</label>
+                          <StarRating rating={editFeedbackRating} setRating={setEditFeedbackRating} />
+                        </div>
+                        <textarea
+                          className="event-feedbackTextarea"
+                          value={editFeedbackText}
+                          onChange={(e) => setEditFeedbackText(e.target.value)}
+                          rows={3}
+                          style={{ width: '100%', marginBottom: '8px', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                        />
+                        <div className="d-flex gap-2">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            disabled={!editFeedbackText.trim() || editFeedbackSubmitting}
+                            onClick={handleUpdateFeedback}
+                          >
+                            {editFeedbackSubmitting ? "Lưu..." : "Lưu"}
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => setEditingFeedbackId(null)}
+                          >
+                            Hủy
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {f.rating != null && (
+                          <div className="event-feedbackRating">⭐ {f.rating}/5</div>
+                        )}
+                        <div className="event-feedbackText">{f.comments ?? f.comment ?? f.commentText ?? f.text ?? f.content ?? ""}</div>
+                        {isMyFeedback && (
+                          <div className="event-feedbackActions mt-2 d-flex gap-2">
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              onClick={() => {
+                                setEditingFeedbackId(fId);
+                                setEditFeedbackRating(f.rating || 5);
+                                setEditFeedbackText(f.comments ?? f.comment ?? f.commentText ?? f.text ?? f.content ?? "");
+                              }}
+                            >
+                              ✎ Sửa
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDeleteFeedback(fId)}
+                            >
+                              🗑 Xóa
+                            </Button>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
-                  {f.rating != null && (
-                    <div className="event-feedbackRating">⭐ {f.rating}/5</div>
-                  )}
-                  <div className="event-feedbackText">{f.comments ?? f.comment ?? f.commentText ?? f.text ?? f.content ?? ""}</div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
           <div className="event-feedbackForm">
-            <div className="event-feedbackRatingWrap mb-2">
-              <label className="event-feedbackRatingLabel">Đánh giá (1–5 sao):</label>
-              <select
-                className="event-feedbackRatingSelect"
-                value={feedbackRating}
-                onChange={(e) => setFeedbackRating(Number(e.target.value))}
+            <div className="event-feedbackRatingWrap mb-2 d-flex align-items-center">
+              <label className="event-feedbackRatingLabel" style={{ marginRight: '8px' }}>Đánh giá:</label>
+              <StarRating
+                rating={feedbackRating}
+                setRating={setFeedbackRating}
                 disabled={!hasEnded || !registered}
-              >
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>
-                    {n} sao
-                  </option>
-                ))}
-              </select>
+              />
             </div>
             <textarea
               className="event-feedbackTextarea"
@@ -483,6 +667,54 @@ const EventDetail = () => {
           eventTitle={event.title}
           eventImage={event.media_urls?.[0]}
           isRegistered={registered}
+        />
+
+        {/* Modal xác nhận xóa feedback */}
+        <Modal
+          show={showDeleteConfirm}
+          onHide={() => setShowDeleteConfirm(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Xác nhận xóa</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Bạn có chắc chắn muốn xóa đánh giá này không? Hành động này không thể hoàn tác.
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
+              Hủy
+            </Button>
+            <Button variant="danger" onClick={confirmDeleteFeedback}>
+              Xóa đánh giá
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Modal xác nhận hủy đăng ký */}
+        <ConfirmModal
+          show={showCancelConfirm}
+          onHide={() => setShowCancelConfirm(false)}
+          onConfirm={async () => {
+            setCancelLoading(true);
+            try {
+              const profile = getProfile();
+              await eventApi.cancelRegistration(eventId, profile.userId);
+              toast.info("Đã hủy đăng ký thành công.");
+              setRegVersion(v => v + 1);
+              setShowCancelConfirm(false);
+            } catch (err) {
+              toast.error(err.response?.data?.message || "Hủy đăng ký thất bại.");
+            } finally {
+              setCancelLoading(false);
+            }
+          }}
+          title="Xác nhận hủy đăng ký"
+          message="Bạn có chắc chắn muốn hủy đăng ký tham gia sự kiện này không? Hành động này không thể hoàn tác."
+          confirmText="Hủy đăng ký"
+          cancelText="Giữ lại"
+          type="danger"
+          loading={cancelLoading}
         />
       </Container>
     </div>

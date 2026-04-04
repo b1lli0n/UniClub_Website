@@ -3,6 +3,7 @@ import { Button, Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import "../../styles/Event.css";
 import eventApi from "../../api/eventApi";
+import Pagination from "../../components/common/Pagination";
 
 const CATEGORY_BADGE_MAP = {
   Workshop: "Workshop, Học tập",
@@ -38,6 +39,11 @@ const MyEvent = () => {
   const [myEvents, setMyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const EVENTS_PER_PAGE = 10;
+
   useEffect(() => {
     document.body.classList.add("event-body");
     return () => {
@@ -50,16 +56,23 @@ const MyEvent = () => {
     const fetchMyEvents = async () => {
       setLoading(true);
       try {
-
-        const res = await eventApi.getPastEvents();
-        setMyEvents(res.data.data || []);
+        const res = await eventApi.getPastEvents({
+          page: currentPage,
+          limit: EVENTS_PER_PAGE,
+          sort: sortBy
+        });
+        if (res?.data?.success) {
+          setMyEvents(res.data.data || []);
+          setTotalPages(res.data.pagination?.pages || 1);
+        }
       } catch (err) {
+        console.error("Error fetching my events:", err);
         setMyEvents([]);
       }
       setLoading(false);
     };
     fetchMyEvents();
-  }, []);
+  }, [currentPage, sortBy]);
 
   // Sắp xếp sự kiện theo sortBy (backend past events trả start_time, end_time ISO)
   const sortedEvents = useMemo(() => {
@@ -95,25 +108,6 @@ const MyEvent = () => {
         </div>
 
         <Row className="g-4">
-          <Col lg={3}>
-            <div className="myevent-sidebar glass-panel">
-              <button
-                type="button"
-                className={`myevent-navItem ${activeNav === "club" ? "is-active" : ""}`}
-                onClick={() => setActiveNav("club")}
-              >
-                Quản lý câu lạc bộ
-              </button>
-              <button
-                type="button"
-                className={`myevent-navItem ${activeNav === "events" ? "is-active" : ""}`}
-                onClick={() => setActiveNav("events")}
-              >
-                Quản lý sự kiện
-              </button>
-            </div>
-          </Col>
-
           <Col lg={9}>
             <div className="myevent-toolbar">
               <div className="myevent-sort">
@@ -143,56 +137,80 @@ const MyEvent = () => {
                 </Button>
               </div>
             ) : (
-              <div className="myevent-list">
-                {sortedEvents.map((e) => {
-                  const badgeText = CATEGORY_BADGE_MAP[e.category] ?? e.category;
-                  return (
-                    <div key={e._id || e.id} className="myevent-card glass-panel">
-                      <Row className="g-3 align-items-center">
-                        <Col md={4}>
-                          <div className="myevent-cardImage" aria-hidden="true">
-                            {e.media_urls && e.media_urls.length > 0 ? (
-                              <img
-                                src={`http://localhost:5000${e.media_urls[0]}`}
-                                alt={e.title}
-                                className="myevent-cardImg"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
-                              />
-                            ) : (
-                              <div className="event-rowMediaOverlay" />
-                            )}
-                          </div>
-                        </Col>
-                        <Col md={8}>
-                          <div className="myevent-cardBadges">
-                            <span className="myevent-badge">{badgeText}</span>
-                            <span className="myevent-badge">
-                              {formatDate(e.start_time)} – {formatDate(e.end_time)}
-                            </span>
-                          </div>
-                          <h3 className="myevent-cardTitle">{e.title}</h3>
-                          <div className="myevent-cardHost">
-                            Clb đảm nhận sự kiện: {e.club_id?.name ?? e.host ?? "UniClub"}
-                          </div>
-                          {(() => {
-                            const clubId = e.club_id?._id || e.club_id?.id || e.club_id;
-                            // If no clubId found, might need fallback or keep '#'
-                            const linkTarget = clubId
-                              ? `/club/${clubId}/events/${e._id || e.id}`
-                              : '#';
+              <>
+                <div className="event-grid">
+                  {sortedEvents.map((e) => {
+                    const badgeText = CATEGORY_BADGE_MAP[e.category] ?? e.category;
+                    const clubId = e.club_id?._id || e.club_id?.id || e.club_id;
+                    const eventId = e._id || e.id;
+                    const eventLink = clubId ? `/club/${clubId}/events/${eventId}` : '#';
+                    const { day, month } = (() => {
+                      const d = new Date(e.start_time);
+                      return {
+                        day: isNaN(d) ? "--" : String(d.getDate()).padStart(2, "0"),
+                        month: isNaN(d) ? "--" : String(d.getMonth() + 1).padStart(2, "0")
+                      };
+                    })();
 
-                            return (
-                              <Button as={Link} to={linkTarget} className="myevent-cardBtn">
-                                Xem sự kiện
-                              </Button>
-                            );
-                          })()}
-                        </Col>
-                      </Row>
-                    </div>
-                  );
-                })}
-              </div>
+                    return (
+                      <div key={`${clubId || 'my'}-${eventId}`} className="event-grid-card glass-panel">
+                        <div className="event-grid-badge">{badgeText}</div>
+
+                        <div className="event-grid-date-overlay">
+                          <span className="event-grid-day">{day}</span>
+                          <span className="event-grid-month">Tháng {month}</span>
+                        </div>
+
+                        {/* Media Section */}
+                        <div className="event-grid-media">
+                          <img
+                            src={e.media_urls && e.media_urls.length > 0 
+                              ? (e.media_urls[0].startsWith('http') ? e.media_urls[0] : `http://localhost:5000${e.media_urls[0]}`) 
+                              : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"}
+                            alt={e.title}
+                            className="event-grid-img"
+                            onError={(e) => {
+                              e.target.src = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070&auto=format&fit=crop";
+                            }}
+                          />
+                        </div>
+
+                        <div className="event-grid-body">
+                          <Link className="event-grid-title" to={eventLink}>
+                            {e.title}
+                          </Link>
+
+                          <div className="event-grid-meta">
+                            <div className="event-grid-meta-item">
+                              <span aria-hidden="true">👥</span>
+                              <span>{e.club_id?.name || e.host || 'UniClub'}</span>
+                            </div>
+                            <div className="event-grid-meta-item">
+                              <span aria-hidden="true">📍</span>
+                              <span title={e.location}>{e.location}</span>
+                            </div>
+                          </div>
+
+                          <div className="event-grid-footer">
+                            <Link to={eventLink} className="btn event-grid-btn">
+                              Xem chi tiết
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {!loading && myEvents.length > 0 && totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    loading={loading}
+                  />
+                )}
+              </>
             )}
           </Col>
         </Row>

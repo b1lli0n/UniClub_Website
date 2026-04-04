@@ -70,6 +70,69 @@
     gap: 16px;
 }
 
+.memberships-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 16px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.memberships-filter-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.memberships-filter-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #6b7280;
+}
+
+.memberships-filter-select {
+    min-width: 170px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: #ffffff;
+    color: #374151;
+    font-weight: 600;
+    outline: none;
+}
+
+.memberships-filter-select:focus {
+    border-color: rgba(99, 102, 241, 0.45);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.memberships-invite-list-button {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: #f3f4ff;
+    color: #3f3d56;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.memberships-invite-button {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    background: #BDE0FE;
+    color: #3f3d56;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.memberships-invite-button:disabled {
+    background: #e5e7eb;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
 .memberships-item {
     padding: 20px;
     background: #FFFFFF;
@@ -126,6 +189,18 @@
     opacity: 0.5;
 }
 
+.memberships-view-detail {
+    margin: 10px 0 0 60px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    padding: 7px 12px;
+    background: #eef2ff;
+    color: #374151;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
 .memberships-actions {
     display: flex;
     align-items: center;
@@ -151,6 +226,22 @@
 
 .memberships-status-badge.status-rejected {
     background: #FFAFCC;
+}
+
+.memberships-status-badge.status-0 {
+    background: #CDB4DB;
+}
+
+.memberships-status-badge.status-1 {
+    background: #BDE0FE;
+}
+
+.memberships-status-badge.status-2 {
+    background: #FFAFCC;
+}
+
+.memberships-status-badge.status-3 {
+    background: #e5e7eb;
 }
 
 .memberships-action-buttons {
@@ -190,4 +281,233 @@
     font-size: 1.1rem;
     color: var(--candy-text);
     opacity: 0.6;
+}
+
+.memberships-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(40, 30, 65, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 20px;
+}
+
+.memberships-invite-modal {
+    width: min(760px, 95vw);
+    max-height: 85vh;
+    overflow: auto;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+}
+
+.memberships-invite-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.memberships-invite-modal-title {
+    margin: 0;
+    color: var(--candy-text);
+    font-size: 1.2rem;
+}
+
+.memberships-modal-close {
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 10px;
+    padding: 8px 12px;
+    background: #eef4ff;
+    color: #384166;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.send-invite-form {
+    display: grid;
+    gap: 10px;
+}
+
+.send-invite-form h3 {
+    margin: 0 0 4px;
+    color: var(--candy-text);
+}
+
+.send-invite-form select,
+.send-invite-form input,
+.send-invite-form textarea {
+    width: 100%;
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.send-invite-form textarea {
+    resize: vertical;
+    min-height: 78px;
+}
+
+.send-invite-form button {
+    justify-self: start;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    background: #bde0fe;
+    color: #32415f;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.send-invite-form button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.invite-status {
+    font-size: 0.9rem;
+    color: var(--candy-text);
+    opacity: 0.82;
+}
+
+.memberships-detail-modal,
+.memberships-reject-modal {
+    width: min(560px, 95vw);
+    max-height: 85vh;
+    overflow: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: #ffffff;
+    padding: 18px;
+}
+
+.memberships-detail-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.memberships-detail-modal-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--candy-text);
+}
+
+.memberships-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.memberships-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.memberships-detail-item-full {
+    grid-column: 1 / -1;
+}
+
+.memberships-detail-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-weight: 700;
+}
+
+.memberships-detail-value {
+    font-size: 0.95rem;
+    color: #1f2937;
+    line-height: 1.45;
+}
+
+.memberships-detail-reject-reason {
+    color: #b91c1c;
+}
+
+.memberships-reject-help-text {
+    margin: 0 0 10px;
+    color: #374151;
+    font-size: 0.95rem;
+}
+
+.memberships-reject-textarea {
+    width: 100%;
+    border: 1px solid rgba(107, 114, 128, 0.35);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    color: #1f2937;
+    resize: vertical;
+    outline: none;
+}
+
+.memberships-reject-textarea:focus {
+    border-color: rgba(239, 68, 68, 0.45);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.memberships-reject-error {
+    margin: 8px 0 0;
+    color: #dc2626;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.memberships-reject-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.memberships-reject-cancel,
+.memberships-reject-confirm {
+    border: none;
+    border-radius: 9px;
+    padding: 9px 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.memberships-reject-cancel {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.memberships-reject-confirm {
+    background: #fca5a5;
+    color: #7f1d1d;
+}
+
+.memberships-reject-cancel:disabled,
+.memberships-reject-confirm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .memberships-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .memberships-view-detail {
+        margin-left: 0;
+    }
+
+    .memberships-requested-at {
+        margin-left: 0;
+    }
+
+    .memberships-filter-select {
+        min-width: 100%;
+    }
 }

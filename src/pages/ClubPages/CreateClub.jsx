@@ -32,6 +32,11 @@ const CreateClub = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [validated, setValidated] = useState(false);
 
+  // Scroll to top khi navigate đến trang này
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Fetch danh sách users khi component mount
   useEffect(() => {
     fetchUsers();
@@ -109,8 +114,8 @@ const CreateClub = () => {
         members: [...formData.members, member]
       });
       setMemberEmail('');
-      toast.success(`✅ Thêm thành viên thành công! (${formData.members.length + 1}/5)`);
-    } catch (error) {
+      toast.success(`✅ Thêm thành viên thành công!`);
+    } catch {
       toast.error('Lỗi khi thêm thành viên');
     }
   };
@@ -126,15 +131,12 @@ const CreateClub = () => {
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result);
-        setFormData({
-          ...formData,
-          logo_url: reader.result
-        });
-      };
-      reader.readAsDataURL(file);
+      setLogoPreview(URL.createObjectURL(file));
+      setFormData({
+        ...formData,
+        logo_url: file
+      });
+      // console.log('Selected logo file:', file);
     }
   };
 
@@ -144,7 +146,7 @@ const CreateClub = () => {
     // Kiểm tra tên club
     if (!formData.name.trim()) {
       setValidated(true);
-      toast.error('Vui lòng nhập tên club');
+      toast.error('Vui lòng nhập tên câu lạc bộ');
       return;
     }
 
@@ -162,31 +164,38 @@ const CreateClub = () => {
     }
 
     if (formData.members.length < 1) {
-      toast.error('Club phải có ít nhất 1 thành viên');
+      toast.error('Câu lạc bộ phải có ít nhất 1 thành viên');
       return;
     }
 
     setLoading(true);
-    try {
-      const firstMember = typeof formData.members[0] === 'string' 
-        ? JSON.parse(formData.members[0]) 
-        : formData.members[0];
-      
+    try {    
       const memberIds = formData.members.map(member => {
         const memberObj = typeof member === 'string' 
           ? JSON.parse(member) 
           : member;
         return memberObj.userId;
-      });
+      }); 
       
-      const dataToSubmit = {
-        ...formData,
-        members: memberIds,
-        leader_id: firstMember.userId
-      };
-      
-      await createClub(dataToSubmit);
-      toast.success('✅ Club được tạo thành công!');
+    const formDataToSend = new FormData();
+
+    formDataToSend.append("name", formData.name);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("category", formData.category);
+
+    // gửi members
+    memberIds.forEach(id => {
+      formDataToSend.append("members", id);
+    });
+
+    // gửi file
+    if (formData.logo_url) {
+      formDataToSend.append("logo", formData.logo_url); // 👈 KEY PHẢI LÀ 'logo'
+    }
+
+      // console.log('Dữ liệu gửi đi:', dataToSubmit);
+      await createClub(formDataToSend);
+      toast.success('✅ Câu lạc bộ được tạo thành công!');
       
       // Reset form
       setFormData({ name: '', description: '', logo_url: '', category: null, members: [] });
@@ -197,14 +206,14 @@ const CreateClub = () => {
       setTimeout(() => navigate('/clubs'), 1000);
     } catch (error) {
       console.error('Lỗi tạo club:', error);
-      toast.error('❌ ' + (error.message || 'Có lỗi xảy ra khi tạo club'));
+      toast.error('❌ ' + (error.message || 'Có lỗi xảy ra khi tạo câu lạc bộ'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container className="create-club-page">
+    <div className="create-club-page">
       <div className="create-club-container">
         <div className="create-club-header">
           <h1>Tạo Club Mới</h1>
@@ -324,7 +333,7 @@ const CreateClub = () => {
 
           {/* Logo Section */}
           <div className="form-section">
-            <h3 className="form-section-title">🖼️ Logo Club</h3>
+            <h3 className="form-section-title">🖼️ Logo Câu lạc bộ</h3>
             <Form.Group className="mb-0">
               <Form.Control
                 type="file"
@@ -335,7 +344,7 @@ const CreateClub = () => {
 
             {logoPreview && (
               <Form.Group className="mt-3 mb-0">
-                <Form.Label className="mb-2" style={{ fontWeight: 700 }}>Preview</Form.Label>
+                <Form.Label className="mb-2" style={{ fontWeight: 700 }}>Xem Trước Logo</Form.Label>
                 <div className="logo-preview-container">
                   <img 
                     src={logoPreview} 
@@ -362,12 +371,12 @@ const CreateClub = () => {
               disabled={loading}
               className="px-4"
             >
-              {loading ? 'Đang tạo...' : 'Tạo Club'}
+              {loading ? 'Đang tạo...' : 'Tạo Câu lạc bộ'}
             </Button>
           </div>
         </Form>
       </div>
-    </Container>
+    </div>
   );
 };
 

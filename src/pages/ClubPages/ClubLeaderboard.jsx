@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { Calendar, Trophy, Medal } from 'lucide-react';
 import { getMonthlyLeaderboard } from '../../api/pointsApi';
 import { getClubById } from '../../api/clubApi';
-import ClubDetailNav from '../../components/ClubDetailNav';
+import ClubDetailNav from '../../components/clubs/ClubDetailNav';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/Leaderboard.css';
 import { ASSET_BASE } from '../../api/api';

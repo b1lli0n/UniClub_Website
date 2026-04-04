@@ -17,7 +17,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { getPointRules } from '../../api/pointsApi';
-import ClubDetailNav from '../../components/ClubDetailNav';
+import ClubDetailNav from '../../components/clubs/ClubDetailNav';
 import '../../styles/PointRules.css';
 
 const ACTION_ICONS = {

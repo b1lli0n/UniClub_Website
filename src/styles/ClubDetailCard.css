@@ -28,6 +28,46 @@
   padding: 0;
 }
 
+.club-detail-card--paused {
+  opacity: 0.7;
+}
+
+.club-detail-card--paused .club-detail-logo-img {
+  filter: grayscale(1);
+}
+
+.club-detail-card--paused .club-detail-image-placeholder {
+  filter: grayscale(1);
+  opacity: 0.9;
+}
+
+.club-detail-status-pill {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 2;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(15, 23, 42, 0.45);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.club-detail-status-pill--paused {
+  background: rgba(2, 132, 199, 0.35);
+  border-color: rgba(56, 189, 248, 0.55);
+}
+
+.club-detail-status-pill--rejected {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(248, 113, 113, 0.55);
+}
+
 .club-detail-card:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--card-accent-soft), var(--card-shadow-hover);
@@ -138,6 +178,51 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: calc(1.35em * 2);
+}
+
+.club-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.club-detail-title-row .club-detail-title {
+  flex: 1;
+  min-height: 0;
+}
+
+.club-detail-name-status {
+  flex-shrink: 0;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+.club-detail-name-status--pending {
+  color: #7c5800;
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.club-detail-name-status--active {
+  color: #0f766e;
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.club-detail-name-status--paused {
+  color: #155e75;
+  background: rgba(14, 165, 233, 0.16);
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+.club-detail-name-status--rejected {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .club-detail-description {

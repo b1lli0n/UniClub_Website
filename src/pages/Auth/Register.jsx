@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Users, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { register as registerService } from '../../api/authApi';
 import { useAuth } from '../../context/AuthContext';
-import logoImage from '../../image/logo.png';
+import logoUniclub from '../../assets/logo-uniclub.png';
 import '../../styles/Register.css';
 
 const Register = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -15,7 +20,7 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState({
+  const [fieldErrors, setFieldErrors] = useState({
     fullName: '',
     email: '',
     password: '',
@@ -25,254 +30,76 @@ const Register = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  // Validation function for fullName
-  const validateFullName = (value) => {
-    const trimmedValue = value.trim();
-
-    // Không được rỗng
-    if (!trimmedValue) {
-      return 'Họ và tên không được để trống';
-    }
-
-    // Lớn hơn hoặc bằng 2 ký tự
-    if (trimmedValue.length < 2) {
-      return 'Họ và tên phải có ít nhất 2 ký tự';
-    }
-
-    // Ít hơn hoặc bằng 70 ký tự
-    if (trimmedValue.length > 70) {
-      return 'Họ và tên không được vượt quá 70 ký tự';
-    }
-
-    // Regex: chỉ chữ cái tiếng Việt có dấu và khoảng trắng
-    // const vietnameseNameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/;
-    const vietnameseNameRegex = /^[\p{L}\s]+$/u;
-
-    if (!vietnameseNameRegex.test(trimmedValue)) {
-      return 'Họ và tên chỉ được chứa chữ cái tiếng Việt và khoảng trắng';
-    }
-
-    return '';
-  };
-
-  // Validation function for email
   const validateEmail = (value) => {
     const trimmedValue = value.trim();
-
-    // Không được rỗng
-    if (!trimmedValue) {
-      return 'Email không được để trống';
-    }
-
-    // Kiểm tra format email cơ bản
+    if (!trimmedValue) return 'Email không được để trống';
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedValue)) {
-      return 'Email không đúng định dạng';
-    }
-
-    // Bắt buộc đuôi @fpt.edu.vn
-    if (!trimmedValue.endsWith('@fpt.edu.vn')) {
-      return 'Email phải có đuôi @fpt.edu.vn';
-    }
-
+    if (!emailRegex.test(trimmedValue)) return 'Email không đúng định dạng';
+    if (!trimmedValue.endsWith('@fpt.edu.vn')) return 'Email phải có đuôi @fpt.edu.vn';
     return '';
   };
 
-  // Validation function for password
+  const validateFullName = (value) => {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return 'Họ và tên không được để trống';
+    if (trimmedValue.length < 2) return 'Họ và tên phải có ít nhất 2 ký tự';
+    const vietnameseNameRegex = /^[\p{L}\s]+$/u;
+    if (!vietnameseNameRegex.test(trimmedValue)) return 'Họ và tên chỉ chứa chữ cái';
+    return '';
+  };
+
+  const validateConfirmPassword = (confirm, password) => {
+    if (!confirm) return 'Xác nhận mật khẩu không được để trống';
+    if (confirm !== password) return 'Mật khẩu xác nhận không khớp';
+    return '';
+  };
+
   const validatePassword = (value) => {
-    // Không được rỗng
-    if (!value) {
-      return 'Mật khẩu không được để trống';
-    }
-
-    // Không được chứa khoảng trắng
-    if (/\s/.test(value)) {
-      return 'Mật khẩu không được chứa khoảng trắng';
-    }
-
-    // Lớn hơn hoặc bằng 6 ký tự
-    if (value.length < 6) {
-      return 'Mật khẩu phải có ít nhất 6 ký tự';
-    }
-
-    // Phải có chữ cái, số và ký tự đặc biệt
+    if (!value) return 'Mật khẩu không được để trống';
+    if (value.length < 6) return 'Ít nhất 6 ký tự';
     const hasLetter = /[a-zA-Z]/.test(value);
     const hasNumber = /[0-9]/.test(value);
     const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
-
-    if (!hasLetter) {
-      return 'Mật khẩu phải chứa ít nhất một chữ cái';
-    }
-
-    if (!hasNumber) {
-      return 'Mật khẩu phải chứa ít nhất một số';
-    }
-
-    if (!hasSpecialChar) {
-      return 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt';
-    }
-
+    if (!hasLetter || !hasNumber || !hasSpecialChar) return 'Mật khẩu yếu (cần chữ, số, ký tự đặc biệt)';
     return '';
-  };
-
-  // Validation function for confirmPassword
-  const validateConfirmPassword = (value, password) => {
-    // Không được rỗng
-    if (!value) {
-      return 'Xác nhận mật khẩu không được để trống';
-    }
-
-    // Phải trùng với password
-    if (value !== password) {
-      return 'Mật khẩu xác nhận không khớp';
-    }
-
-    return '';
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: '',
-      });
-    }
-
-    // Nếu đang nhập password và có confirmPassword, validate lại confirmPassword
-    if (name === 'password' && formData.confirmPassword) {
-      const confirmError = validateConfirmPassword(formData.confirmPassword, value);
-      setErrors(prev => ({
-        ...prev,
-        confirmPassword: confirmError,
-      }));
-    }
-  };
-
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-
-    if (name === 'fullName') {
-      // Trim khoảng trắng đầu cuối
-      const trimmedValue = value.trim();
-      setFormData({
-        ...formData,
-        fullName: trimmedValue,
-      });
-
-      // Validate
-      const error = validateFullName(trimmedValue);
-      setErrors({
-        ...errors,
-        fullName: error,
-      });
-    } else if (name === 'email') {
-      // Trim khoảng trắng đầu cuối
-      const trimmedValue = value.trim();
-      setFormData({
-        ...formData,
-        email: trimmedValue,
-      });
-
-      // Validate
-      const error = validateEmail(trimmedValue);
-      setErrors({
-        ...errors,
-        email: error,
-      });
-    } else if (name === 'password') {
-      // Validate password
-      const error = validatePassword(value);
-      setErrors({
-        ...errors,
-        password: error,
-      });
-
-      // Nếu có confirmPassword, validate lại confirmPassword
-      if (formData.confirmPassword) {
-        const confirmError = validateConfirmPassword(formData.confirmPassword, value);
-        setErrors(prev => ({
-          ...prev,
-          confirmPassword: confirmError,
-        }));
-      }
-    } else if (name === 'confirmPassword') {
-      // Validate confirmPassword
-      const error = validateConfirmPassword(value, formData.password);
-      setErrors({
-        ...errors,
-        confirmPassword: error,
-      });
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Trim và validate fullName
-    const trimmedFullName = formData.fullName.trim();
-    const fullNameError = validateFullName(trimmedFullName);
-
-    // Trim và validate email
-    const trimmedEmail = formData.email.trim();
-    const emailError = validateEmail(trimmedEmail);
-
-    // Validate password
+    const fullNameError = validateFullName(formData.fullName);
+    const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
-
-    // Validate confirmPassword
-    const confirmPasswordError = validateConfirmPassword(formData.confirmPassword, formData.password);
-
-    // Set all errors
-    const newErrors = {
+    const confirmError = validateConfirmPassword(formData.confirmPassword, formData.password);
+    setFieldErrors({
       fullName: fullNameError,
       email: emailError,
       password: passwordError,
-      confirmPassword: confirmPasswordError,
-    };
+      confirmPassword: confirmError,
+    });
 
-    setErrors(newErrors);
-
-    // Check if there are any errors
-    if (fullNameError || emailError || passwordError || confirmPasswordError) {
-      const firstError = fullNameError || emailError || passwordError || confirmPasswordError;
-      toast.error(firstError);
+    if (fullNameError || emailError || passwordError || confirmError) {
+      toast.error(fullNameError || emailError || passwordError || confirmError);
       return;
     }
 
-    // Update formData with trimmed values
-    const finalFormData = {
-      ...formData,
-      fullName: trimmedFullName,
-      email: trimmedEmail,
-    };
-
     setLoading(true);
-
     try {
-      const response = await registerService(finalFormData);
+      const response = await registerService({
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
+      });
 
       if (response.success) {
-        const data = response.data || {};
-        if (data.needVerify) {
-          toast.success(response.message || 'Đăng ký thành công! Vui lòng xác thực email.');
-          navigate('/verify-otp', {
-            state: {
-              email: data.email || finalFormData.email,
-              resendCooldownSeconds: data.resendCooldownSeconds ?? 60,
-            },
-          });
-          return;
+        if (response.data?.needVerify) {
+          toast.success(response.message || 'Thành công! Hãy xác thực email.');
+          navigate('/verify-otp', { state: { email: formData.email.trim() } });
+        } else {
+          if (response.data?.user) login(response.data.user);
+          toast.success('Đăng ký thành công!');
+          navigate('/');
         }
-        if (data.user) login(data.user);
-        toast.success(response.message || 'Đăng ký thành công!');
-        navigate('/');
       }
     } catch (error) {
       toast.error(error.message || 'Đăng ký thất bại');
@@ -283,164 +110,199 @@ const Register = () => {
 
   return (
     <div className="register-page">
-      {/* Animated Blobs */}
-      <div className="blob blob-1"></div>
-      <div className="blob blob-2"></div>
-      <div className="blob blob-3"></div>
+      <div className="register-auth-container">
+        {/* Left Side: Visuals */}
+        <div className="auth-visual-side">
+          <img src={logoUniclub} alt="UniClub" className="auth-logo-top" />
 
-      {/* Register Card */}
-      <div className="register-card glass-card">
-        {/* Logo */}
-        <div className="form-logo-container">
-          <img src={logoImage} alt="UniClub Logo" className="form-logo" />
+          <div className="auth-illustration-center">
+            <div className="illustration-blob-bg"></div>
+            <div className="auth-main-icon">
+              <Users size={180} strokeWidth={1} />
+            </div>
+            <div className="auth-visual-text">
+              <h2>Gia nhập cộng đồng</h2>
+              <p>Kết nối cùng hàng nghìn sinh viên ưu tú tại các câu lạc bộ hàng đầu</p>
+            </div>
+          </div>
+
+          <div className="auth-footer-copyright">
+            <p>© 2026 UniClub - Bản quyền đã trợ bảo lưu.</p>
+          </div>
         </div>
 
-        <div className="register-header">
-          <h1 className="register-title">
-            Đăng<span className="title-accent"> Ký</span>
-          </h1>
-          <p className="register-subtitle">Đăng ký để được tham gia các câu lạc bộ độc đáo nào!!</p>
-        </div>
+        {/* Right Side: Form */}
+        <div className="auth-form-side">
+          <div className="auth-form-content">
+            <h1 className="auth-title">Đăng ký</h1>
 
-        <form onSubmit={handleSubmit} className="register-form">
-          {/* Full Name Field */}
-          <div className="form-group">
-            <label htmlFor="fullName" className="form-label">Họ và tên</label>
-            <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              placeholder="Mai An Tiêm"
-              className={`form-input ${errors.fullName ? 'form-input-error' : ''}`}
-              required
-              disabled={loading}
-            />
-            {errors.fullName && (
-              <span className="form-error-message">{errors.fullName}</span>
-            )}
-          </div>
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="auth-input-group">
+                <label className="auth-label">Họ và tên</label>
+                <div className="auth-input-wrapper">
+                  <i><User size={18} /></i>
+                  <input
+                    type="text"
+                    value={formData.fullName}
+                    onChange={(e) => {
+                      setFormData({ ...formData, fullName: e.target.value });
+                      setFieldErrors((prev) => ({ ...prev, fullName: '' }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        fullName: validateFullName(formData.fullName),
+                      }))
+                    }
+                    placeholder="Mai An Tiêm"
+                    className={`auth-input${fieldErrors.fullName ? ' auth-input--error' : ''}`}
+                    style={{ paddingLeft: '3.5rem' }}
+                    autoComplete="name"
+                  />
+                </div>
+                {fieldErrors.fullName ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.fullName}
+                  </span>
+                ) : null}
+              </div>
 
-          {/* Email Field */}
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">Email </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              placeholder="uniclub@fpt.edu.vn"
-              className={`form-input ${errors.email ? 'form-input-error' : ''}`}
-              required
-              disabled={loading}
-            />
-            {errors.email && (
-              <span className="form-error-message">{errors.email}</span>
-            )}
-          </div>
+              <div className="auth-input-group">
+                <label className="auth-label">Email</label>
+                <div className="auth-input-wrapper">
+                  <i><Mail size={18} /></i>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      setFieldErrors((prev) => ({ ...prev, email: '' }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        email: validateEmail(formData.email),
+                      }))
+                    }
+                    placeholder="uniclub@fpt.edu.vn"
+                    className={`auth-input${fieldErrors.email ? ' auth-input--error' : ''}`}
+                    style={{ paddingLeft: '3.5rem' }}
+                    autoComplete="email"
+                  />
+                </div>
+                {fieldErrors.email ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.email}
+                  </span>
+                ) : null}
+              </div>
 
-          {/* Password Field */}
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">Mật khẩu</label>
-            <div className="password-input-wrapper">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="••••••••"
-                className={`form-input ${errors.password ? 'form-input-error' : ''}`}
-                required
-                disabled={loading}
-              />
-              <button
-                type="button"
-                className="password-toggle-btn"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={loading}
-                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'}
-              >
-                {showPassword ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                  </svg>
-                ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                )}
+              <div className="auth-input-group">
+                <label className="auth-label">Mật khẩu</label>
+                <div className="auth-input-wrapper">
+                  <i><Lock size={18} /></i>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setFormData({ ...formData, password: v });
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        password: '',
+                        confirmPassword: prev.confirmPassword
+                          ? validateConfirmPassword(formData.confirmPassword, v)
+                          : '',
+                      }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        password: validatePassword(formData.password),
+                        confirmPassword: validateConfirmPassword(
+                          formData.confirmPassword,
+                          formData.password
+                        ),
+                      }))
+                    }
+                    placeholder="••••••••"
+                    className={`auth-input${fieldErrors.password ? ' auth-input--error' : ''}`}
+                    style={{ paddingLeft: '3.5rem', paddingRight: '3.25rem' }}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="auth-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {fieldErrors.password ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.password}
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="auth-input-group">
+                <label className="auth-label">Xác nhận mật khẩu</label>
+                <div className="auth-input-wrapper">
+                  <i><Lock size={18} /></i>
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setFormData({ ...formData, confirmPassword: v });
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        confirmPassword: validateConfirmPassword(v, formData.password),
+                      }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        confirmPassword: validateConfirmPassword(
+                          formData.confirmPassword,
+                          formData.password
+                        ),
+                      }))
+                    }
+                    placeholder="••••••••"
+                    className={`auth-input${fieldErrors.confirmPassword ? ' auth-input--error' : ''}`}
+                    style={{ paddingLeft: '3.5rem', paddingRight: '3.25rem' }}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="auth-password-toggle"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? 'Ẩn mật khẩu xác nhận' : 'Hiện mật khẩu xác nhận'}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {fieldErrors.confirmPassword ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.confirmPassword}
+                  </span>
+                ) : null}
+              </div>
+
+              <button type="submit" className="auth-btn-submit" disabled={loading}>
+                {loading ? 'ĐANG XỬ LÝ...' : 'Tạo tài khoản UniClub'}
               </button>
+            </form>
+
+            <div className="auth-switch-text">
+              Đã có tài khoản?
+              <Link to="/login" className="auth-switch-link">
+                Đăng nhập
+              </Link>
             </div>
-            {errors.password && (
-              <span className="form-error-message">{errors.password}</span>
-            )}
           </div>
-
-          {/* Confirm Password Field */}
-          <div className="form-group">
-            <label htmlFor="confirmPassword" className="form-label">Xác nhận mật khẩu</label>
-            <div className="password-input-wrapper">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="••••••••"
-                className={`form-input ${errors.confirmPassword ? 'form-input-error' : ''}`}
-                required
-                disabled={loading}
-              />
-              <button
-                type="button"
-                className="password-toggle-btn"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                disabled={loading}
-                aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'}
-              >
-                {showConfirmPassword ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                  </svg>
-                ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                )}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <span className="form-error-message">{errors.confirmPassword}</span>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="register-submit-button"
-            disabled={loading}
-          >
-            {loading ? 'ĐANG XỬ LÝ...' : 'ĐĂNG KÝ'}
-          </button>
-        </form>
-
-        {/* Login Link */}
-        <div className="login-link">
-          <span className="login-text">Đã có tài khoản?</span>{' '}
-          <Link to="/login" className="login-link-text">
-            Đăng nhập
-          </Link>
         </div>
       </div>
     </div>

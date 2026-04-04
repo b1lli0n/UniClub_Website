@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="main-footer">
       <div className="footer-content">
-        <p>&copy; 2024 UniClub. All Rights Reserved.</p>
+        <p>&copy; 2024 UniClub. Bản quyền đã được bảo lưu.</p>
       </div>
     </footer>
   );

@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import '../styles/UpdateEvent.css';
+import '../styles/CreateEvent.css';
+import { ArrowLeft, AlertCircle, CheckCircle, Settings } from 'lucide-react';
 import { unmapEvent } from '../services/dataMappers';
 import StatusBadge from '../components/events/StatusBadge';
 import { EventUpdateForm } from '../components/events/EventUpdateForm';
 import { DangerZoneCard } from '../components/events/DangerZoneCard';
 import { CancelDialog } from '../components/events/CancelDialog';
+import api from '../api/api';
 
 function UpdateEventPage() {
     const { eventId } = useParams();
@@ -150,7 +154,7 @@ function UpdateEventPage() {
             setMessage('Cập nhật thành công!');
             setTimeout(() => {
                 setMessage('');
-                navigate(`/events/${eventId}`);
+                navigate(`/clubEvent/${eventId}`);
             }, 1200);
         } catch (err) {
             console.error('❌ Update error:', err);
@@ -167,27 +171,17 @@ function UpdateEventPage() {
 
             console.log('🚫 Canceling event:', eventId);
 
-            const response = await fetch(
-                `http://localhost:5000/api/clubs/${clubId}/events/${eventId}/cancel`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ reason: cancelReason })
-                }
+            const response = await api.patch(
+                `/clubs/${clubId}/events/${eventId}/cancel`,
+                { reason: cancelReason }
             );
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Hủy sự kiện thất bại');
-            }
-
-            const data = await response.json();
+            const data = response.data;
             console.log('✅ Event canceled:', data);
             setEvent(data.event || data);
-            setMessage(`Đã hủy sự kiện. Thông báo đã gửi: ${data.notificationsSent || 0}`);
+            const notificationsSent = data.notificationsSent || 0;
+            setMessage(`Đã hủy sự kiện. Thông báo đã gửi: ${notificationsSent}`);
+            toast.success(`Đã hủy sự kiện thành công. Thông báo đã gửi: ${notificationsSent}`);
             setShowCancelDialog(false);
             setCancelReason('');
             setTimeout(() => {
@@ -196,7 +190,9 @@ function UpdateEventPage() {
             }, 1500);
         } catch (err) {
             console.error('❌ Cancel error:', err);
-            setError(err.message || 'Hủy sự kiện thất bại');
+            const errorMessage = err.response?.data?.message || err.message || 'Hủy sự kiện thất bại';
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setUpdating(false);
         }
@@ -208,7 +204,7 @@ function UpdateEventPage() {
                 <div className="home-overlay" />
                 <div className="myclub-container">
                     <div className="glass-card update-event-loading-card">
-                        Loading...
+                        Đang tải...
                     </div>
                 </div>
             </div>
@@ -241,7 +237,7 @@ function UpdateEventPage() {
                         <p className="update-event-notfound-text">
                             Sự kiện này không tồn tại hoặc đã bị xóa
                         </p>
-                        <button className="card-button" onClick={() => navigate('/events')}>
+                        <button className="card-button" onClick={() => navigate('/clubEvent ')}>
                             ← Quay lại danh sách
                         </button>
                     </div>
@@ -250,35 +246,64 @@ function UpdateEventPage() {
         );
     }
 
+    if (event.status === 'canceled') {
+        return (
+            <div className="home-page">
+                <div className="home-overlay" />
+                <div className="myclub-container">
+                    <div className="glass-card update-event-notfound-card">
+                        <div className="update-event-notfound-icon">🚫</div>
+                        <h3 className="update-event-notfound-title">
+                            Sự kiện đã bị hủy
+                        </h3>
+                        <p className="update-event-notfound-text">
+                            Trạng thái hiện tại không cho phép chỉnh sửa thông tin.
+                        </p>
+                        <button className="card-button" onClick={() => navigate(`/clubEvent/${eventId}`)}>
+                            ← Quay lại chi tiết
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="home-page">
-            <div className="home-overlay" />
-            <div className="myclub-container">
-                <header className="myclub-header">
-                    <h1 className="myclub-title">Chỉnh sửa sự kiện</h1>
+        <div className="create-event-page-wrapper">
+            <div className="create-event-container">
+                <header className="create-event-header">
+                    <div className="header-badge-premium">Quản lý sự kiện</div>
+                    <h1 className="page-main-title">Chỉnh sửa sự kiện</h1>
+                    <p className="page-subtitle">Cập nhật thông tin để thu hút nhiều thành viên hơn</p>
                 </header>
 
-                <div className="update-event-back">
-                    <button className="card-button" onClick={() => navigate(`/events/${eventId}`)}>
-                        ← Quay lại
+                <div className="create-event-nav">
+                    <button className="btn-back-soft" onClick={() => navigate(`/clubEvent/${eventId}`)}>
+                        <ArrowLeft size={18} />
+                        <span>Quay lại</span>
                     </button>
                 </div>
 
                 {message && (
-                    <div className="glass-card update-event-message-card">
-                        <p className="update-event-message-text">✓ {message}</p>
+                    <div className="toast-success-custom">
+                        <CheckCircle size={20} />
+                        <span>{message}</span>
                     </div>
                 )}
                 {error && event && (
-                    <div className="glass-card update-event-error-alert">
-                        <p className="update-event-error-text">⚠ {error}</p>
+                    <div className="toast-error-custom">
+                        <AlertCircle size={20} />
+                        <span>{error}</span>
                     </div>
                 )}
 
-                <div className="glass-card update-event-status-card">
-                    <span className="update-event-status-label">
-                        Trạng thái hiện tại:
-                    </span>
+                <div className="glass-card-premium update-event-status-card-modern">
+                    <div className="status-label-wrap">
+                        <Settings size={18} className="status-icon" />
+                        <span className="update-event-status-label">
+                            Trạng thái hiện tại:
+                        </span>
+                    </div>
                     <StatusBadge status={event.status} />
                 </div>
 
@@ -287,8 +312,9 @@ function UpdateEventPage() {
                     onChange={handleChange}
                     onSubmit={handleUpdate}
                     updating={updating}
-                    onBack={() => navigate(`/events/${eventId}`)}
+                    onBack={() => navigate(`/clubEvent/${eventId}`)}
                     eventTitle={event.title}
+
                 />
 
                 {event.status !== 'canceled' && (

@@ -1,11 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { QuickActionCard } from '../components/dashboard/QuickActionCard';
 import { EventListCard } from '../components/dashboard/EventListCard';
 import { MemberListCard } from '../components/dashboard/MemberListCard';
-import { getClubById, getEventsByClub, getClubMembers } from '../api/clubApi';
+import { getClubById, getEventsByClub, getClubMembers, updateClubStatus } from '../api/clubApi';
 import '../styles/DashboardClubLeader.css';
+import '../styles/PointHistory.css';
+
+// Import Google Font - Outfit
+const fontLink = document.createElement('link');
+fontLink.href = 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap';
+fontLink.rel = 'stylesheet';
+document.head.appendChild(fontLink);
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -15,6 +23,8 @@ export default function Dashboard() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showMembersModal, setShowMembersModal] = useState(false);
+  const [selectedMemberForPoints, setSelectedMemberForPoints] = useState(null);
+  const [isUpdatingClubStatus, setIsUpdatingClubStatus] = useState(false);
 
   const { user } = useAuth();
 
@@ -89,6 +99,47 @@ export default function Dashboard() {
     return { items: Array.isArray(items) ? items : [], pagination };
   };
 
+  const normalizeClubFromResponse = (response) => {
+    const clubPayload =
+      response?.data?.club ||
+      response?.club ||
+      response?.data ||
+      response ||
+      {};
+
+    const normalizedStatus = Number(clubPayload?.status) === 2 ? 2 : 1;
+
+    return {
+      ...(typeof clubPayload === 'object' ? clubPayload : {}),
+      status: normalizedStatus,
+    };
+  };
+
+  const handleUpdateClubStatus = async () => {
+    if (!clubId || !club || isUpdatingClubStatus) return;
+
+    const nextStatus = club.status === 2 ? 1 : 2;
+
+    try {
+      setIsUpdatingClubStatus(true);
+      console.log('🔄 Updating club status:', { clubId, currentStatus: club.status, nextStatus });
+      const response = await updateClubStatus(clubId, nextStatus);
+      const updatedClub = normalizeClubFromResponse(response);
+      setClub((prev) => ({ ...prev, ...updatedClub }));
+
+      toast.success(nextStatus === 1 ? 'Đã chuyển trạng thái sang Hoạt động' : 'Đã chuyển trạng thái sang Tạm dừng');
+    } catch (error) {
+      const errorMessage =
+        error?.message ||
+        error?.error ||
+        error?.response?.data?.message ||
+        'Không thể cập nhật trạng thái câu lạc bộ';
+      toast.error(errorMessage);
+    } finally {
+      setIsUpdatingClubStatus(false);
+    }
+  };
+
   const fetchAllMembers = async (clubIdValue) => {
     const allMembers = [];
     let page = 1;
@@ -116,9 +167,9 @@ export default function Dashboard() {
         console.log('🔍 Loading data for clubId:', clubId);
 
         // Fetch club details
-        const clubData = await getClubById(clubId);
-        console.log('✅ Club data:', clubData);
-        setClub(clubData);
+        const clubResponse = await getClubById(clubId);
+        console.log('✅ Club data:', clubResponse);
+        setClub(normalizeClubFromResponse(clubResponse));
 
         // Fetch events (including drafts for leaders)
         const eventsResponse = await getEventsByClub(clubId);
@@ -159,6 +210,7 @@ export default function Dashboard() {
     };
 
     if (clubId) {
+      localStorage.setItem('clubId', clubId);
       loadData();
     } else {
       console.log('❌ No clubId found');
@@ -166,35 +218,59 @@ export default function Dashboard() {
     }
   }, [clubId]);
 
+  const isClubPaused = club?.status === 2;
+  const statusButtonLabel = isUpdatingClubStatus
+    ? 'Đang cập nhật...'
+    : isClubPaused
+      ? 'Chuyển sang Active'
+      : 'Chuyển sang Paused';
+  const statusButtonIcon = isUpdatingClubStatus ? '⏳' : isClubPaused ? '▶' : '⏸';
+
   return (
-    <div className="home-page">
-      <div className="home-overlay" />
-      <div className="myclub-container">
-        <div className="myclub-hero glass-card dashboard-hero">
-          <div className="myclub-hero-content">
-            <h2>
-              Chào mừng{user?.fullName ? `, ${user.fullName}` : ''}
-            </h2>
-            <p>Quản lý câu lạc bộ của bạn</p>
+    <div className="dashboard-page-v2">
+      <div className="dashboard-glass-container">
+        <div className="dashboard-hero-premium">
+          <div className="hero-welcome-area">
+            <h1 className="hero-title">
+              Chào mừng quay trở lại{user?.fullName ? `, ${user.fullName.split(' ').pop()}` : ''} ✨
+            </h1>
+            <p className="hero-subtitle">
+              Bạn đang quản lý câu lạc bộ <strong>{club?.name || '...'}</strong>
+            </p>
           </div>
-          <button className="myclub-add">Tạm dừng hoạt động câu lạc bộ</button>
+          <button
+            className={`btn-club-status-toggle ${isClubPaused ? 'is-paused' : 'is-active'}`}
+            onClick={handleUpdateClubStatus}
+            disabled={!club || isUpdatingClubStatus}
+          >
+            <span className="icon">{statusButtonIcon}</span>
+            {statusButtonLabel}
+          </button>
         </div>
 
         <div className="dashboard-quick-actions">
           <QuickActionCard
             title="Bổ sung thông tin"
             subtitle="Thông tin cơ bản câu lạc bộ"
+            icon="ℹ️"
             onClick={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/clubs')}
           />
           <QuickActionCard
             title="Tạo trang đại diện"
             subtitle="Trang đại diện công khai của câu lạc bộ"
+            icon="🌐"
             onClick={() => navigate(clubId ? `/clubs/${clubId}/dashboard` : '/clubs')}
           />
           <QuickActionCard
             title="Thêm thành viên"
             subtitle="Duyệt thành viên vào nhóm"
-            onClick={() => navigate('/memberships')}
+            icon="👥"
+            onClick={() => navigate(clubId ? `/clubs/manager/${clubId}/invitations` : '/clubs')}
+          />
+          <QuickActionCard
+            title="Quản lý tài chính"
+            subtitle="Thu chi quỹ câu lạc bộ"
+            onClick={() => navigate(`/clubs/${clubId}/transactions`)}
           />
         </div>
 
@@ -202,34 +278,35 @@ export default function Dashboard() {
           <EventListCard
             events={previewEvents}
             clubName={club?.name || 'Câu lạc bộ'}
-            onCreate={() => navigate('/events/create')}
-            onView={(id) => navigate(`/events/${id}`)}
-            onEdit={(id) => navigate(`/events/${id}/update`)}
+            onCreate={() => navigate('/clubEvent/create')}
+            onView={(id) => navigate(`/clubEvent/${id}`)}
+            onEdit={(id) => navigate(`/clubEvent/${id}/update`)}
+            onAttend={(id) => navigate(`/clubs/${clubId}/events/${id}/attendance`)}
             onSeeAll={() => {
               localStorage.setItem('clubId', clubId);
-              navigate('/events');
+              navigate('/clubEvent');
             }}
             loading={loading}
           />
 
           <MemberListCard
             members={previewMembers}
-            onManage={() => setShowMembersModal(true)}
+            onInvite={() => navigate(clubId ? `/clubs/manager/${clubId}/invitations` : '/clubs')}
+            onManage={() => navigate(clubId ? `/clubs/manager/${clubId}/members` : '/clubs')}
           />
         </div>
       </div>
 
+      {/* Member list modal */}
       {showMembersModal && (
         <div className="members-modal-overlay" onClick={() => setShowMembersModal(false)}>
           <div className="members-modal" onClick={(e) => e.stopPropagation()}>
             <div className="members-modal-header">
               <div>
                 <h3 className="members-modal-title">Tất cả thành viên</h3>
-                <p className="members-modal-count">{members.length} thành viên</p>
+                <p className="members-modal-count">{members.length} thành viên — click để xem lịch sử điểm</p>
               </div>
-              <button className="members-modal-close" onClick={() => setShowMembersModal(false)}>
-                ✕
-              </button>
+              <button className="members-modal-close" onClick={() => setShowMembersModal(false)}>✕</button>
             </div>
             <div className="members-modal-body">
               <div className="members-modal-list">
@@ -237,22 +314,24 @@ export default function Dashboard() {
                   const displayName = getMemberName(member);
                   const roleLabel = getMemberRoleLabel(member);
                   const keyValue =
-                    member?.id ||
-                    member?._id ||
-                    member?.membershipId ||
-                    member?.user_id?._id ||
-                    member?.user?._id ||
-                    index;
+                    member?.id || member?._id || member?.membershipId ||
+                    member?.user_id?._id || member?.user?._id || index;
 
                   return (
-                    <div key={keyValue} className="member-list-item">
-                      <div className="member-list-avatar">
-                        {displayName?.charAt(0) || '?'}
-                      </div>
+                    <div
+                      key={keyValue}
+                      className="member-list-item-clickable"
+                      onClick={() => {
+                        setShowMembersModal(false);
+                        setSelectedMemberForPoints(member);
+                      }}
+                    >
+                      <div className="member-list-avatar">{displayName?.charAt(0) || '?'}</div>
                       <div className="member-list-info">
                         <p className="member-list-name">{displayName}</p>
                         <p className="member-list-role">{roleLabel}</p>
                       </div>
+                      <span className="view-points-hint">📊 Xem điểm →</span>
                     </div>
                   );
                 })}
@@ -260,6 +339,17 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Point history modal (Leader views member's points) */}
+      {selectedMemberForPoints && clubId && (
+        <MemberPointModal
+          member={selectedMemberForPoints}
+          clubId={clubId}
+          onClose={() => setSelectedMemberForPoints(null)}
+          getMemberName={getMemberName}
+          getMemberRoleLabel={getMemberRoleLabel}
+        />
       )}
     </div>
   );

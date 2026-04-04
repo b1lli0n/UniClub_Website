@@ -53,12 +53,18 @@ export const login = async (credentials) => {
   try {
     const response = await authAPI.post('/auth/login', credentials);
 
-    if (response.data.success) {
-      const { user, accessToken, refreshToken } = response.data.data;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(user));
-      console.log('User logged in:', accessToken, user);
+    if (response.data.success && response.data.data) {
+      const data = response.data.data;
+      const needVerify = data.needVerify === true;
+      const userUnverified = data.user && data.user.isVerified === false;
+      if (!needVerify && !userUnverified && data.accessToken) {
+        const { user, accessToken, refreshToken } = data;
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('adminToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('user', JSON.stringify(user));
+        // console.log('User logged in:', accessToken, user);
+      }
     }
 
     return response.data;

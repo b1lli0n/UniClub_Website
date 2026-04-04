@@ -1,0 +1,22 @@
+/* Main layout wrapper */
+.main-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* Apply signature pastel gradient globally */
+    background: linear-gradient(135deg, #A2D2FF 0%, #FFC8DD 50%, #CDB4DB 100%);
+    background-attachment: fixed;
+}
+
+.main-layout-body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.main-layout-content {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+    background: transparent;
+}

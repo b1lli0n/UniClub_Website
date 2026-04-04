@@ -7,16 +7,17 @@ const statusConfig = {
     completed: { label: 'Hoàn thành', className: 'completed' },
     paused: { label: 'Tạm dừng', className: 'paused' },
     canceled: { label: 'Đã hủy', className: 'canceled' },
-    pending: { label: 'Đang chờ', className: 'pending' },
+    pending: { label: 'Chờ duyệt', className: 'pending' },
     rejected: { label: 'Bị từ chối', className: 'rejected' },
+    approved: { label: 'Đã duyệt', className: 'published' },
     left: { label: 'Đã rời', className: 'left' }
 };
 
 // Map numeric codes to labels
 const CODE_MAP = {
-    0: 'draft',
-    1: 'published',
-    2: 'paused',
+    0: 'pending',
+    1: 'approved',
+    2: 'rejected',
     3: 'canceled'
 };
 
