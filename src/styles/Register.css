@@ -1,4 +1,4 @@
-/* Register Page Styling - Light Transparent Pink Theme */
+
 .register-page {
   min-height: 120vh;
   display: flex;
@@ -24,7 +24,6 @@
   position: relative;
 }
 
-/* Left Section - Visuals */
 .auth-visual-side {
   flex: 1;
   background: rgba(255, 255, 255, 0.5);
@@ -68,7 +67,6 @@
   animation: float-icon 4s ease-in-out infinite;
 }
 
-/* Right Section - Form (Light Pink Transparent) */
 .auth-form-side {
   flex: 1;
   background: rgba(255, 255, 255, 0.7);
@@ -240,7 +238,6 @@
   }
 }
 
-/* Register Page Styling - Light Transparent Pink Theme */
 .register-page {
   min-height: 120vh;
   display: flex;
@@ -266,7 +263,6 @@
   position: relative;
 }
 
-/* Left Section - Visuals */
 .auth-visual-side {
   flex: 1;
   background: rgba(255, 255, 255, 0.5);
@@ -310,7 +306,6 @@
   animation: float-icon 4s ease-in-out infinite;
 }
 
-/* Right Section - Form (Light Pink Transparent) */
 .auth-form-side {
   flex: 1;
   background: rgba(255, 255, 255, 0.7);
@@ -480,4 +475,24 @@
   .auth-form-side::before {
     display: none;
   }
+}
+.auth-field-error {
+  display: block;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin-top: 0.35rem;
+  line-height: 1.35;
+}
+
+.auth-input--error {
+  border-color: rgba(220, 38, 38, 0.55) !important;
+}
+
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  box-shadow: 0 0 0 1000px #ffffff inset;
+  transition: background-color 9999s ease-out 0s;
 }

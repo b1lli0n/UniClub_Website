@@ -12,6 +12,7 @@ import '../../styles/ClubDetail.css';
 import { ASSET_BASE } from '../../api/api';
 import ClubPollStrip from '../../components/ClubPollStrip';
 import PollVoteModal from '../../components/PollVoteModal';
+import { isPollVotingOpen } from '../../utils/pollVoting';
 
 const buildImageSrc = (raw) => {
   const cleaned = (raw || '').trim().replace(/"/g, '');
@@ -430,7 +431,7 @@ const handleLeaveClub = async () => {
       if (res?.success) {
         const items = Array.isArray(res.items) ? res.items : [];
         setPollItems(items);
-        const openIndex = items.findIndex((p) => p.status === 'open');
+        const openIndex = items.findIndex((p) => isPollVotingOpen(p));
         setActivePollIndex(openIndex >= 0 ? openIndex : 0);
       } else {
         setPollItems([]);
@@ -458,7 +459,9 @@ const handleLeaveClub = async () => {
       items = items.filter((p) => String(p?.title || '').toLowerCase().includes(q));
     }
     if (pollFilterStatus !== 'all') {
-      items = items.filter((p) => String(p?.status || '').toLowerCase() === pollFilterStatus);
+      items = items.filter((p) =>
+        pollFilterStatus === 'open' ? isPollVotingOpen(p) : !isPollVotingOpen(p)
+      );
     }
 
     const toMs = (v) => {
@@ -569,15 +572,10 @@ const handleLeaveClub = async () => {
   const librarySlots = [0, 1, 2, 3];
 
   const showcaseEvents = organizedEvents.slice(0, 5);
-  const hasOpenPollInClub = pollItems.some(
-    (p) => String(p?.status || '').toLowerCase() === 'open'
-  );
+  const hasOpenPollInClub = pollItems.some((p) => isPollVotingOpen(p));
   const selectedPoll = visiblePollItems[activePollIndex] || null;
   const selectedPollData = featuredPollDetail?.poll || null;
-  const selectedPollEndMs = selectedPollData?.end_date ? new Date(selectedPollData.end_date).getTime() : null;
-  const selectedPollNotExpired =
-    selectedPollEndMs == null || Number.isNaN(selectedPollEndMs) || selectedPollEndMs > Date.now();
-  const canOpenSelectedPoll = selectedPollData?.status === 'open' && selectedPollNotExpired;
+  const canOpenSelectedPoll = isPollVotingOpen(selectedPollData);
   const userPointRaw = club?.my_points ?? club?.points ?? club?.member_points;
   const userPoints = userPointRaw != null && !Number.isNaN(Number(userPointRaw))
     ? Number(userPointRaw)

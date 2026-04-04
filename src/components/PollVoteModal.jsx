@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { getPollDetail, votePoll } from '../api/pollApi';
+import { isPollVotingOpen } from '../utils/pollVoting';
 import '../styles/PollVoteModal.css';
 
 const formatDateTime = (input) => {
@@ -61,10 +62,11 @@ const PollVoteModal = ({
   const options = detail?.options || [];
   const totalVotes = detail?.total_votes ?? 0;
   const isSingle = Number(poll?.type) === 0;
-  const isOpen = poll?.status === 'open';
+  const votingOpen = isPollVotingOpen(poll);
   const nowMs = Date.now();
+  const startMs = poll?.start_date ? new Date(poll.start_date).getTime() : null;
   const endMs = poll?.end_date ? new Date(poll.end_date).getTime() : null;
-  const expired = endMs != null && !Number.isNaN(endMs) && nowMs > endMs;
+  const dbClosed = Number(poll?.status_code) === 1;
   const myVoteIds = (detail?.my_vote?.option_ids || []).map((id) => String(id));
   const alreadyVotedLocked = myVoteIds.length > 0 && !poll?.allow_change_vote;
   const pointRestricted = poll?.min_points_required != null;
@@ -73,14 +75,30 @@ const PollVoteModal = ({
     userPoints != null &&
     Number(userPoints) < Number(poll.min_points_required);
 
-  const disableVote = !isOpen || expired || alreadyVotedLocked || notEnoughPoints;
+  const disableVote = !votingOpen || alreadyVotedLocked || notEnoughPoints;
+  const canChangeAfterVote = !!poll?.allow_change_vote;
+  const hasMyVote = myVoteIds.length > 0;
+
+  const submitLabel = useMemo(() => {
+    if (submitting) return 'Đang gửi...';
+    if (alreadyVotedLocked) return 'Đã bình chọn';
+    if (hasMyVote && canChangeAfterVote) return 'Cập nhật phiếu';
+    return 'Bình chọn ngay';
+  }, [submitting, alreadyVotedLocked, hasMyVote, canChangeAfterVote]);
+
   const disableReason = useMemo(() => {
-    if (!isOpen) return 'Bảng vote đã đóng';
-    if (expired) return 'Bảng vote đã hết hạn';
+    if (dbClosed) return 'Poll đã được đóng';
+    if (startMs != null && !Number.isNaN(startMs) && nowMs < startMs) {
+      return 'Chưa đến giờ mở bình chọn';
+    }
+    if (endMs != null && !Number.isNaN(endMs) && nowMs > endMs) {
+      return 'Đã hết thời gian bình chọn';
+    }
+    if (!votingOpen) return 'Đang không trong thời gian cho phép vote';
     if (alreadyVotedLocked) return 'Bạn đã vote và bảng này không cho đổi lựa chọn';
     if (notEnoughPoints) return `Yêu cầu tối thiểu ${poll?.min_points_required} điểm`;
     return '';
-  }, [isOpen, expired, alreadyVotedLocked, notEnoughPoints, poll?.min_points_required]);
+  }, [dbClosed, startMs, endMs, votingOpen, alreadyVotedLocked, notEnoughPoints, poll?.min_points_required]);
 
   const handleToggleOption = (optionId) => {
     const id = String(optionId);
@@ -140,11 +158,23 @@ const PollVoteModal = ({
         </div>
 
         <div className="poll-modal-meta">
-          <span className={`poll-modal-pill ${isOpen ? 'is-open' : 'is-closed'}`}>
-            {isOpen ? 'Đang mở' : 'Đã đóng'}
+          <span className={`poll-modal-pill ${votingOpen ? 'is-open' : 'is-closed'}`}>
+            {votingOpen ? 'Đang mở' : 'Đang đóng'}
           </span>
           <span className="poll-modal-pill is-muted">{isSingle ? 'Chọn một' : 'Chọn nhiều'}</span>
           <span className="poll-modal-pill is-muted">Hạn: {formatDateTime(poll?.end_date)}</span>
+          {poll ? (
+            <span
+              className={`poll-modal-pill poll-modal-pill--change ${canChangeAfterVote ? 'is-yes' : 'is-no'}`}
+              title={
+                canChangeAfterVote
+                  ? 'Trong thời gian mở bình chọn, bạn có thể gửi lại phiếu với lựa chọn khác.'
+                  : 'Sau khi đã gửi phiếu, bạn không thể đổi lựa chọn.'
+              }
+            >
+              {canChangeAfterVote ? 'Được đổi lựa chọn' : 'Không đổi lựa chọn sau khi vote'}
+            </span>
+          ) : null}
           {pointRestricted ? (
             <span className="poll-modal-pill is-muted">Tối thiểu {poll?.min_points_required} điểm</span>
           ) : null}
@@ -158,7 +188,14 @@ const PollVoteModal = ({
               <div className="poll-modal-total-wrap">
                 <div className="poll-modal-total">Tổng phiếu: {totalVotes}</div>
                 <div className="poll-modal-description">
-                  Bình chọn phương án phù hợp. Bạn có thể chọn {isSingle ? '1' : 'nhiều'} lựa chọn.
+                  <span className="poll-modal-description-lead">
+                    Bình chọn phương án phù hợp. Bạn có thể chọn {isSingle ? 'một' : 'nhiều'} lựa chọn.
+                  </span>
+                  <span className="poll-modal-description-follow">
+                    {canChangeAfterVote
+                      ? 'Sau khi đã bình chọn, bạn vẫn có thể thay đổi lựa chọn (trong thời gian còn mở).'
+                      : 'Sau khi đã bình chọn, bạn không thể đổi lựa chọn.'}
+                  </span>
                 </div>
               </div>
               <div className="poll-modal-options">
@@ -205,7 +242,7 @@ const PollVoteModal = ({
               onClick={handleVote}
               disabled={disableVote || submitting || selected.length === 0}
             >
-              {submitting ? 'Đang gửi...' : 'Vote ngay'}
+              {submitLabel}
             </button>
             {disableReason ? <span className="poll-modal-disable-reason">{disableReason}</span> : null}
           </div>

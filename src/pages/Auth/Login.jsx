@@ -15,6 +15,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [verifyPrompt, setVerifyPrompt] = useState(null);
   const [verifyConfirmLoading, setVerifyConfirmLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -71,6 +72,7 @@ const Login = () => {
     const trimmedEmail = email.trim();
     const emailError = validateEmail(trimmedEmail);
     const passwordError = validatePassword(password);
+    setFieldErrors({ email: emailError, password: passwordError });
 
     if (emailError || passwordError) {
       toast.error(emailError || passwordError);
@@ -155,7 +157,7 @@ const Login = () => {
           <div className="auth-form-content">
             <h1 className="auth-title">Đăng nhập</h1>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="auth-input-group">
                 <label className="auth-label">Email</label>
                 <div className="auth-input-wrapper">
@@ -163,13 +165,27 @@ const Login = () => {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setFieldErrors((prev) => ({ ...prev, email: '' }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        email: validateEmail(email.trim()),
+                      }))
+                    }
                     placeholder="Enter your email"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.email ? ' auth-input--error' : ''}`}
                     style={{ paddingLeft: '3.5rem' }}
-                    required
+                    autoComplete="email"
                   />
                 </div>
+                {fieldErrors.email ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.email}
+                  </span>
+                ) : null}
               </div>
 
               <div className="auth-input-group" style={{ marginBottom: '1rem' }}>
@@ -179,11 +195,20 @@ const Login = () => {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setFieldErrors((prev) => ({ ...prev, password: '' }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        password: validatePassword(password),
+                      }))
+                    }
                     placeholder="Enter your password"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.password ? ' auth-input--error' : ''}`}
                     style={{ paddingLeft: '3.5rem' }}
-                    required
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"
@@ -194,6 +219,11 @@ const Login = () => {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+                {fieldErrors.password ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.password}
+                  </span>
+                ) : null}
               </div>
 
               <div className="auth-link-row">

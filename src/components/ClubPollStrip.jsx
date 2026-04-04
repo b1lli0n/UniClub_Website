@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { isPollVotingOpen } from '../utils/pollVoting';
 import '../styles/ClubPollStrip.css';
 
 const formatDateTime = (input) => {
@@ -43,10 +44,8 @@ const ClubPollStrip = ({ detail, onOpen }) => {
 
   if (!poll) return null;
 
-  const now = Date.now();
-  const endMs = poll.end_date ? new Date(poll.end_date).getTime() : null;
-  const notExpired = endMs == null || Number.isNaN(endMs) || endMs > now;
-  const isOngoing = poll.status === 'open' && notExpired;
+  const votingOpen = isPollVotingOpen(poll);
+  const isOngoing = votingOpen;
   const canOpen = isOngoing && typeof onOpen === 'function';
 
   return (
@@ -67,12 +66,21 @@ const ClubPollStrip = ({ detail, onOpen }) => {
         <h3 className="club-poll-strip-title" title={poll.title}>
           {poll.title}
         </h3>
-        <span className={`club-poll-strip-badge ${poll.status === 'open' ? 'is-open' : 'is-closed'}`}>
-          {poll.status === 'open' ? 'Đang mở' : 'Đã đóng'}
+        <span className={`club-poll-strip-badge ${votingOpen ? 'is-open' : 'is-closed'}`}>
+          {votingOpen ? 'Đang mở' : 'Đang đóng'}
         </span>
       </div>
 
-      <p className="club-poll-strip-expiry">{buildExpiryHint(poll.end_date, poll.status === 'open')}</p>
+      <p className="club-poll-strip-expiry">{buildExpiryHint(poll.end_date, votingOpen)}</p>
+
+      <p
+        className={`club-poll-strip-change-rule ${poll.allow_change_vote ? 'club-poll-strip-change-rule--yes' : 'club-poll-strip-change-rule--no'}`}
+        role="note"
+      >
+        {poll.allow_change_vote
+          ? 'Được đổi lựa chọn sau khi đã bình chọn'
+          : 'Không đổi lựa chọn sau khi đã bình chọn'}
+      </p>
 
       <div className="club-poll-strip-options">
         {options.map((opt, idx) => {
@@ -107,7 +115,7 @@ const ClubPollStrip = ({ detail, onOpen }) => {
       <div className="club-poll-strip-footer">
         <span className="club-poll-strip-total">{total.toLocaleString('vi-VN')} phiếu</span>
         <span className={`club-poll-strip-vote-pill ${canOpen ? '' : 'is-disabled'}`}>
-          {canOpen ? 'Vote' : 'Đã đóng'}
+          {canOpen ? 'Bình chọn' : 'Đang đóng'}
         </span>
       </div>
     </div>

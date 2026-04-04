@@ -11,16 +11,29 @@ import PollVoteModal from '../../components/PollVoteModal';
 import PollList from '../../components/poll/PollList';
 import PollDetail from '../../components/poll/PollDetail';
 import '../../styles/ClubPollManagement.css';
+import {
+  POLL_DATETIME_GAP_MS,
+  earliestPollStartMsAfterGap,
+  formatDateAsDatetimeLocal,
+  minPollStartLocalAfterNow,
+  minPollEndLocalAfterStart,
+  validatePollTitle,
+} from '../../lib/utils';
 
-const createInitialForm = () => ({
-  title: '',
-  options: ['', ''],
-  type: '0',
-  start_date: '',
-  end_date: '',
-  min_points_required: '',
-  allow_change_vote: false,
-});
+const createInitialForm = () => {
+  const startStr = minPollStartLocalAfterNow();
+  const sd = new Date(startStr);
+  const end = new Date(sd.getTime() + 7 * 24 * 60 * 60 * 1000);
+  return {
+    title: '',
+    options: ['', ''],
+    type: '0',
+    start_date: startStr,
+    end_date: formatDateAsDatetimeLocal(end),
+    min_points_required: '',
+    allow_change_vote: false,
+  };
+};
 
 const toIso = (localValue) => {
   if (!localValue) return null;
@@ -266,7 +279,13 @@ const ClubPollManagement = () => {
     const startIso = toIso(form.start_date);
     const endIso = toIso(form.end_date);
 
-    if (!title) {
+    if (!editingPollId) {
+      const titleErr = validatePollTitle(form.title);
+      if (titleErr) {
+        toast.error(titleErr);
+        return;
+      }
+    } else if (!title) {
       toast.error('Tiêu đề bình chọn không được để trống');
       return;
     }
@@ -282,19 +301,44 @@ const ClubPollManagement = () => {
       toast.error('Ngày bắt đầu/kết thúc không hợp lệ');
       return;
     }
-    if (new Date(endIso).getTime() <= new Date(startIso).getTime()) {
-      toast.error('Ngày kết thúc phải sau ngày bắt đầu');
-      return;
+
+    const isEditing = !!editingPollId;
+    const editHasVotes =
+      isEditing &&
+      ((Number(detail?.total_votes) || 0) > 0 || (detail?.options || []).some((opt) => (Number(opt?.votes) || 0) > 0));
+
+    const now = Date.now();
+    const startMs = new Date(startIso).getTime();
+    const endMs = new Date(endIso).getTime();
+    const earliestStartMs = earliestPollStartMsAfterGap(now);
+
+    if (!editHasVotes) {
+      const startUnchanged =
+        isEditing &&
+        editInitialForm &&
+        String(form.start_date) === String(editInitialForm.start_date);
+      if (!startUnchanged && startMs < earliestStartMs) {
+        toast.error('Thời gian bắt đầu phải sau thời điểm hiện tại ít nhất 1 phút');
+        return;
+      }
+      if (endMs < startMs + POLL_DATETIME_GAP_MS) {
+        toast.error('Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 1 phút');
+        return;
+      }
+    } else {
+      const pollStartMs = detail?.poll?.start_date
+        ? new Date(detail.poll.start_date).getTime()
+        : NaN;
+      if (!Number.isNaN(pollStartMs) && endMs < pollStartMs + POLL_DATETIME_GAP_MS) {
+        toast.error('Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 1 phút');
+        return;
+      }
     }
     if (new Date(endIso).getTime() < Date.now()) {
       toast.error('Không thể đặt ngày kết thúc trong quá khứ');
       return;
     }
 
-    const isEditing = !!editingPollId;
-    const editHasVotes =
-      isEditing &&
-      ((Number(detail?.total_votes) || 0) > 0 || (detail?.options || []).some((opt) => (Number(opt?.votes) || 0) > 0));
     const formChanged = !isEditing || hasFormChanged(form, editInitialForm);
 
     if (isEditing && !formChanged) {
@@ -415,6 +459,14 @@ const ClubPollManagement = () => {
                 ((Number(detail?.total_votes) || 0) > 0 || (detail?.options || []).some((opt) => (Number(opt?.votes) || 0) > 0));
               const lockForVotedPoll = isEditing && editHasVotes;
               const canSubmit = !creating && (!isEditing || hasFormChanged(form, editInitialForm));
+              const minPollStart =
+                !isEditing && !lockForVotedPoll ? minPollStartLocalAfterNow() : undefined;
+              const minPollEnd =
+                lockForVotedPoll && detail?.poll?.start_date
+                  ? minPollEndLocalAfterStart(toLocalInput(detail.poll.start_date))
+                  : form.start_date
+                    ? minPollEndLocalAfterStart(form.start_date)
+                    : undefined;
               return (
             <form className="club-pm-create-form club-pm-create-form--split" onSubmit={handleCreate}>
               <div className="club-pm-create-modal-top">
@@ -443,6 +495,7 @@ const ClubPollManagement = () => {
                     <input
                       type="datetime-local"
                       value={form.start_date}
+                      min={minPollStart}
                       onChange={(e) => setForm((prev) => ({ ...prev, start_date: e.target.value }))}
                       disabled={lockForVotedPoll}
                     />
@@ -452,6 +505,7 @@ const ClubPollManagement = () => {
                     <input
                       type="datetime-local"
                       value={form.end_date}
+                      min={minPollEnd}
                       onChange={(e) => setForm((prev) => ({ ...prev, end_date: e.target.value }))}
                     />
                   </label>

@@ -1,4 +1,4 @@
-/* Profile Page - Candy Pastel Style */
+
 :root {
   --candy-purple: #CDB4DB;
   --candy-lightpink: #FFC8DD;
@@ -9,7 +9,6 @@
   --club-ink: #1f2a44;
 }
 
-/* Body class for profile page */
 body.profile-body {
   margin: 0;
   min-height: 100vh;
@@ -213,7 +212,7 @@ body.profile-body #root {
   padding: 0.75rem 1rem;
   border-radius: 0.9rem;
   border: 1px solid rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.95);
+  background: #fff;
   font-size: 0.95rem;
   color: var(--candy-text);
   box-shadow: 0 4px 10px rgba(255, 255, 255, 0.04);
@@ -224,10 +223,32 @@ body.profile-body #root {
 .profile-input:focus {
   border-color: var(--candy-hotpink);
   box-shadow: 0 0 0 3px rgba(255, 175, 204, 0.45);
+  background: #fff;
+}
+
+.profile-input--error {
+  border-color: rgba(220, 38, 38, 0.55);
+}
+
+.profile-field-error {
+  display: block;
+  color: #dc2626;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 0.35rem;
+  line-height: 1.35;
+}
+
+.profile-input:-webkit-autofill,
+.profile-input:-webkit-autofill:hover,
+.profile-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  box-shadow: 0 0 0 1000px #ffffff inset;
+  transition: background-color 9999s ease-out 0s;
 }
 
 .profile-input--readonly {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.92);
   cursor: default;
 }
 
@@ -404,7 +425,6 @@ body.profile-body #root {
   transform: rotate(-15deg);
 }
 
-/* User Badge Grid */
 .badge-grid-title {
   font-size: 1.25rem;
   font-weight: 800;
@@ -479,7 +499,6 @@ body.profile-body #root {
   font-weight: 600;
 }
 
-/* Responsive fixes for achievements */
 @media (max-width: 640px) {
   .achievement-summary-grid {
     grid-template-columns: 1fr;

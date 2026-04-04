@@ -64,6 +64,25 @@
   border-color: #FFAFCC;
   outline: none;
   box-shadow: 0 0 0 4px rgba(255, 175, 204, 0.15);
+  background: #fff;
+}
+
+.verify-otp-field-error {
+  display: block;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin: -1.25rem auto 1.25rem;
+  max-width: 100%;
+  line-height: 1.35;
+}
+
+.verify-otp-input-group input:-webkit-autofill,
+.verify-otp-input-group input:-webkit-autofill:hover,
+.verify-otp-input-group input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  box-shadow: 0 0 0 1000px #ffffff inset;
+  transition: background-color 9999s ease-out 0s;
 }
 
 .verify-otp-btn {
