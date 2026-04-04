@@ -1,7 +1,8 @@
 import React from 'react';
+import { isPollVotingOpen } from '../../utils/pollVoting';
 
 const PollItem = ({ poll, selected, onSelect, formatDate, voteBarPct }) => {
-  const isOpen = poll.status === 'open';
+  const isOpen = isPollVotingOpen(poll);
   const pct = Math.min(100, Math.max(0, Number(voteBarPct) || 0));
 
   return (
@@ -15,7 +16,7 @@ const PollItem = ({ poll, selected, onSelect, formatDate, voteBarPct }) => {
           {poll.title}
         </h3>
         <span className={`pm-glass-badge ${isOpen ? 'is-open' : 'is-closed'}`}>
-          {isOpen ? 'Đang mở' : 'Đã đóng'}
+          {isOpen ? 'Đang mở' : 'Đang đóng'}
         </span>
       </div>
       <div className="pm-glass-item-meta">

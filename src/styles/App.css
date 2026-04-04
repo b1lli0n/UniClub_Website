@@ -11,9 +11,11 @@ main {
     padding-top: 140px;
 }
 
+/* Cảnh báo: file này hiện KHÔNG được import trong main.jsx. Biến layout site phải khai báo trong src/App.css (entry). */
 :root {
-    --site-content-max-width: 1200px;
-    --site-content-gutter: 1rem;
+    /* Khớp với .glass-header (Header.css): max-width 1400px, width calc(100% - 40px) */
+    --site-content-max-width: 1400px;
+    --site-content-gutter: 20px;
     --candy-purple: #cdb4db;
     --candy-lightpink: #ffc8dd;
     --candy-hotpink: #ffafcc;

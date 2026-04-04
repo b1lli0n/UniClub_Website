@@ -66,7 +66,7 @@ const RegistrationModal = ({ show, onHide, onChanged, eventId, eventTitle, event
             if (isEditing) {
                 const phoneTrim = String(formData.phone || '').trim();
                 if (phoneTrim && !isValidPhoneNumber(phoneTrim)) {
-                    toast.error('Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)');
+                    toast.error('Số điện thoại không hợp lệ (10 số, đầu số 03/05/07/08/09)');
                     setLoading(false);
                     return;
                 }

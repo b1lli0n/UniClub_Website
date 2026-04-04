@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Award,
 } from 'lucide-react';
+import { isPollVotingOpen, isPollOpenInDatabase } from '../../utils/pollVoting';
 
 const formatDateTime = (iso) => {
   if (!iso) return '—';
@@ -62,7 +63,8 @@ const PollDetail = ({
   const options = detail.options || [];
   const totalVotes = detail.total_votes ?? 0;
   const typeLabel = Number(poll?.type) === 0 ? 'Chọn một' : 'Chọn nhiều';
-  const isOpen = poll?.status === 'open';
+  const votingOpen = isPollVotingOpen(poll);
+  const dbOpen = isPollOpenInDatabase(poll);
   const hasMinPoints = poll?.min_points_required != null && poll?.min_points_required !== '';
 
   return (
@@ -73,13 +75,13 @@ const PollDetail = ({
           <div className="pm-detail-actions">
             {canManage ? (
               <>
-                {isOpen ? (
+                {dbOpen ? (
                   <button type="button" className="pm-detail-btn-ghost" onClick={onEditPoll}>
                     <Pencil size={14} strokeWidth={2.2} aria-hidden />
                     <span>Chỉnh sửa</span>
                   </button>
                 ) : null}
-                {isOpen ? (
+                {dbOpen ? (
                   <button
                     type="button"
                     className="pm-detail-btn-ghost"
@@ -104,8 +106,8 @@ const PollDetail = ({
           </div>
         </div>
         <div className="pm-detail-status-row">
-          <span className={`pm-detail-status ${isOpen ? 'is-open' : 'is-closed'}`}>
-            {isOpen ? 'Đang mở' : 'Đã đóng'}
+          <span className={`pm-detail-status ${votingOpen ? 'is-open' : 'is-closed'}`}>
+            {votingOpen ? 'Đang mở' : 'Đang đóng'}
           </span>
         </div>
 

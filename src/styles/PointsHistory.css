@@ -25,6 +25,8 @@
   max-width: var(--site-content-max-width);
   margin: 0 auto;
   width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 .points-history-shell {
@@ -53,9 +55,10 @@
 
 .points-history-dashboard {
   display: grid;
-  grid-template-columns: minmax(260px, 300px) 1fr;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
   gap: clamp(16px, 2vw, 22px);
   align-items: start;
+  min-width: 0;
 }
 
 @media (max-width: 960px) {

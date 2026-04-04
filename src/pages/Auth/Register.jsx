@@ -20,7 +20,12 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -43,6 +48,12 @@ const Register = () => {
     return '';
   };
 
+  const validateConfirmPassword = (confirm, password) => {
+    if (!confirm) return 'Xác nhận mật khẩu không được để trống';
+    if (confirm !== password) return 'Mật khẩu xác nhận không khớp';
+    return '';
+  };
+
   const validatePassword = (value) => {
     if (!value) return 'Mật khẩu không được để trống';
     if (value.length < 6) return 'Ít nhất 6 ký tự';
@@ -58,7 +69,13 @@ const Register = () => {
     const fullNameError = validateFullName(formData.fullName);
     const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
-    const confirmError = formData.password !== formData.confirmPassword ? 'Mật khẩu xác nhận không khớp' : '';
+    const confirmError = validateConfirmPassword(formData.confirmPassword, formData.password);
+    setFieldErrors({
+      fullName: fullNameError,
+      email: emailError,
+      password: passwordError,
+      confirmPassword: confirmError,
+    });
 
     if (fullNameError || emailError || passwordError || confirmError) {
       toast.error(fullNameError || emailError || passwordError || confirmError);
@@ -119,7 +136,7 @@ const Register = () => {
           <div className="auth-form-content">
             <h1 className="auth-title">Đăng ký</h1>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="auth-input-group">
                 <label className="auth-label">Họ và tên</label>
                 <div className="auth-input-wrapper">
@@ -127,13 +144,27 @@ const Register = () => {
                   <input
                     type="text"
                     value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, fullName: e.target.value });
+                      setFieldErrors((prev) => ({ ...prev, fullName: '' }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        fullName: validateFullName(formData.fullName),
+                      }))
+                    }
                     placeholder="Mai An Tiêm"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.fullName ? ' auth-input--error' : ''}`}
                     style={{ paddingLeft: '3.5rem' }}
-                    required
+                    autoComplete="name"
                   />
                 </div>
+                {fieldErrors.fullName ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.fullName}
+                  </span>
+                ) : null}
               </div>
 
               <div className="auth-input-group">
@@ -143,13 +174,27 @@ const Register = () => {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      setFieldErrors((prev) => ({ ...prev, email: '' }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        email: validateEmail(formData.email),
+                      }))
+                    }
                     placeholder="uniclub@fpt.edu.vn"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.email ? ' auth-input--error' : ''}`}
                     style={{ paddingLeft: '3.5rem' }}
-                    required
+                    autoComplete="email"
                   />
                 </div>
+                {fieldErrors.email ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.email}
+                  </span>
+                ) : null}
               </div>
 
               <div className="auth-input-group">
@@ -159,11 +204,31 @@ const Register = () => {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setFormData({ ...formData, password: v });
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        password: '',
+                        confirmPassword: prev.confirmPassword
+                          ? validateConfirmPassword(formData.confirmPassword, v)
+                          : '',
+                      }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        password: validatePassword(formData.password),
+                        confirmPassword: validateConfirmPassword(
+                          formData.confirmPassword,
+                          formData.password
+                        ),
+                      }))
+                    }
                     placeholder="••••••••"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.password ? ' auth-input--error' : ''}`}
                     style={{ paddingLeft: '3.5rem', paddingRight: '3.25rem' }}
-                    required
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
@@ -174,6 +239,11 @@ const Register = () => {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+                {fieldErrors.password ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.password}
+                  </span>
+                ) : null}
               </div>
 
               <div className="auth-input-group">
@@ -183,11 +253,27 @@ const Register = () => {
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setFormData({ ...formData, confirmPassword: v });
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        confirmPassword: validateConfirmPassword(v, formData.password),
+                      }));
+                    }}
+                    onBlur={() =>
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        confirmPassword: validateConfirmPassword(
+                          formData.confirmPassword,
+                          formData.password
+                        ),
+                      }))
+                    }
                     placeholder="••••••••"
-                    className="auth-input"
+                    className={`auth-input${fieldErrors.confirmPassword ? ' auth-input--error' : ''}`}
                     style={{ paddingLeft: '3.5rem', paddingRight: '3.25rem' }}
-                    required
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
@@ -198,6 +284,11 @@ const Register = () => {
                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+                {fieldErrors.confirmPassword ? (
+                  <span className="auth-field-error" role="alert">
+                    {fieldErrors.confirmPassword}
+                  </span>
+                ) : null}
               </div>
 
               <button type="submit" className="auth-btn-submit" disabled={loading}>

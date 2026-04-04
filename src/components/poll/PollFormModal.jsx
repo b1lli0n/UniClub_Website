@@ -1,17 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { createPoll, updatePoll } from '../../api/pollApi';
-import { fromDatetimeLocal, toDatetimeLocal } from '../../lib/pollUtils';
+import {
+  fromDatetimeLocal,
+  toDatetimeLocal,
+  POLL_DATETIME_GAP_MS,
+  earliestPollStartMsAfterGap,
+  formatDateAsDatetimeLocal,
+  minPollStartLocalAfterNow,
+  minPollEndLocalAfterStart,
+  validatePollTitle,
+} from '../../lib/utils';
 
 function buildCreateInitial() {
-  const start = new Date();
-  const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const startStr = minPollStartLocalAfterNow();
+  const sd = new Date(startStr);
+  const end = new Date(sd.getTime() + 7 * 24 * 60 * 60 * 1000);
   return {
     title: '',
     options: ['', ''],
     type: 0,
-    start_date: toDatetimeLocal(start.toISOString()),
-    end_date: toDatetimeLocal(end.toISOString()),
+    start_date: startStr,
+    end_date: formatDateAsDatetimeLocal(end),
     min_points_required: '',
     allow_change_vote: false,
   };
@@ -61,9 +71,12 @@ export default function PollFormModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!dirty || saving) return;
-    if (mode === 'create' && !String(form.title || '').trim()) {
-      toast.error('Nhập tiêu đề');
-      return;
+    if (mode === 'create') {
+      const titleErr = validatePollTitle(form.title);
+      if (titleErr) {
+        toast.error(titleErr);
+        return;
+      }
     }
     const opts = (form.options || []).map((s) => String(s).trim()).filter(Boolean);
     if (!hasVotes && opts.length < 2) {
@@ -73,6 +86,14 @@ export default function PollFormModal({
     if (hasVotes) {
       const endIso = fromDatetimeLocal(form.end_date);
       if (!endIso) return;
+      const pollStartMs = initialDetail?.poll?.start_date
+        ? new Date(initialDetail.poll.start_date).getTime()
+        : NaN;
+      const endMs = new Date(endIso).getTime();
+      if (!Number.isNaN(pollStartMs) && endMs < pollStartMs + POLL_DATETIME_GAP_MS) {
+        toast.error('Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 1 phút');
+        return;
+      }
       setSaving(true);
       try {
         await updatePoll(clubId, initialDetail.poll._id, { end_date: endIso });
@@ -89,6 +110,23 @@ export default function PollFormModal({
     const startIso = fromDatetimeLocal(form.start_date);
     const endIso = fromDatetimeLocal(form.end_date);
     if (!startIso || !endIso) return;
+
+    const snapParsed = snapshot ? JSON.parse(snapshot) : null;
+    const startUnchanged =
+      mode === 'edit' && snapParsed && form.start_date === snapParsed.start_date;
+    const startMs = new Date(startIso).getTime();
+    const endMs = new Date(endIso).getTime();
+    const now = Date.now();
+    const earliestStartMs = earliestPollStartMsAfterGap(now);
+    if (!startUnchanged && startMs < earliestStartMs) {
+      toast.error('Thời gian bắt đầu phải sau thời điểm hiện tại ít nhất 1 phút');
+      return;
+    }
+    if (endMs < startMs + POLL_DATETIME_GAP_MS) {
+      toast.error('Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 1 phút');
+      return;
+    }
+
     const body = {
       title: form.title.trim(),
       options: opts,
@@ -121,6 +159,10 @@ export default function PollFormModal({
 
   const titleText = mode === 'create' ? 'Tạo bình chọn mới' : 'Chỉnh sửa bình chọn';
   const submitLabel = mode === 'create' ? 'Tạo' : 'Lưu';
+  const minStartStr = minPollStartLocalAfterNow();
+  const minEndStr = hasVotes
+    ? minPollEndLocalAfterStart(toDatetimeLocal(initialDetail?.poll?.start_date))
+    : minPollEndLocalAfterStart(form.start_date);
 
   return (
     <div className="poll-pm-modal-overlay" role="dialog" aria-modal="true">
@@ -204,6 +246,7 @@ export default function PollFormModal({
                       type="datetime-local"
                       className="poll-pm-input"
                       value={form.start_date}
+                      min={mode === 'create' ? minStartStr : undefined}
                       onChange={(e) => setForm((p) => ({ ...p, start_date: e.target.value }))}
                       required
                     />
@@ -234,6 +277,7 @@ export default function PollFormModal({
                   type="datetime-local"
                   className="poll-pm-input"
                   value={form.end_date}
+                  min={minEndStr || undefined}
                   onChange={(e) => setForm((p) => ({ ...p, end_date: e.target.value }))}
                   required
                 />

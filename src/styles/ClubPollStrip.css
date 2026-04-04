@@ -85,11 +85,33 @@
 }
 
 .club-poll-strip-expiry {
-  margin: 0 0 14px;
+  margin: 0 0 8px;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--poll-muted);
   line-height: 1.45;
+}
+
+.club-poll-strip-change-rule {
+  margin: 0 0 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.club-poll-strip-change-rule--yes {
+  color: #047857;
+  background: rgba(5, 150, 105, 0.1);
+  border-color: rgba(5, 150, 105, 0.28);
+}
+
+.club-poll-strip-change-rule--no {
+  color: #b91c1c;
+  background: rgba(220, 38, 38, 0.07);
+  border-color: rgba(220, 38, 38, 0.22);
 }
 
 .club-poll-strip-options {

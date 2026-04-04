@@ -248,3 +248,82 @@
     display: none;
   }
 }
+
+.auth-field-error,
+.form-error-message {
+  display: block;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin-top: 0.35rem;
+  line-height: 1.35;
+}
+
+.auth-input--error,
+.form-input-error {
+  border-color: rgba(220, 38, 38, 0.55) !important;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #4a4a6a;
+}
+
+.form-input {
+  width: 100%;
+  background: #fff;
+  border: 2px solid rgba(255, 175, 204, 0.3);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  color: #2d1b3d;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  border-color: #ffafcc;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 175, 204, 0.15);
+  background: #fff;
+}
+
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-input-wrapper .form-input {
+  padding-right: 3rem;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #ffafcc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+}
+
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  box-shadow: 0 0 0 1000px #ffffff inset;
+  transition: background-color 9999s ease-out 0s;
+}

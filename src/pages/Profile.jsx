@@ -21,7 +21,7 @@ const selectStyles = {
     borderRadius: '0.9rem',
     borderColor: state.isFocused ? '#FFAFCC' : 'rgba(255, 255, 255, 0.9)',
     boxShadow: state.isFocused ? '0 0 0 3px rgba(255, 175, 204, 0.45)' : '0 4px 10px rgba(31, 42, 68, 0.04)',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: '#fff',
     padding: '0 2px',
     '&:hover': {
       borderColor: '#FFAFCC',
@@ -95,13 +95,13 @@ const validateDob = (dobStr) => {
   if (d > t) {
     return { ok: false, message: 'Ngày sinh phải là ngày trong quá khứ' };
   }
-  const oldest = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
-  if (d < oldest) {
-    return { ok: false, message: 'Ngày sinh không hợp lệ' };
+  const oldestAllowed = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+  if (d < oldestAllowed) {
+    return { ok: false, message: 'Tuổi tối đa cho phép là 120' };
   }
-  const twelfth = new Date(d.getFullYear() + 12, d.getMonth(), d.getDate());
-  if (twelfth > t) {
-    return { ok: false, message: 'Bạn phải đủ ít nhất 12 tuổi' };
+  const eighteenth = new Date(d.getFullYear() + 18, d.getMonth(), d.getDate());
+  if (eighteenth > t) {
+    return { ok: false, message: 'Bạn phải đủ ít nhất 18 tuổi' };
   }
   return { ok: true };
 };
@@ -130,11 +130,16 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({
+    fullName: '',
+    phone: '',
+    dob: '',
+  });
   const avatarInputRef = useRef(null);
 
   const maxDobStr = useMemo(() => {
     const t = new Date();
-    t.setFullYear(t.getFullYear() - 12);
+    t.setFullYear(t.getFullYear() - 18);
     return formatDateForInput(t);
   }, []);
 
@@ -192,36 +197,63 @@ const Profile = () => {
     const { name, value } = e.target;
     if (!isEditing) return;
     setProfile((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateFullNameField = (nameTrim) => {
+    if (nameTrim.length < 2 || nameTrim.length > 70) {
+      return 'Họ và tên phải từ 2 đến 70 ký tự';
+    }
+    if (!FULLNAME_REGEX.test(nameTrim)) {
+      return 'Họ và tên chỉ được chứa chữ cái và khoảng trắng';
+    }
+    return '';
+  };
+
+  const validatePhoneField = (phoneTrim) => {
+    if (!phoneTrim) return '';
+    if (!isValidPhoneNumber(phoneTrim)) {
+      return 'Số điện thoại không hợp lệ (10 số, đầu số 03/05/07/08/09)';
+    }
+    return '';
   };
 
   const beginEdit = () => {
+    setFieldErrors({ fullName: '', phone: '', dob: '' });
     setIsEditing(true);
   };
 
   const cancelEdit = () => {
     if (originalProfile) setProfile(originalProfile);
     setIsEditing(false);
+    setFieldErrors({ fullName: '', phone: '', dob: '' });
   };
 
   const handleSave = async () => {
     if (!isEditing) return;
     const nameTrim = (profile.fullName || '').trim();
-    if (nameTrim.length < 2 || nameTrim.length > 70) {
-      toast.error('Họ và tên phải từ 2 đến 70 ký tự');
-      return;
-    }
-    if (!FULLNAME_REGEX.test(nameTrim)) {
-      toast.error('Họ và tên chỉ được chứa chữ cái và khoảng trắng');
-      return;
-    }
-
+    const nameErr = validateFullNameField(nameTrim);
     const phoneTrim = (profile.phone || '').trim();
-    if (phoneTrim && !isValidPhoneNumber(phoneTrim)) {
-      toast.error('Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)');
+    const phoneErr = validatePhoneField(phoneTrim);
+    const dobCheck = validateDob(profile.dob);
+    const dobErr = dobCheck.ok ? '' : dobCheck.message;
+
+    setFieldErrors({
+      fullName: nameErr,
+      phone: phoneErr,
+      dob: dobErr,
+    });
+
+    if (nameErr) {
+      toast.error(nameErr);
       return;
     }
-
-    const dobCheck = validateDob(profile.dob);
+    if (phoneErr) {
+      toast.error(phoneErr);
+      return;
+    }
     if (!dobCheck.ok) {
       toast.error(dobCheck.message);
       return;
@@ -288,7 +320,6 @@ const Profile = () => {
   };
 
   const handleAvatarButtonClick = () => {
-    if (!isEditing) return;
     avatarInputRef.current?.click();
   };
 
@@ -296,7 +327,6 @@ const Profile = () => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!isEditing) return;
     if (file.size > 2 * 1024 * 1024) {
       toast.error('Ảnh tối đa 2MB');
       return;
@@ -398,7 +428,7 @@ const Profile = () => {
                 type="button"
                 className="profile-avatar-edit"
                 onClick={handleAvatarButtonClick}
-                        disabled={!isEditing || uploadingAvatar || saving}
+                disabled={uploadingAvatar || saving}
               >
                 {uploadingAvatar ? 'Đang tải...' : 'Đổi ảnh'}
               </button>
@@ -421,12 +451,24 @@ const Profile = () => {
                     id="fullName"
                     name="fullName"
                     type="text"
-                    className="profile-input"
+                    className={`profile-input${fieldErrors.fullName ? ' profile-input--error' : ''}`}
                     value={profile.fullName}
                     onChange={handleChange}
+                    onBlur={() => {
+                      if (!isEditing) return;
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        fullName: validateFullNameField((profile.fullName || '').trim()),
+                      }));
+                    }}
                     placeholder="Họ và tên"
                     disabled={!isEditing || saving}
                   />
+                  {fieldErrors.fullName ? (
+                    <span className="profile-field-error" role="alert">
+                      {fieldErrors.fullName}
+                    </span>
+                  ) : null}
                 </div>
                 <div className="profile-field">
                   <label className="profile-label" htmlFor="phone">
@@ -436,14 +478,26 @@ const Profile = () => {
                     id="phone"
                     name="phone"
                     type="tel"
-                    className="profile-input"
+                    className={`profile-input${fieldErrors.phone ? ' profile-input--error' : ''}`}
                     value={profile.phone}
                     onChange={handleChange}
+                    onBlur={() => {
+                      if (!isEditing) return;
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        phone: validatePhoneField((profile.phone || '').trim()),
+                      }));
+                    }}
                     inputMode="numeric"
                     maxLength={10}
-                    placeholder="Nhập số điện thoại"
+                    placeholder="VD: 0912345678"
                     disabled={!isEditing || saving}
                   />
+                  {fieldErrors.phone ? (
+                    <span className="profile-field-error" role="alert">
+                      {fieldErrors.phone}
+                    </span>
+                  ) : null}
                 </div>
                 <div className="profile-field-group profile-field-group--left">
                   <div className="profile-field">
@@ -508,9 +562,17 @@ const Profile = () => {
                         id="dob"
                         name="dob"
                         type="date"
-                        className="profile-input profile-date-input"
+                        className={`profile-input profile-date-input${fieldErrors.dob ? ' profile-input--error' : ''}`}
                         value={profile.dob}
                         onChange={handleChange}
+                        onBlur={() => {
+                          if (!isEditing) return;
+                          const dobCheck = validateDob(profile.dob);
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            dob: dobCheck.ok ? '' : dobCheck.message,
+                          }));
+                        }}
                         min={minDobStr}
                         max={maxDobStr}
                         disabled={!isEditing || saving}
@@ -519,6 +581,11 @@ const Profile = () => {
 
                       </span>
                     </div>
+                    {fieldErrors.dob ? (
+                      <span className="profile-field-error" role="alert">
+                        {fieldErrors.dob}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
               </div>
