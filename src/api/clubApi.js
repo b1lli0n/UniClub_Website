@@ -107,6 +107,37 @@ export const getClubMembers = async (clubId) => {
   }
 };
 
+// [Leader] Lấy danh sách thành viên active kèm role (API mới)
+export const getClubMembersWithRoles = async (clubId) => {
+  try {
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// [Leader] Tìm kiếm thành viên trong club theo tên hoặc email
+export const searchClubMembers = async (clubId, keyword) => {
+  try {
+    const params = keyword ? { keyword } : {};
+    const response = await clubAPI.get(`/clubs/${clubId}/memberships/leader/members/search`, { params });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// [Leader] Xóa / kick thành viên khỏi club (đặt status = 3)
+export const removeMember = async (clubId, membershipId) => {
+  try {
+    const response = await clubAPI.delete(`/clubs/${clubId}/memberships/leader/members/${membershipId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
 // Thêm thành viên vào club (BE chưa có route)
 export const addMemberToClub = async (clubId, memberId) => {
   try {
@@ -175,13 +206,11 @@ export const cancelJoinRequest = async (clubId, requestId) => {
 export const getMyClubs = async () => {
   try {
     const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-    // Thử endpoint phổ biến hơn nếu my-clubs báo lỗi ID
     const response = await axios.get('http://localhost:5000/api/clubs/user/my-clubs', {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
     return response.data;
   } catch (error) {
-    // Nếu vẫn lỗi, thử fallback về endpoint mặc định nhưng xử lý error tốt hơn
     console.warn("Retrying with default my-clubs endpoint...");
     const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
     const response = await axios.get('http://localhost:5000/api/clubs/my-clubs', {
